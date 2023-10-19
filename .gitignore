@@ -1,8 +1,11 @@
 # Bỏ qua thư mục target
-/target/
-
-# Nhưng bao gồm tệp FanstaticBack.jar
-!/target/FanstaticBack.jar
+/target/classes/
+/target/generated-sources/
+/target/generated-test-sources/
+/target/maven-archiver/
+/target/maven-status/
+/target/test-classes/
+/target/FanstaticBack.jar.original
 
 ### STS ###
 .apt_generated
