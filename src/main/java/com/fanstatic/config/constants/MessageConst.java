@@ -12,4 +12,7 @@ public class MessageConst {
 
     public static final String RESTORE_SUCCESS = "Khôi phục thành công";
     public static final String RESTORE_FAIL = "Khôi phục thất bại";
+
+    public static final String UPLOAD_SUCCESS = "Tải lên thành công";
+    public static final String UPLOAD_FAIL = "Tải lên thất bại";
 }
