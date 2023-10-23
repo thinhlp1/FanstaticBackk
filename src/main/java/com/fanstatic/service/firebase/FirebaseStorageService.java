@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fanstatic.config.constants.DataConst;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.BlobInfo;
 import com.google.firebase.FirebaseApp;
@@ -21,6 +22,35 @@ public class FirebaseStorageService {
     private String storageBucket;
 
     public String uploadImage(MultipartFile file) throws IOException {
+        String imageName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-admin-sdk.json");
+        FirebaseOptions options = FirebaseOptions.builder()
+        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+        .setStorageBucket(storageBucket)
+        .build();
+    
+        if (FirebaseApp.getApps().isEmpty()) {
+            FirebaseApp.initializeApp(options);
+        }
+
+        BlobInfo blobInfo = StorageClient.getInstance().bucket(storageBucket)
+                .create(imageName, file.getBytes(), file.getContentType());
+
+        return blobInfo.getMediaLink();
+    }
+
+       public String uploadImage(MultipartFile file, String folder) throws IOException {
+
+
+        switch (folder) {
+            case DataConst.FODLER_PRODUCT:
+                
+                break;
+        
+            default:
+                break;
+        }
+
         String imageName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-admin-sdk.json");
         FirebaseOptions options = FirebaseOptions.builder()

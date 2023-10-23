@@ -61,19 +61,59 @@ public class ProductVarientService {
                 productVarient.setProduct(product);
 
                 ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
-                // if (productVarientSaved == null) {
+                if (productVarientSaved == null) {
 
-                //     transactionManager.rollback(transactionStatus);
-                //     return ResponseUtils.fail(500, "Thêm product size không thành công", null);
+                    transactionManager.rollback(transactionStatus);
+                    return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
 
-                // }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
             transactionManager.rollback(transactionStatus);
-            return ResponseUtils.fail(500, "Thêm product size không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
         transactionManager.commit(transactionStatus);
         return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
     }
+
+    public ResponseDTO updateProductVarient(List<ProductVarientRequestDTO> productVarientRequestDTOs, Product product) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+        try {
+            for (ProductVarientRequestDTO productVarientDTO : productVarientRequestDTOs) {
+                // check if product has same size
+
+                ProductVarient productVarient = productVarientRepository.findById(productVarientDTO.getId())
+                        .orElse(null);
+                Size size = sizeRepository.findById(productVarientDTO.getSize()).orElse(null);
+
+                if (size == null) {
+                    transactionManager.rollback(transactionStatus);
+                    return ResponseUtils.fail(404, "Size không tồn tại", null);
+                }
+
+                productVarient.setPrice(productVarientDTO.getPrice());
+                productVarient.setUpdateAt(new Date());
+                productVarient.setUpdateBy(systemService.getUserLogin());
+                productVarient.setSize(size);
+
+                ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
+                if (productVarientSaved == null) {
+
+                    transactionManager.rollback(transactionStatus);
+                    return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
+
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            transactionManager.rollback(transactionStatus);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
+        }
+        transactionManager.commit(transactionStatus);
+        return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
+    }
+
 }

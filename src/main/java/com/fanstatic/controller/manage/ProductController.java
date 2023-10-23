@@ -40,9 +40,9 @@ public class ProductController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid ProductRequestDTO data) {
+    public ResponseEntity<ResponseDTO> update(@RequestPart @Valid ProductRequestDTO data, @PathVariable("id") Integer id) {
         ResponseDTO reponseDTO = productService.update(data);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
