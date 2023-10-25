@@ -55,6 +55,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                     int roleId = account.getRole().getId();
                     boolean isAuthentization = rolePermissionService.checkUserRolePermission(roleId, managerFeatureId,
                             permissionId);
+                       System.out.println(isAuthentization);
                     if (isAuthentization) {
                         filterChain.doFilter(request, response);
                         return;
