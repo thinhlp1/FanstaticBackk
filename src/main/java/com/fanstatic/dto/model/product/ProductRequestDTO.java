@@ -20,15 +20,15 @@ import lombok.NoArgsConstructor;
 public class ProductRequestDTO extends ResponseDataDTO {
 	private int id;
 
-	@NotNull(message = "{NotNull.category.code}")
-	@Pattern(regexp = "^[A-Z0-9]*$", message = "{Pattern.category.code}")
+	@NotNull(message = "{NotNull.product.code}")
+	@Pattern(regexp = "^[A-Z0-9]*$", message = "{Pattern.product.code}")
 	private String code;
 
-	@NotBlank(message = "{NotBlank.category.name}")
-	@Size(min = 1, max = 50, message = "{Size.category.name}")
+	@NotBlank(message = "{NotBlank.product.name}")
+	@Size(min = 1, max = 50, message = "{Size.product.name}")
 	private String name;
 
-	@NonNull
+	@NotNull(message = "{NotNull.product.price}")
 	private BigInteger price;
 
 	private List<Integer> categoriesId;

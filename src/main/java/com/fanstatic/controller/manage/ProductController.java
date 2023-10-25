@@ -18,7 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.model.product.ProductRequestDTO;
+import com.fanstatic.dto.model.product.ProductVarientRequestDTO;
 import com.fanstatic.service.model.ProductService;
+import com.fanstatic.service.model.ProductVarientService;
 import com.fanstatic.util.ResponseUtils;
 
 import jakarta.validation.Valid;
@@ -29,11 +31,12 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ProductController {
     private final ProductService productService;
+    private final ProductVarientService productVarientService;
 
     @PostMapping("/create")
     @ResponseBody
     public ResponseEntity<ResponseDTO> create(@RequestPart @Valid ProductRequestDTO data,
-            @RequestPart List<MultipartFile> imageFiles,  @RequestPart MultipartFile descriptionFile ) {
+            @RequestPart List<MultipartFile> imageFiles, @RequestPart MultipartFile descriptionFile) {
         data.setImageFiles(imageFiles);
         data.setDescriptionFile(descriptionFile);
         ResponseDTO reponseDTO = productService.create(data);
@@ -42,8 +45,17 @@ public class ProductController {
 
     @PutMapping("/update/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> update(@RequestPart @Valid ProductRequestDTO data, @PathVariable("id") Integer id) {
+    public ResponseEntity<ResponseDTO> update(@RequestPart @Valid ProductRequestDTO data,
+            @PathVariable("id") Integer id) {
         ResponseDTO reponseDTO = productService.update(data);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @PutMapping("/update/varient/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateVarient(@RequestPart @Valid ProductVarientRequestDTO data,
+            @PathVariable("id") Integer id) {
+        ResponseDTO reponseDTO = productVarientService.updateProductVarient(data);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
@@ -62,10 +74,24 @@ public class ProductController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
+    @DeleteMapping("/delete/varient/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> deleteVarient(@PathVariable("id") int id) {
+        ResponseDTO reponseDTO = productVarientService.deleteProductVarient(id);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
     @PutMapping("/restore/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> restore(@PathVariable("id") int id) {
         ResponseDTO reponseDTO = productService.restore(id);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @PutMapping("/restore/varient/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> restoreVarient(@PathVariable("id") int id) {
+        ResponseDTO reponseDTO = productVarientService.restoreProductVarient(id);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 

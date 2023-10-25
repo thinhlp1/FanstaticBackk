@@ -9,6 +9,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.model.product.ProductVarientRequestDTO;
@@ -55,6 +56,7 @@ public class ProductVarientService {
 
                 productVarient.setCode(product.getCode() + "_" + size.getCode());
                 productVarient.setPrice(productVarientDTO.getPrice());
+                productVarient.setActive(DataConst.ACTIVE_TRUE);
                 productVarient.setCreateAt(new Date());
                 productVarient.setCreateBy(systemService.getUserLogin());
                 productVarient.setSize(size);
@@ -77,43 +79,119 @@ public class ProductVarientService {
         return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
     }
 
-    public ResponseDTO updateProductVarient(List<ProductVarientRequestDTO> productVarientRequestDTOs, Product product) {
+    public ResponseDTO updateProductVarient(ProductVarientRequestDTO productVarientDTO) {
         TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
         try {
-            for (ProductVarientRequestDTO productVarientDTO : productVarientRequestDTOs) {
-                // check if product has same size
 
-                ProductVarient productVarient = productVarientRepository.findById(productVarientDTO.getId())
-                        .orElse(null);
-                Size size = sizeRepository.findById(productVarientDTO.getSize()).orElse(null);
+            // check if product has same size
 
-                if (size == null) {
-                    transactionManager.rollback(transactionStatus);
-                    return ResponseUtils.fail(404, "Size không tồn tại", null);
-                }
+            ProductVarient productVarient = productVarientRepository.findByIdAndActiveIsTrue(productVarientDTO.getId())
+                    .orElse(null);
+            Size size = sizeRepository.findById(productVarientDTO.getSize()).orElse(null);
 
-                productVarient.setPrice(productVarientDTO.getPrice());
-                productVarient.setUpdateAt(new Date());
-                productVarient.setUpdateBy(systemService.getUserLogin());
-                productVarient.setSize(size);
+            if (productVarient == null) {
+                transactionManager.rollback(transactionStatus);
+                return ResponseUtils.fail(404, "Sản phẩm không tồn tại", null);
+            }
 
-                ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
-                if (productVarientSaved == null) {
+            if (size == null) {
+                transactionManager.rollback(transactionStatus);
+                return ResponseUtils.fail(404, "Size không tồn tại", null);
+            }
 
-                    transactionManager.rollback(transactionStatus);
-                    return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
+            productVarient.setPrice(productVarientDTO.getPrice());
+            productVarient.setUpdateAt(new Date());
+            productVarient.setUpdateBy(systemService.getUserLogin());
+            productVarient.setSize(size);
 
-                }
+            ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
+            if (productVarientSaved == null) {
+
+                transactionManager.rollback(transactionStatus);
+                return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
 
             }
+
         } catch (Exception e) {
             e.printStackTrace();
             transactionManager.rollback(transactionStatus);
-            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
+            return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
         }
         transactionManager.commit(transactionStatus);
-        return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
+        return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
+    }
+
+    public ResponseDTO deleteProductVarient(int id) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+        try {
+
+            // check if product has same size
+
+            ProductVarient productVarient = productVarientRepository.findByIdAndActiveIsTrue(id)
+                    .orElse(null);
+
+            if (productVarient == null) {
+                transactionManager.rollback(transactionStatus);
+                return ResponseUtils.fail(404, "Sản phẩm không tồn tại", null);
+            }
+
+            productVarient.setDeleteAt(new Date());
+            productVarient.setDeleteBy(systemService.getUserLogin());
+            productVarient.setActive(DataConst.ACTIVE_FALSE);
+
+            ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
+            if (productVarientSaved == null) {
+
+                transactionManager.rollback(transactionStatus);
+                return ResponseUtils.fail(500, MessageConst.DELETE_FAIL, null);
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            transactionManager.rollback(transactionStatus);
+            return ResponseUtils.fail(500, MessageConst.DELETE_FAIL, null);
+        }
+        transactionManager.commit(transactionStatus);
+        return ResponseUtils.success(200, MessageConst.DELETE_SUCCESS, null);
+    }
+
+    public ResponseDTO restoreProductVarient(int id) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+        try {
+
+            // check if product has same size
+
+            ProductVarient productVarient = productVarientRepository.findByIdAndActiveIsFalse(id)
+                    .orElse(null);
+
+            if (productVarient == null) {
+                transactionManager.rollback(transactionStatus);
+                return ResponseUtils.fail(404, "Sản phẩm không tồn tại", null);
+            }
+
+            productVarient.setUpdateAt(new Date());
+            productVarient.setUpdateBy(systemService.getUserLogin());
+            productVarient.setActive(DataConst.ACTIVE_TRUE);
+
+            ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
+            if (productVarientSaved == null) {
+
+                transactionManager.rollback(transactionStatus);
+                return ResponseUtils.fail(500, MessageConst.DELETE_FAIL, null);
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            transactionManager.rollback(transactionStatus);
+            return ResponseUtils.fail(500, MessageConst.DELETE_FAIL, null);
+        }
+        transactionManager.commit(transactionStatus);
+        return ResponseUtils.success(200, MessageConst.DELETE_SUCCESS, null);
     }
 
 }

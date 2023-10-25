@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.fanstatic.dto.ResponseDataDTO;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,11 +15,11 @@ import lombok.NoArgsConstructor;
 public class ProductVarientRequestDTO extends ResponseDataDTO {
     private int id;
 
-	private String code;
+    @NotNull
+    @NotNull(message = "{NotNull.productVarient.price}")
+    private BigInteger price;
 
-	private BigInteger price;
-
+    @NotNull(message = "{NotNull.productVarient.size}")
     private int size;
 
-    
 }
