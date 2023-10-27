@@ -3,14 +3,13 @@ package com.fanstatic.dto.model.product;
 import java.math.BigInteger;
 
 import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.model.size.SizeDTO;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-// @EqualsAndHashCode(callSuper=false)
 public class ProductVarientDTO extends ResponseDataDTO{
     private int id;
 
@@ -18,6 +17,6 @@ public class ProductVarientDTO extends ResponseDataDTO{
 
     private BigInteger price;
 
-    private int size;
+    private SizeDTO size;
 
 }

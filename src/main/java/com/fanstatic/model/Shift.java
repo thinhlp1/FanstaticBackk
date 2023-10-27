@@ -37,6 +37,8 @@ public class Shift  {
 
 	private String shirft;
 
+	private String code;
+
 	@Column(name = "start_at")
 	private Time startAt;
 
