@@ -60,6 +60,9 @@ public class SizeService {
 
         if (sizeSaved != null) {
 
+            Size sizeSaved2 = sizeRepository.findByCodeAndActiveIsTrue(sizeSaved.getCode()).orElse(null);
+
+            systemService.writeSystemLog(sizeSaved2.getId(), sizeSaved2.getName(), null);
             return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
 
         }
@@ -99,6 +102,7 @@ public class SizeService {
         Size sizeSaved = sizeRepository.save(size);
 
         if (sizeSaved != null) {
+            systemService.writeSystemLog(sizeSaved.getId(), sizeSaved.getName(), null);
 
             return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 
@@ -122,7 +126,7 @@ public class SizeService {
         Size sizeSaved = sizeRepository.save(size);
 
         if (sizeSaved != null) {
-
+            systemService.writeSystemLog(size.getId(), size.getName(), null);
             return ResponseUtils.success(200, MessageConst.DELETE_SUCCESS, null);
 
         }
@@ -145,6 +149,7 @@ public class SizeService {
         Size sizeSaved = sizeRepository.save(size);
 
         if (sizeSaved != null) {
+            systemService.writeSystemLog(sizeSaved.getId(), sizeSaved.getName(), null);
 
             return ResponseUtils.success(200, MessageConst.RESTORE_SUCCESS, null);
 
@@ -161,7 +166,7 @@ public class SizeService {
             return ResponseUtils.fail(401, "Size không tồn tại", null);
         }
 
-        SizeDTO sizeDTO = modelMapper.map(size,SizeDTO.class);
+        SizeDTO sizeDTO = modelMapper.map(size, SizeDTO.class);
 
         return ResponseUtils.success(200, "Chi tiết size", sizeDTO);
 
