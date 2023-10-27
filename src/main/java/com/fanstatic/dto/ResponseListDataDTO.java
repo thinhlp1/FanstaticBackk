@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponseListDataDTO extends ResponseDataDTO {
+    private String nameList;
+
     private List<ResponseDataDTO> datas;
 
-    private String nameList;
 }
