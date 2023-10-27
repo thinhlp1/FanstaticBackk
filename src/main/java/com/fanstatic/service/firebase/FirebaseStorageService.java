@@ -20,21 +20,22 @@ public class FirebaseStorageService {
     @Value("${firebase.storage.bucket}")
     private String storageBucket;
 
-    public String uploadImage(MultipartFile file) throws IOException {
-        String imageName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+    public String uploadImage(MultipartFile file, String folder) throws IOException {
+        String imageName = folder + "/" + UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-admin-sdk.json");
         FirebaseOptions options = FirebaseOptions.builder()
-        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-        .setStorageBucket(storageBucket)
-        .build();
+            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+            .setStorageBucket(storageBucket)
+            .build();
     
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options);
         }
-
+    
         BlobInfo blobInfo = StorageClient.getInstance().bucket(storageBucket)
                 .create(imageName, file.getBytes(), file.getContentType());
-
+    
         return blobInfo.getMediaLink();
     }
+    
 }
