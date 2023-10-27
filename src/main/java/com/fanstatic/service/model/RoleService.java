@@ -20,15 +20,12 @@ import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.permissioin.RoleDTO;
 import com.fanstatic.dto.model.role.RoleRequestDTO;
-import com.fanstatic.dto.model.user.UserDTO;
 import com.fanstatic.model.Role;
-import com.fanstatic.model.User;
 import com.fanstatic.repository.AccountRepository;
 import com.fanstatic.repository.RoleRepository;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.model.role.RoleRequestDTO;
-import com.fanstatic.dto.model.user.UserRequestDTO;
 import com.fanstatic.service.model.RolePermissionService;
 import com.fanstatic.service.model.RoleService;
 import com.fanstatic.util.ResponseUtils;
