@@ -35,7 +35,9 @@ public class Shift  {
 	@Column(name = "end_at")
 	private Time endAt;
 
-	private String shirft;
+	private String shift;
+
+	private String code;
 
 	@Column(name = "start_at")
 	private Time startAt;

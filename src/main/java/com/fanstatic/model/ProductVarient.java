@@ -48,6 +48,9 @@ public class ProductVarient {
 	@ManyToOne
 	private Size size;
 
+	private byte active;
+
+
 	@OneToMany(mappedBy = "productVariant")
 	private List<ProductImage> productImages;
 
