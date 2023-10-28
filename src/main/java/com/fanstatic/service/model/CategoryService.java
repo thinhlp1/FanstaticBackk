@@ -92,7 +92,7 @@ public class CategoryService {
         File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
         category.setImage(file);
 
-        Category categorySaved = categoryRepository.save(category);
+        Category categorySaved = categoryRepository.saveAndFlush(category);
         if (categorySaved != null) {
 
             systemService.writeSystemLog(categorySaved.getId(), categorySaved.getName(), null);
