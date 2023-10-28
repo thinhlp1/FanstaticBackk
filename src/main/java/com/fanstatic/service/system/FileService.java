@@ -11,6 +11,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.config.constants.DataConst;
+import com.fanstatic.dto.firebase.FileUploadInfoDTO;
 import com.fanstatic.model.File;
 import com.fanstatic.repository.FileRepository;
 import com.fanstatic.service.firebase.FirebaseStorageService;
@@ -28,11 +29,11 @@ public class FileService {
     public File upload(MultipartFile file, String folder) {
         try {
 
-            String link = firebaseStorageService.uploadImage(file, folder);
-            String name = file.getOriginalFilename();
+            FileUploadInfoDTO fileUploadInfoDTO = firebaseStorageService.uploadImage(file, folder);
+            String name = fileUploadInfoDTO.getImageName();
             long size = file.getSize();
             String extension = getExtensionByStringHandling(file.getName()).orElse("");
-            File fileUpload = new File(DataConst.ACTIVE_TRUE, extension, link, name, size);
+            File fileUpload = new File(DataConst.ACTIVE_TRUE, extension, fileUploadInfoDTO.getImageUrl(), name, size);
 
             File fileSaved = fileRepository.saveAndFlush(fileUpload);
             return fileSaved;
@@ -43,8 +44,15 @@ public class FileService {
         }
     }
 
-    public void delete(int id){
-        fileRepository.deleteById(id);
+    public void delete(int id) {
+        File file = fileRepository.findById(id).orElse(null);
+        if (file != null) {
+            String name = file.getName();
+            firebaseStorageService.removeRelativeFileImage(name);
+            fileRepository.deleteById(id);
+
+        }
+
     }
 
     public Optional<String> getExtensionByStringHandling(String filename) {

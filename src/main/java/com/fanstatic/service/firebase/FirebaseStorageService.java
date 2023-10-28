@@ -40,7 +40,7 @@ public class FirebaseStorageService {
 
         BlobInfo blobInfo = StorageClient.getInstance().bucket(storageBucket)
                 .create(imageName, file.getBytes(), file.getContentType());
-        return new FileUploadInfoDTO(imageName, blobInfo.getMediaLink());
+        return new FileUploadInfoDTO(blobInfo.getMediaLink(),imageName);
     }
 
     public String removeRelativeFileImage(String imageName) {
