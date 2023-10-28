@@ -57,7 +57,7 @@ public class CookieUtils {
      * @param hours thời hạn (giờ)
      * @return đối tượng cookie đã tạo
      */
-    public Cookie add(String name, String value, int hours) {
+    public Cookie set(String name, String value, int hours) {
         Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge(hours * 3600); // Chuyển đổi thời hạn từ giờ sang giây
         cookie.setPath("/");

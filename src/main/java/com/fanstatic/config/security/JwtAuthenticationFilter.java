@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fanstatic.util.CookieUtils;
 import com.fanstatic.util.JwtUtil;
 import com.fanstatic.util.ResponseUtils;
 import com.fanstatic.util.SessionUtils;
@@ -26,6 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final SessionUtils sessionUtils;
+    private final CookieUtils cookieUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -40,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
          * username == number Phone trong co so du lieu va model
          */
 
-        String token = sessionUtils.get("token");
+        String token = cookieUtils.getValue("token");
         String jwt;
         String username;
 
@@ -68,8 +70,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 userDetails = this.userDetailsService.loadUserByUsername(username);
             } catch (Exception e) {
-              ResponseUtils.setResponseDTOToHttpResponse(response,
-                ResponseUtils.fail(498, "User không tồn tại", null));
+                ResponseUtils.setResponseDTOToHttpResponse(response,
+                        ResponseUtils.fail(498, "User không tồn tại", null));
                 return;
             }
 
