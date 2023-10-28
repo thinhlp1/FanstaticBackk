@@ -2,6 +2,8 @@ package com.fanstatic.service.firebase;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +25,7 @@ public class FirebaseStorageService {
     @Value("${firebase.storage.bucket}")
     private String storageBucket;
 
-    public String uploadImage(MultipartFile file, String folder) throws IOException {
+    public Map<String, String> uploadImage(MultipartFile file, String folder) throws IOException {
         String imageName = folder + "/" + UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-admin-sdk.json");
         FirebaseOptions options = FirebaseOptions.builder()
@@ -37,8 +39,10 @@ public class FirebaseStorageService {
 
         BlobInfo blobInfo = StorageClient.getInstance().bucket(storageBucket)
                 .create(imageName, file.getBytes(), file.getContentType());
-
-        return blobInfo.getMediaLink();
+        Map<String, String> result = new HashMap<>();
+        result.put("imageName", imageName);
+        result.put("imageUrl", blobInfo.getMediaLink());
+        return result;
     }
 
     public String removeRelativeFileImage(String imageName) {
@@ -57,7 +61,6 @@ public class FirebaseStorageService {
             System.out.println("Bucket: " + bucket.getName());
             Page<Blob> blobs = bucket.list();
             for (Blob blob : blobs.iterateAll()) {
-                System.out.println(blob.getName());
                 if (blob.getName().contains(imageName)) {
                     blob.delete();
                     return "success";
@@ -66,9 +69,10 @@ public class FirebaseStorageService {
         } catch (Exception e) {
             return "fail";
         }
-             
+
         return "Not found";
     }
+
     public String removeAbsoluteFileImage(String folder, String imageName) {
         try {
             InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-admin-sdk.json");
@@ -85,7 +89,6 @@ public class FirebaseStorageService {
             System.out.println("Bucket: " + bucket.getName());
             Page<Blob> blobs = bucket.list();
             for (Blob blob : blobs.iterateAll()) {
-                System.out.println(blob.getName());
                 if (blob.getName().equals(folder + "/" + imageName)) {
                     blob.delete();
                     return "success";
@@ -94,9 +97,10 @@ public class FirebaseStorageService {
         } catch (Exception e) {
             return "fail";
         }
-             
+
         return "Not found";
     }
+
     public void clearAll() {
         try {
             InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-admin-sdk.json");

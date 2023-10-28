@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class FirebaseResponse extends ResponseDataDTO{
+public class FileUploadInfoDTO extends ResponseDataDTO{
     private String imageUrl;
+    private String imageName;
 }
