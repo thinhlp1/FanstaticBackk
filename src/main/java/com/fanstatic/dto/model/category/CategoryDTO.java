@@ -20,6 +20,7 @@ public class CategoryDTO extends ResponseDataDTO {
 
     private String name;
 
+    private String imageUrl;
     // bi-directional many-to-one association to Category
 
     private List<ResponseDataDTO> childCategories;
