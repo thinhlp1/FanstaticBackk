@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @Controller
-@CrossOrigin("http://localhost:3000")
 @RequestMapping("/api/manage/size")
 @AllArgsConstructor
 public class SizeController {

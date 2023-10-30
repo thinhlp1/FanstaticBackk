@@ -64,7 +64,7 @@ public class RoleService {
         role.setCreateAt(new Date());
         role.setCreateBy(systemService.getUserLogin());
 
-        Role roleSaved = roleRepository.save(role);
+        Role roleSaved = roleRepository.saveAndFlush(role);
 
         if (roleSaved != null) {
 

@@ -12,12 +12,15 @@ import com.fanstatic.model.Shift;
 import com.fanstatic.dto.model.shift.ShiftRequestDTO;
 import com.fanstatic.repository.ShiftRepository;
 import com.fanstatic.service.system.SystemService;
+import com.fanstatic.util.DateUtils;
 import com.fanstatic.util.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
 
+import java.sql.Time;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,6 +53,10 @@ public class ShiftService {
         shift.setActive(DataConst.ACTIVE_TRUE);
         shift.setCreateAt(new Date());
         shift.setCreateBy(systemService.getUserLogin());
+        LocalTime start = LocalTime.parse(shiftRequestDTO.getStartAt());
+        LocalTime end = LocalTime.parse(shiftRequestDTO.getEndAt());
+        shift.setStartAt(Time.valueOf(start));
+        shift.setEndAt(Time.valueOf(end));
 
         Shift shiftSaved = shiftRepository.save(shift);
 
@@ -88,6 +95,10 @@ public class ShiftService {
 
         shift.setUpdateAt(new Date());
         shift.setUpdateBy(systemService.getUserLogin());
+        LocalTime start = LocalTime.parse(shiftRequestDTO.getStartAt());
+        LocalTime end = LocalTime.parse(shiftRequestDTO.getEndAt());
+        shift.setStartAt(Time.valueOf(start));
+        shift.setEndAt(Time.valueOf(end));
 
         Shift shiftSaved = shiftRepository.save(shift);
 

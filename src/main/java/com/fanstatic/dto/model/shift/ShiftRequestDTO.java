@@ -19,4 +19,10 @@ public class ShiftRequestDTO {
 
     @NotBlank(message = "{NotBlank.shift.shift}")
     private String shift;
+
+    @NotBlank(message = "{NotBlank.shift.startAt}")
+    private String startAt;
+
+    @NotBlank(message = "{NotBlank.shift.endAt}")
+    private String endAt;
 }

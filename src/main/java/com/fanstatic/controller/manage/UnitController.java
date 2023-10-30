@@ -1,8 +1,8 @@
 package com.fanstatic.controller.manage;
 
 import com.fanstatic.dto.ResponseDTO;
-import com.fanstatic.dto.model.shift.ShiftRequestDTO;
-import com.fanstatic.service.model.ShiftService;
+import com.fanstatic.dto.model.unit.UnitRequestDTO;
+import com.fanstatic.service.model.UnitService;
 import com.fanstatic.util.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/api/manage/shift")
+@RequestMapping("/api/manage/unit")
 @AllArgsConstructor
-public class ShiftController {
-    private final ShiftService shiftService;
+public class UnitController {
+    private final UnitService unitService;
 
     // @GetMapping("/show/size-permission")
     // @ResponseBody
@@ -25,43 +25,43 @@ public class ShiftController {
 
     @PostMapping("/create")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> create(@RequestBody @Valid ShiftRequestDTO shiftRequestDTO) {
-        ResponseDTO reponseDTO = shiftService.create(shiftRequestDTO);
+    public ResponseEntity<ResponseDTO> create(@RequestBody @Valid UnitRequestDTO unitRequestDTO) {
+        ResponseDTO reponseDTO = unitService.create(unitRequestDTO);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @PutMapping("/update/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid ShiftRequestDTO shiftRequestDTO, @PathVariable("id") String id) {
-        ResponseDTO reponseDTO = shiftService.update(shiftRequestDTO);
+    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid UnitRequestDTO unitRequestDTO, @PathVariable("id") String id) {
+        ResponseDTO reponseDTO = unitService.update(unitRequestDTO);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> delete(@PathVariable("id") String id) {
-        ResponseDTO reponseDTO = shiftService.delete(id);
+        ResponseDTO reponseDTO = unitService.delete(id);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @PutMapping("/restore/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> restore(@PathVariable("id") String id) {
-        ResponseDTO reponseDTO = shiftService.restore(id);
+        ResponseDTO reponseDTO = unitService.restore(id);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @GetMapping("/show")
     @ResponseBody
     public ResponseEntity<ResponseDTO> show(@RequestParam(name = "active") int active) {
-        ResponseDTO reponseDTO = shiftService.show(active);
+        ResponseDTO reponseDTO = unitService.show(active);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
-     @GetMapping("/show/detail/{id}")
+    @GetMapping("/show/detail/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> detail(@PathVariable("id") String id) {
-        ResponseDTO reponseDTO = shiftService.detail(id);
+        ResponseDTO reponseDTO = unitService.detail(id);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 }

@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 public class File  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private byte active;
@@ -31,11 +32,21 @@ public class File  {
 	private String extension;
 
 	@Column(name="link_in_project")
-	private String linkInProject;
+	private String link;
 
 	private String name;
 
-	private int size;
+	private long size;
+
+
+	public File( byte active, String extension, String link, String name, long size) {
+		this.active = active;
+		this.extension = extension;
+		this.link = link;
+		this.name = name;
+		this.size = size;
+	}
+
 
 
 }

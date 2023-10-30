@@ -18,10 +18,10 @@ public interface ShiftRepository extends JpaRepository<Shift, String> {
     public Optional<Shift> findByCodeAndActiveIsTrue(String code);
 
     public Optional<Shift> findByIdAndActiveIsFalse(String id);
-//
+
     public Optional<Shift> findByShiftAndActiveIsTrue(String shift);
-//
+
     public Optional<Shift> findByCodeAndActiveIsTrueAndIdNot(String code, String id);
-//
+
     public Optional<Shift> findByShiftAndActiveIsTrueAndIdNot(String shift, String id);
 }

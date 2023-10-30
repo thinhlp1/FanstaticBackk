@@ -16,6 +16,7 @@ import com.fanstatic.model.Role;
 import com.fanstatic.repository.AccountRepository;
 import com.fanstatic.repository.RoleRepository;
 import com.fanstatic.service.system.SystemService;
+import com.fanstatic.util.CookieUtils;
 import com.fanstatic.util.JwtUtil;
 import com.fanstatic.util.ResponseUtils;
 import com.fanstatic.util.SessionUtils;
@@ -32,7 +33,7 @@ public class AuthenticationService {
     private final RoleRepository roleRepository;
     private final AuthenticationManager authenticationManager;
     private final SystemService systemService;
-    private final SessionUtils sessionUtils;
+    private final CookieUtils cookieUtils;
 
     public ResponseDTO login(LoginDTO loginDTO) {
         AuthenReponse authenReponse = new AuthenReponse();
@@ -52,7 +53,7 @@ public class AuthenticationService {
                     .orElseThrow();
             String jwtToken = jwtUtil.generateToken(account);
             authenReponse.setToken(jwtToken);
-            sessionUtils.set("token", jwtToken);
+            cookieUtils.set("token", jwtToken,24);
             systemService.writeLoginLog(jwtToken, account.getUser());
             // return authenReponse;
             return ResponseUtils.success(200, "Đăng nhập thành công", authenReponse);

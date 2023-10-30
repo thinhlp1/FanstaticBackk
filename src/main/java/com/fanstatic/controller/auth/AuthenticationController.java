@@ -12,7 +12,7 @@ import com.fanstatic.util.ResponseUtils;
 import lombok.AllArgsConstructor;
 
 @Controller
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("http://localhost:3000/")
 @RequestMapping("/auth")
 @AllArgsConstructor
 public class AuthenticationController {
