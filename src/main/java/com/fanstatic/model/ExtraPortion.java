@@ -30,6 +30,7 @@ public class ExtraPortion  {
 	
 	@Id
 	@Column(name="extra_portion_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int extraPortionId;
 
 	private byte active;
@@ -55,9 +56,6 @@ public class ExtraPortion  {
 	@OneToMany(mappedBy="extraPortion")
 	private List<OrderExtraPortion> orderExtraPortions;
 
-	//bi-directional many-to-one association to OrderItemOption
-	@OneToMany(mappedBy="extraPortion")
-	private List<OrderItemOption> orderItemOptions;
 
 	
 	@Temporal(TemporalType.TIMESTAMP)

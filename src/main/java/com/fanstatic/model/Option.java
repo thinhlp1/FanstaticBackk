@@ -23,41 +23,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Flavor  {
+public class Option  {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	private byte active;
-
-	private String code;
-
-	private String description;
-
 	private String name;
-
-
-	//bi-directional many-to-one association to Category
-	@ManyToOne
-	private Category category;
-
-	//bi-directional many-to-one association to Unit
-	@ManyToOne
-	private Unit unit;
-
-	//bi-directional many-to-one association to WarehouseDeliverItem
-	@OneToMany(mappedBy="flavor")
-	private List<WarehouseDeliverItem> warehouseDeliverItems;
-
-	//bi-directional many-to-one association to WarehouseInventoryItem
-	@OneToMany(mappedBy="flavor")
-	private List<WarehouseInventoryItem> warehouseInventoryItems;
-
-	//bi-directional many-to-one association to WarehouseReceiveItem
-	@OneToMany(mappedBy="flavor")
-	private List<WarehouseReceiveItem> warehouseReceiveItems;
-
 
 	
 	@Temporal(TemporalType.TIMESTAMP)

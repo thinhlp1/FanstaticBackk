@@ -47,21 +47,21 @@ public class WebSecurityConfig {
                                 .authenticationProvider(authenticationProvider)
                                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterAfter(authorizationFilter, JwtAuthenticationFilter.class)
-                                .cors(cors -> cors.disable());
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
                 ;
 
                 return http.build();
 
         }
 
-        // @Bean
-        // CorsConfigurationSource corsConfigurationSource() {
-        //         CorsConfiguration configuration = new CorsConfiguration();
-        //         configuration.setAllowedOrigins(Arrays.asList("https://example.com"));
-        //         configuration.setAllowedMethods(Arrays.asList("GET", "POST"));
-        //         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        //         source.registerCorsConfiguration("/**", configuration);
-        //         return source;
-        // }
+        @Bean
+        CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(Arrays.asList("*"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST"));
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 
 }
