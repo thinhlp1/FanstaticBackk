@@ -28,7 +28,8 @@ import lombok.NoArgsConstructor;
 public class Shift  {
 	
 	@Id
-	private String id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
 
 	private byte active;
 

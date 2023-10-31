@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
@@ -10,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
 
 /**
  * 
@@ -23,13 +20,12 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor 
-public class Order  {
-	
-	
+@NoArgsConstructor
+public class Order {
 
 	@Id
 	@Column(name = "order_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int orderId;
 
 	@Column(name = "cancel_reason")
@@ -72,8 +68,9 @@ public class Order  {
 	private List<OrderTable> orderTables;
 
 	// bi-directional many-to-one association to OrderVoucher
-	@OneToMany(mappedBy = "order")
-	private List<OrderVoucher> orderVouchers;
+	@ManyToOne
+	@JoinColumn(name = "voucher_id")
+	private Voucher voucher;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")

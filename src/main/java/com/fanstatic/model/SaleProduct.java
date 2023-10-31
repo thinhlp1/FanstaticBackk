@@ -28,6 +28,7 @@ import lombok.NoArgsConstructor;
 public class SaleProduct  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	// bi-directional many-to-one association to Product

@@ -28,6 +28,7 @@ import lombok.NoArgsConstructor;
 public class HotProduct  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	@Temporal(TemporalType.TIMESTAMP)

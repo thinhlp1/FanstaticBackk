@@ -30,8 +30,8 @@ import lombok.NoArgsConstructor;
 public class OrderVoucher  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-
 	// bi-directional many-to-one association to Order
 	@ManyToOne
 	@JoinColumn(name = "order_id")
