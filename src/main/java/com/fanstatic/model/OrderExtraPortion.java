@@ -26,8 +26,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderExtraPortion  {
-	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private String note;
@@ -41,6 +41,8 @@ public class OrderExtraPortion  {
 	@ManyToOne
 	@JoinColumn(name = "order_id")
 	private Order order;
+
+	private int quantity;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")

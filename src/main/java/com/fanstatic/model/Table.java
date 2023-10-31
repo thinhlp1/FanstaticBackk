@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import java.util.Date;
 import java.util.List;
 
@@ -9,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
 
 /**
  * 
@@ -23,25 +20,24 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Table  {
-	
+public class Table {
+
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private byte active;
 
 	private int capacity;
 
-	@Lob
-	private String description;
-
 	private String name;
 
 	@Column(name = "number_table")
 	private int numberTable;
-
-	@Column(name = "table_type")
-	private String tableType;
+	
+	@ManyToOne
+	@JoinColumn(name = "table_type")
+	private TableType tableType;
 
 	// bi-directional many-to-one association to OrderTable
 	@OneToMany(mappedBy = "table")
