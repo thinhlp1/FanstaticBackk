@@ -2,6 +2,7 @@ package com.fanstatic.service.system;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -72,6 +73,9 @@ public class QRCodeService {
             qrCode.setContent("QR Code bàn " + nameQr);
 
             QrCode qrCodeSaved = qrCodeRepository.saveAndFlush(qrCode);
+
+            Files.delete(pathToFile);
+
 
             return qrCodeSaved;
         } catch (Exception e) {
