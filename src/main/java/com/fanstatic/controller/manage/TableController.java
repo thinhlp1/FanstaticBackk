@@ -87,11 +87,24 @@ public class TableController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
+      @GetMapping("/show/layout")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showTableLayout() {
+        ResponseDTO reponseDTO = tableService.showTableLayout();
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
 
-    // @GetMapping("/show/detail/{id}")
-    // @ResponseBody
-    // public ResponseEntity<ResponseDTO> detail(@PathVariable("id") int id) {
-    // ResponseDTO reponseDTO = sizeService.detail(id);
-    // return ResponseUtils.returnReponsetoClient(reponseDTO);
-    // }
+    @GetMapping("/show/table-type")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showTableType() {
+        ResponseDTO reponseDTO = tableTypeService.show();
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @GetMapping("/show")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showTable() {
+        ResponseDTO reponseDTO = tableService.show();
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
 }
