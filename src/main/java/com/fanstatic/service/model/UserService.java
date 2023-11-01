@@ -68,16 +68,14 @@ public class UserService {
         }
 
         // check image
-        MultipartFile image = userRequestDTO.getImage();
-        if (image != null) {
-            String fileName = image.getOriginalFilename();
-            String contentType = image.getContentType();
-            long fileSize = image.getSize();
-
-            // save image to Fisebase and file table
-        }
 
         User user = modelMapper.map(userRequestDTO, User.class);
+        MultipartFile image = userRequestDTO.getImage();
+        if (image != null) {
+            File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+            user.setImage(file);
+            // save image to Fisebase and file table
+        }
 
         String employeeCode = generateEmployeeCode(user.getName());
 
@@ -86,9 +84,6 @@ public class UserService {
         user.setActive(DataConst.ACTIVE_TRUE);
         user.setCreateAt(new Date());
         user.setCreateBy(systemService.getUserLogin());
-
-        File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
-        user.setImage(file);
 
         User userSaved = userRepository.saveAndFlush(user);
         if (userSaved != null) {
