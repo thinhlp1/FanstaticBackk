@@ -210,10 +210,10 @@ public class RoleService {
             case RequestParamConst.ACTIVE_ALL:
                 roles = roleRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 roles = roleRepository.findAllByActiveIsTrue().orElse(roles);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 roles = roleRepository.findAllByActiveIsFalse().orElse(roles);
                 break;
             default:

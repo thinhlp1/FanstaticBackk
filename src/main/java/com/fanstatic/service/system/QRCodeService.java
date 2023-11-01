@@ -60,7 +60,7 @@ public class QRCodeService {
                     ImageConst.TALBE_FOLDER);
             String name = fileUploadInfoDTO.getImageName();
             String extension = FORMAT;
-            File fileUpload = new File(DataConst.ACTIVE_TRUE, extension, fileUploadInfoDTO.getImageUrl(), name, 0);
+            File fileUpload = new File(DataConst.ACTIVE_TRUE, extension, fileUploadInfoDTO.getImageUrl(), name, 0,File.FILE_TYPE_QR);
 
             File fileSaved = fileRepository.saveAndFlush(fileUpload);
 

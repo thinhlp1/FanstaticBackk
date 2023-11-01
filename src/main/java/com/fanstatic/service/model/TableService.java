@@ -11,14 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.config.constants.ApplicationConst;
 import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.ImageConst;
-import com.fanstatic.config.constants.MessageConst;
-import com.fanstatic.config.exception.ValidationException;
+import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
@@ -27,13 +25,12 @@ import com.fanstatic.dto.model.table.TableCompactRequestDTO;
 import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.table.TableRequestDTO;
 import com.fanstatic.dto.model.table.TableTypeDTO;
-import com.fanstatic.dto.model.table.TableTypeRequestDTO;
 import com.fanstatic.model.File;
 import com.fanstatic.model.QrCode;
 import com.fanstatic.model.Table;
 import com.fanstatic.model.TableType;
+import com.fanstatic.repository.FileRepository;
 import com.fanstatic.repository.TableRepository;
-import com.fanstatic.repository.TableTypeRepository;
 import com.fanstatic.repository.TableTypeRepository;
 import com.fanstatic.service.firebase.FirebaseStorageService;
 import com.fanstatic.service.system.FileService;
@@ -56,6 +53,7 @@ public class TableService {
     private final PlatformTransactionManager transactionManager;
     private final QRCodeService qrCodeService;
     private final FirebaseStorageService firebaseStorageService;
+    private final FileRepository fileRepository;
 
     public ResponseDTO checkExits(int number) {
         Table table = tableRepository.findByNumberTableAndActiveIsTrue(number).orElse(null);
@@ -171,8 +169,70 @@ public class TableService {
         }
     }
 
+    public ResponseDTO show() {
+        List<Table> tables = new ArrayList<>();
+        int active = RequestParamConst.ACTIVE_TRUE;
+        switch (active) {
+            case RequestParamConst.ACTIVE_ALL:
+                tables = tableRepository.findAll();
+                break;
+            case RequestParamConst.ACTIVE_TRUE:
+                tables = tableRepository.findAllByActiveIsTrue().orElse(tables);
+                break;
+            case RequestParamConst.ACTIVE_FALSE:
+                tables = tableRepository.findAllByActiveIsFalse().orElse(tables);
+                break;
+            default:
+                tables = tableRepository.findAll();
+                break;
+        }
+        List<ResponseDataDTO> tableDTOS = new ArrayList<>();
+
+        for (Table table : tables) {
+            TableDTO tableDTO = new TableDTO();
+            modelMapper.map(table, tableDTO);
+            String qrCodeUrl = table.getQrCode().getImage().getLink();
+            tableDTO.setQrImageUrl(qrCodeUrl);
+            tableDTO.setTableTypeDTO(modelMapper.map(table.getTableType(), TableTypeDTO.class));
+            tableDTOS.add(tableDTO);
+        }
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+        reponseListDataDTO.setDatas(tableDTOS);
+        return ResponseUtils.success(200, "Danh sách bàn", reponseListDataDTO);
+    }
+
     public ResponseDTO saveLayout(MultipartFile tableLayout) {
-        return null;
+
+        File file = fileRepository.findByFileTypeAndActiveIsTrue(File.FILE_TYPE_TABLE_LAYOUT).orNull();
+        File fileSaved;
+        if (file == null) {
+            fileSaved = fileService.upload(tableLayout, ImageConst.TALBE_LAYOUT_FOLDER,
+                    File.FILE_TYPE_TABLE_LAYOUT);
+        } else {
+            fileService.deleteFireStore(file.getName());
+
+            fileSaved = fileService.updateFile(tableLayout, ImageConst.TALBE_LAYOUT_FOLDER,
+                    file);
+        }
+
+        if (fileSaved != null) {
+            return ResponseUtils.success(200, "Upload layout bàn thành công", null);
+        }
+
+        return ResponseUtils.fail(500, "Upload layout không thành công", null);
+
+    }
+
+    public ResponseDTO showTableLayout() {
+        File file = fileRepository.findByFileTypeAndActiveIsTrue(File.FILE_TYPE_TABLE_LAYOUT).orNull();
+        if (file != null) {
+            FileUploadInfoDTO fileUploadInfoDTO = new FileUploadInfoDTO();
+            fileUploadInfoDTO.setImageName(file.getName());
+            fileUploadInfoDTO.setImageUrl(file.getLink());
+            return ResponseUtils.success(200, "Layout table", fileUploadInfoDTO);
+        }
+        return ResponseUtils.fail(404, "Không tìm thấy layout table", null);
+
     }
 
     public ResponseDTO qrTable() {
@@ -187,10 +247,5 @@ public class TableService {
         }
         return ResponseUtils.fail(500, "Như cke", null);
     }
-
-    // public ResponseDTO saveLayout(MultipartFile tableLayout) {
-    // File file = fileService.upload(tableLayout, ImageConst.TALBE_FOLDER);
-
-    // }
 
 }

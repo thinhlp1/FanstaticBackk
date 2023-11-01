@@ -12,8 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.ImageConst;
 import com.fanstatic.config.constants.MessageConst;
+import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.config.exception.ValidationException;
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.size.SizeDTO;
 import com.fanstatic.dto.model.table.TableTypeDTO;
 import com.fanstatic.dto.model.table.TableTypeRequestDTO;
@@ -127,16 +130,20 @@ public class TableTypeService {
         }
         // check image
         if (image != null) {
-            File file = fileService.upload(image, ImageConst.TALBE_FOLDER);
             if (tableType.getImage() != null) {
-                fileService.delete(tableType.getImage().getId());
+                fileService.updateFile(image, ImageConst.CATEGORY_FOLDER, tableType.getImage());
+
+                fileService.deleteFireStore(tableType.getImage().getName());
+
+            } else {
+                File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+                tableType.setImage(file);
 
             }
-            tableType.setImage(file);
-            TableType userSaved = tableTypeRepository.save(tableType);
-            if (userSaved != null) {
+            TableType tableTypeSaved = tableTypeRepository.save(tableType);
+            if (tableTypeSaved != null) {
 
-                systemService.writeSystemLog(userSaved.getId(), userSaved.getName(), null);
+                systemService.writeSystemLog(tableTypeSaved.getId(), tableTypeSaved.getName(), null);
                 return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, getDTOById(id));
 
             } else {
@@ -172,6 +179,38 @@ public class TableTypeService {
 
     }
 
+    public ResponseDTO show() {
+        List<TableType> tableTypes = new ArrayList<>();
+        int active = RequestParamConst.ACTIVE_TRUE;
+        switch (active) {
+            case RequestParamConst.ACTIVE_ALL:
+                tableTypes = tableTypeRepository.findAll();
+                break;
+            case RequestParamConst.ACTIVE_TRUE:
+                tableTypes = tableTypeRepository.findAllByActiveIsTrue().orElse(tableTypes);
+                break;
+            case RequestParamConst.ACTIVE_FALSE:
+                tableTypes = tableTypeRepository.findAllByActiveIsFalse().orElse(tableTypes);
+                break;
+            default:
+                tableTypes = tableTypeRepository.findAll();
+                break;
+        }
+        List<ResponseDataDTO> tableTypeDTOS = new ArrayList<>();
+
+        for (TableType tableType : tableTypes) {
+            TableTypeDTO tableTypeDTO = new TableTypeDTO();
+            modelMapper.map(tableType, tableTypeDTO);
+            File image = tableType.getImage();
+            if (image != null) {
+                tableTypeDTO.setImageUrl(image.getLink());
+            }
+            tableTypeDTOS.add(tableTypeDTO);
+        }
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+        reponseListDataDTO.setDatas(tableTypeDTOS);
+        return ResponseUtils.success(200, "Danh sách loại bàn", reponseListDataDTO);
+    }
 
     public TableTypeDTO getDTOById(int id) {
         TableType tableType = tableTypeRepository.findById(id).orElse(null);

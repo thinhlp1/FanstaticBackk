@@ -177,10 +177,10 @@ public class SizeService {
             case RequestParamConst.ACTIVE_ALL:
                 sizes = sizeRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 sizes = sizeRepository.findAllByActiveIsTrue().orElse(sizes);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 sizes = sizeRepository.findAllByActiveIsFalse().orElse(sizes);
                 break;
             default:

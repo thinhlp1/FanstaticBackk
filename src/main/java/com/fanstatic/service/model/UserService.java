@@ -172,12 +172,16 @@ public class UserService {
         }
         // check image
         if (image != null) {
-            File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
             if (user.getImage() != null) {
-                fileService.delete(user.getImage().getId());
+                fileService.deleteFireStore(user.getImage().getName());
+
+                fileService.updateFile(image, ImageConst.CATEGORY_FOLDER, user.getImage());
+
+            } else {
+                File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+                user.setImage(file);
 
             }
-            user.setImage(file);
             User userSaved = userRepository.save(user);
             if (userSaved != null) {
 
@@ -261,10 +265,10 @@ public class UserService {
             case RequestParamConst.ACTIVE_ALL:
                 users = userRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 users = userRepository.findAllByActiveIsTrue().orElse(users);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 users = userRepository.findAllByActiveIsFalse().orElse(users);
                 break;
             default:
