@@ -62,6 +62,8 @@ public class ApplicationConfig {
     public MessageSource getMessageSource() {
         ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
         ms.setBasenames(
+                "classpath:validate-message/tabletype",
+                "classpath:validate-message/size",
                 "classpath:validate-message/product",
                 "classpath:validate-message/productvarient",
                 "classpath:validate-message/category",
