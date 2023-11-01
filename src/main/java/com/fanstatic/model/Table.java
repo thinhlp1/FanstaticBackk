@@ -30,10 +30,6 @@ public class Table {
 
 	private byte active;
 
-	private int capacity;
-
-	private String name;
-
 	@Column(name = "number_table")
 	private int numberTable;
 	
@@ -44,11 +40,6 @@ public class Table {
 	// bi-directional many-to-one association to OrderTable
 	@OneToMany(mappedBy = "table")
 	private List<OrderTable> orderTables;
-
-	// bi-directional many-to-one association to File
-	@ManyToOne
-	@JoinColumn(name = "image_id")
-	private File image;
 
 	// bi-directional many-to-one association to QrCode
 	@ManyToOne

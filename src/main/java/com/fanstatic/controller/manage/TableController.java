@@ -87,13 +87,6 @@ public class TableController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
-    // @GetMapping("/show")
-    // @ResponseBody
-    // public ResponseEntity<ResponseDTO> show(@RequestParam(name = "active") int
-    // active) {
-    // ResponseDTO reponseDTO = sizeService.show(active);
-    // return ResponseUtils.returnReponsetoClient(reponseDTO);
-    // }
 
     // @GetMapping("/show/detail/{id}")
     // @ResponseBody

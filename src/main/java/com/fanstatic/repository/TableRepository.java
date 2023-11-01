@@ -8,18 +8,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.fanstatic.model.Table;
 
 public interface TableRepository extends JpaRepository<Table, Integer> {
-    public Optional<List<Table>> findAllByActiveIsTrue();
+  public Optional<List<Table>> findAllByActiveIsTrue();
 
-    public Optional<List<Table>> findAllByActiveIsFalse();
+  public Optional<List<Table>> findAllByActiveIsFalse();
 
-    public Optional<Table> findByIdAndActiveIsTrue(int id);
+  public Optional<Table> findByIdAndActiveIsTrue(int id);
 
-    public List<Table> findByIdInAndActiveTrue(List<Integer> ids);
+  public Optional<Table> findByIdAndActiveTrue(int id);
 
-    public Optional<Table> findByNumberTableAndActiveIsTrue(int numberTable);
+  public Optional<Table> findByNumberTableAndActiveIsTrue(int numberTable);
 
-      public Optional<Table> findByNumberTable(int numberTable);
+  public Optional<Table> findByNumberTable(int numberTable);
 
-    public Optional<Table> findByIdAndActiveIsFalse(int id);
+  public Optional<Table> findByIdAndActiveIsFalse(int id);
 
 }

@@ -1,6 +1,7 @@
 package com.fanstatic.service.system;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +11,15 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fanstatic.config.constants.ApplicationConst;
 import com.fanstatic.config.constants.DataConst;
+import com.fanstatic.config.constants.ImageConst;
 import com.fanstatic.dto.firebase.FileUploadInfoDTO;
 import com.fanstatic.model.File;
 import com.fanstatic.repository.FileRepository;
 import com.fanstatic.service.firebase.FirebaseStorageService;
 import com.google.firebase.internal.FirebaseService;
+import com.google.zxing.WriterException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,6 +47,7 @@ public class FileService {
             return null;
         }
     }
+
 
     public void delete(int id) {
         File file = fileRepository.findById(id).orElse(null);

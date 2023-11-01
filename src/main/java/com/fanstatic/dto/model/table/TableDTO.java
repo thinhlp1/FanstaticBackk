@@ -12,11 +12,9 @@ public class TableDTO extends ResponseDataDTO {
 
 	private byte active;
 
-	private int capacity;
-
-	private String name;
-
     private int numberTable;
 
     private TableTypeDTO tableTypeDTO;
+
+    private String qrImageUrl;
 }
