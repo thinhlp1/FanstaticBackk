@@ -77,7 +77,7 @@ public class VoucherService {
         Trong đối tượng response util chứa method success.
         Tại sao lại truyền responseListDataDTO vào?
          */
-        return ResponseUtils.success(200, "Danh sách size", reponseListDataDTO);
+        return ResponseUtils.success(200, "Danh sách voucher", reponseListDataDTO);
     }
 
     /*
@@ -189,7 +189,7 @@ public class VoucherService {
         Voucher voucherSaved = voucherRepository.save(voucher);
 
         if (voucherSaved != null) {
-            systemService.writeSystemLog(voucher.getId(), voucher.getName(), null);
+            systemService.writeSystemLog(voucherSaved.getId(), voucherSaved.getName(), null);
             return ResponseUtils.success(200, MessageConst.DELETE_SUCCESS, null);
         }
         return ResponseUtils.fail(500, MessageConst.DELETE_FAIL, null);

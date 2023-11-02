@@ -1,9 +1,16 @@
 package com.fanstatic.service.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.model.permissioin.*;
+import com.fanstatic.dto.model.role.FeaturePermissonDTO;
+import com.fanstatic.dto.model.role.RoleRequestDTO;
+import com.fanstatic.model.*;
+import com.fanstatic.repository.*;
+import com.fanstatic.service.system.SystemService;
+import com.fanstatic.util.ResponseUtils;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -14,31 +21,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-import com.fanstatic.dto.ResponseDTO;
-import com.fanstatic.dto.ResponseDataDTO;
-import com.fanstatic.dto.ResponseListDataDTO;
-import com.fanstatic.dto.model.permissioin.FeaturePermissionDTO;
-import com.fanstatic.dto.model.permissioin.ManageFeatureDTO;
-import com.fanstatic.dto.model.permissioin.PermissionDTO;
-import com.fanstatic.dto.model.permissioin.RoleDTO;
-import com.fanstatic.dto.model.permissioin.RolePermissonDTO;
-import com.fanstatic.dto.model.role.FeaturePermissonDTO;
-import com.fanstatic.dto.model.role.RoleRequestDTO;
-import com.fanstatic.model.Account;
-import com.fanstatic.model.FeaturePermission;
-import com.fanstatic.model.ManagerFeature;
-import com.fanstatic.model.Permission;
-import com.fanstatic.model.Role;
-import com.fanstatic.model.RolePermission;
-import com.fanstatic.repository.FeaturePermissionRepository;
-import com.fanstatic.repository.ManagerFeatureRepository;
-import com.fanstatic.repository.PermissionRepository;
-import com.fanstatic.repository.RolePermissionRepository;
-import com.fanstatic.repository.RoleRepository;
-import com.fanstatic.service.system.SystemService;
-import com.fanstatic.util.ResponseUtils;
-
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -280,7 +265,6 @@ public class RolePermissionService {
 
         long count = rolePermissionRepository.countByRoleAndManageFeatureAndPermission(roleId, manageFeatureId,
                 permissionId);
-
         if (count > 0) {
             return true;
         } else {
