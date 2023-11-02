@@ -1,13 +1,17 @@
 package com.fanstatic.service.firebase;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.dto.firebase.FileUploadInfoDTO;
@@ -40,7 +44,26 @@ public class FirebaseStorageService {
 
         BlobInfo blobInfo = StorageClient.getInstance().bucket(storageBucket)
                 .create(imageName, file.getBytes(), file.getContentType());
-        return new FileUploadInfoDTO(blobInfo.getMediaLink(),imageName);
+        return new FileUploadInfoDTO(blobInfo.getMediaLink(), imageName);
+    }
+
+    public FileUploadInfoDTO uploadImage(Path pahtToFile, String folder) throws IOException {
+        String imageName = folder + "/" + UUID.randomUUID().toString() + "_" + pahtToFile.getFileName();
+        InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-admin-sdk.json");
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .setStorageBucket(storageBucket)
+                .build();
+
+        if (FirebaseApp.getApps().isEmpty()) {
+            FirebaseApp.initializeApp(options);
+        }
+
+        byte[] fileContent = Files.readAllBytes(pahtToFile);
+        String contentType = MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE; // Kiểu mặc định
+        BlobInfo blobInfo = StorageClient.getInstance().bucket(storageBucket)
+                .create(imageName, fileContent, contentType);
+        return new FileUploadInfoDTO(blobInfo.getMediaLink(), imageName);
     }
 
     public String removeRelativeFileImage(String imageName) {

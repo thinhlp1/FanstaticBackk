@@ -184,6 +184,10 @@ public class RolePermissionService {
         for (RolePermission rolePermission : rolePermissions) {
             FeaturePermission featurePermission = rolePermission.getFeaturePermission();
             ManagerFeature managerFeature = featurePermission.getManagerFeature();
+            
+            if (managerFeature == null){
+                continue;
+            }
 
             if (managerFeature.getId().equals(addedFeatureId)) {
                 continue;

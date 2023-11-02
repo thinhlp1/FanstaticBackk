@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
  * 
  */
 @Entity
+@Table(name = "table_type")
 @Data
 @Builder
 @AllArgsConstructor
@@ -40,7 +42,7 @@ public class TableType  {
 
 	// bi-directional many-to-one association to OrderTable
 	@OneToMany(mappedBy = "tableType")
-	private List<Table> tables;
+	private List<com.fanstatic.model.Table> tables;
 
 	// bi-directional many-to-one association to File
 	@ManyToOne

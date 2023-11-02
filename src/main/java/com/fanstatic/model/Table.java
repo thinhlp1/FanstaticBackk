@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
  * 
  */
 @Entity
+@jakarta.persistence.Table(name = "`table`")
 @Data
 @Builder
 @AllArgsConstructor
@@ -28,10 +30,6 @@ public class Table {
 
 	private byte active;
 
-	private int capacity;
-
-	private String name;
-
 	@Column(name = "number_table")
 	private int numberTable;
 	
@@ -42,11 +40,6 @@ public class Table {
 	// bi-directional many-to-one association to OrderTable
 	@OneToMany(mappedBy = "table")
 	private List<OrderTable> orderTables;
-
-	// bi-directional many-to-one association to File
-	@ManyToOne
-	@JoinColumn(name = "image_id")
-	private File image;
 
 	// bi-directional many-to-one association to QrCode
 	@ManyToOne
