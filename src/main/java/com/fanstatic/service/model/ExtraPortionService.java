@@ -11,8 +11,10 @@ import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
 import com.fanstatic.dto.model.extraportion.ExtraPortionRequestDTO;
 import com.fanstatic.model.Category;
 import com.fanstatic.model.ExtraPortion;
+import com.fanstatic.model.File;
 import com.fanstatic.repository.CategoryRepository;
 import com.fanstatic.repository.ExtraPortionRepository;
+import com.fanstatic.repository.FileRepository;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
 import lombok.RequiredArgsConstructor;
@@ -30,13 +32,31 @@ public class ExtraPortionService {
     private final ExtraPortionRepository extraPortionRepository;
     private final CategoryRepository categoryRepository;
 
+    private final FileRepository fileRepository;
+
     private final ModelMapper modelMapper;
 
     private final SystemService systemService;
 
     public ResponseDTO create(ExtraPortionRequestDTO extraPortionRequestDTO) {
+        /*
+        Tạo 1 đối tượng Category dựa trên categoryId được truyền vào ExtraPortionRequestDTO
+        Tạo 1 đối tượng Image dựa trên imageId được truyền vào ExtraPortionRequestDTO
+         */
+        Category category = categoryRepository.findByIdAndActiveIsTrue(extraPortionRequestDTO.getCategoryId()).orElse(null);
+        File fileImage = fileRepository.findByIdAndActiveIsTrue(extraPortionRequestDTO.getImageId()).orNull();
+
         //Tạo 1 list để lưu trữ lỗi, khi thông báo lỗi thì truyền nó lên -> mục đích để thông báo lỗi 1 lượt
         List<FieldError> errors = new ArrayList<>();
+        //Bắt lỗi danh mục không tồn tại
+        if (category == null) {
+            errors.add(new FieldError("extraPortionRequestDTO", "categoryId", "Danh mục không tồn tại"));
+        }
+        //Bắt lỗi file ảnh không tồn tại
+        if (fileImage == null) {
+            errors.add(new FieldError("extraPortionRequestDTO", "imageId", "File ảnh không tồn tại"));
+        }
+
         //Bắt lỗi extra portion Code đã tồn tại
         if (extraPortionRepository.findByCodeAndActiveIsTrue(extraPortionRequestDTO.getCode()).isPresent()) {
             errors.add(new FieldError("extraPortionRequestDTO", "code", "Code đã tồn tại"));
@@ -52,18 +72,8 @@ public class ExtraPortionService {
             throw new ValidationException(errors);
         }
 
-        /*
-        // Tạo 1 đối tượng category dựa trên categoryId được truyền vào ExtraPortionRequestDTO
-         */
-        Category category = categoryRepository.findByIdAndActiveIsTrue(extraPortionRequestDTO.getCategoryId()).orElse(null);
-        if (category == null) {
-            return ResponseUtils.fail(500, "Danh mục không tồn tại", null);
-        }
-
-
         //Map voucher request dto vào voucher
         ExtraPortion extraPortion = modelMapper.map(extraPortionRequestDTO, ExtraPortion.class);
-
         /*
         Khi thêm vô thì set:
          image là 1 file
@@ -72,7 +82,8 @@ public class ExtraPortionService {
          create at là ngày mới nhất,
          create by là lấy từ lịch sử truy cập người dùng
          */
-
+        extraPortion.setImage(fileImage);
+        extraPortion.setCategory(category);
         extraPortion.setActive(DataConst.ACTIVE_TRUE);
         extraPortion.setCreateAt(new Date());
         extraPortion.setCreateBy(systemService.getUserLogin());
@@ -94,7 +105,12 @@ public class ExtraPortionService {
     public ResponseDTO update(ExtraPortionRequestDTO extraPortionRequestDTO) {
         //Chúng ta đã có id của extra portion -> tìm extra portion bằng id đó
         ExtraPortion extraPortion = extraPortionRepository.findByExtraPortionIdAndActiveIsTrue(extraPortionRequestDTO.getExtraPortionId()).orElse(null);
-
+        /*
+        Tạo 1 đối tượng Category dựa trên categoryId được truyền vào ExtraPortionRequestDTO
+        Tạo 1 đối tượng Image dựa trên imageId được truyền vào ExtraPortionRequestDTO
+         */
+        Category category = categoryRepository.findByIdAndActiveIsTrue(extraPortionRequestDTO.getCategoryId()).orElse(null);
+        File fileImage = fileRepository.findByIdAndActiveIsTrue(extraPortionRequestDTO.getImageId()).orNull();
         //Nếu extra portion không tồn tại thì nó sẽ lỗi 401
         if (extraPortion == null) {
             return ResponseUtils.fail(401, "Món ăn không tồn tại", null);
@@ -102,6 +118,15 @@ public class ExtraPortionService {
 
         //Tạo 1 list để lưu trữ lỗi, khi thông báo lỗi thì truyền nó lên -> mục đích để thông báo lỗi 1 lượt
         List<FieldError> errors = new ArrayList<>();
+        //Bắt lỗi danh mục không tồn tại
+        if (category == null) {
+            errors.add(new FieldError("extraPortionRequestDTO", "categoryId", "Danh mục không tồn tại"));
+        }
+        //Bắt lỗi file ảnh không tồn tại
+        if (fileImage == null) {
+            errors.add(new FieldError("extraPortionRequestDTO", "imageId", "File ảnh không tồn tại"));
+        }
+
         //Bắt lỗi Code món ăn đã tồn tại
         if (extraPortionRepository.findByCodeAndActiveIsTrue(extraPortionRequestDTO.getCode()).isPresent()) {
             errors.add(new FieldError("extraPortionRequestDTO", "code", "Code món ăn đã tồn tại"));
@@ -109,7 +134,7 @@ public class ExtraPortionService {
 
         //Bắt lỗi tên món ăn đã tồn tại
         if (extraPortionRepository.findByNameAndActiveIsTrue(extraPortionRequestDTO.getName()).isPresent()) {
-            errors.add(new FieldError("extraPortionRequestDTO", "name", "Voucher đã tồn tại"));
+            errors.add(new FieldError("extraPortionRequestDTO", "name", "Tên món ăn đã tồn tại"));
         }
 
         // Nếu có lỗi, ném ra một lượt với danh sách lỗi
@@ -118,6 +143,8 @@ public class ExtraPortionService {
         }
 
         modelMapper.map(extraPortionRequestDTO, extraPortion);
+        extraPortion.setImage(fileImage);
+        extraPortion.setCategory(category);
         extraPortion.setUpdateAt(new Date());
         extraPortion.setUpdateBy(systemService.getUserLogin());
         ExtraPortion extraPortionSaved = extraPortionRepository.save(extraPortion);
