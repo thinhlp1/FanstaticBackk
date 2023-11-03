@@ -21,8 +21,6 @@ public class CustomerDTO extends ResponseDataDTO {
 
 	private String imageUrl;
 
-	private byte gender;
-
 	private String name;
 
 	private String numberPhone;
@@ -30,6 +28,4 @@ public class CustomerDTO extends ResponseDataDTO {
 	private byte active;
 
 	private BigInteger point;
-
-	private RoleDTO role;
 }

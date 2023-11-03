@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fanstatic.dto.model.size.SizeRequestDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.validation.FieldError;
 
 import com.fanstatic.config.constants.DataConst;
@@ -18,9 +17,7 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.size.SizeDTO;
-import com.fanstatic.dto.model.size.SizeRequestDTO;
 import com.fanstatic.model.Size;
-import com.fanstatic.repository.CategoryRepository;
 import com.fanstatic.repository.SizeRepository;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
