@@ -163,12 +163,16 @@ public class CategoryService {
         }
         // check image
         if (image != null) {
-            File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
             if (category.getImage() != null) {
-                fileService.delete(category.getImage().getId());
+                fileService.deleteFireStore(category.getImage().getName());
+
+                fileService.updateFile(image, ImageConst.CATEGORY_FOLDER, category.getImage());
+
+            } else {
+                File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+                category.setImage(file);
 
             }
-            category.setImage(file);
             Category categorySaved = categoryRepository.save(category);
             if (categorySaved != null) {
 
@@ -294,10 +298,10 @@ public class CategoryService {
             case RequestParamConst.ACTIVE_ALL:
                 rootCategories = categoryRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsTrue(ROOT_LEVEL).orElse(rootCategories);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsFalse(ROOT_LEVEL).orElse(rootCategories);
                 break;
             default:
@@ -324,10 +328,10 @@ public class CategoryService {
             case RequestParamConst.ACTIVE_ALL:
                 rootCategories = categoryRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsTrue(ROOT_LEVEL).orElse(rootCategories);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsFalse(ROOT_LEVEL).orElse(rootCategories);
                 break;
             default:

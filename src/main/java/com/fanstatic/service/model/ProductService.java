@@ -316,10 +316,10 @@ public class ProductService {
             case RequestParamConst.ACTIVE_ALL:
                 products = productRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 products = productRepository.findAllByActiveIsTrue().orElse(products);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 products = productRepository.findAllByActiveIsFalse().orElse(products);
                 break;
             default:

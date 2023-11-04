@@ -28,12 +28,12 @@ import lombok.NoArgsConstructor;
 public class OrderItemOption  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	// bi-directional many-to-one association to ExtraPortion
 	@ManyToOne
-	@JoinColumn(name = "extra_portion_id")
-	private ExtraPortion extraPortion;
+	private Option option;
 
 	// bi-directional many-to-one association to OrderItem
 	@ManyToOne

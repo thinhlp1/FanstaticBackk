@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-
 public interface UnitRepository extends JpaRepository<Unit, String> {
     public Optional<List<Unit>> findAllByActiveIsTrue();
 
@@ -23,4 +22,5 @@ public interface UnitRepository extends JpaRepository<Unit, String> {
     public Optional<Unit> findByNameAndActiveIsTrueAndIdNot(String name, String id);
 
     public Optional<Unit> findBySignAndActiveIsTrueAndIdNot(String sign, String id);
+
 }

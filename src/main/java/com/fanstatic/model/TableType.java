@@ -1,42 +1,53 @@
 package com.fanstatic.model;
 
+
 import java.util.Date;
+import java.util.List;
+
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+
 /**
  * 
  * /**
- * The persistent class for the order_table database table.
+ * The persistent class for the table database table.
  * 
  */
-
-@Table(name = "order_table")
 @Entity
+@Table(name = "table_type")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderTable {
-
+public class TableType  {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	// bi-directional many-to-one association to Order
-	@ManyToOne
-	@JoinColumn(name = "order_id")
-	private Order order;
+	private byte active;
 
-	// bi-directional many-to-one association to Table
+	private int capacity;
+
+	private String name;
+
+    
+	private String code;
+
+	// bi-directional many-to-one association to OrderTable
+	@OneToMany(mappedBy = "tableType")
+	private List<com.fanstatic.model.Table> tables;
+
+	// bi-directional many-to-one association to File
 	@ManyToOne
-	@JoinColumn(name = "table_id")
-	private com.fanstatic.model.Table table;
+	@JoinColumn(name = "image_id")
+	private File image;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")

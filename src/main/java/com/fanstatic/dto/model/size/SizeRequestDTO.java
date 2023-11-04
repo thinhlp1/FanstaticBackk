@@ -15,8 +15,8 @@ public class SizeRequestDTO {
 
     @NotNull(message = "{NotNull.product.code}")
     @Pattern(regexp = "^[A-Z0-9]*$", message = "{Pattern.product.code}")
-    
     private String code;
+    
     @NotBlank(message = "{NotBlank.product.name}")
     @Size(min = 1, max = 50, message = "{Size.product.name}")
     private String name;

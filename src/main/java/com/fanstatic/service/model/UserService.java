@@ -68,16 +68,14 @@ public class UserService {
         }
 
         // check image
-        MultipartFile image = userRequestDTO.getImage();
-        if (image != null) {
-            String fileName = image.getOriginalFilename();
-            String contentType = image.getContentType();
-            long fileSize = image.getSize();
-
-            // save image to Fisebase and file table
-        }
 
         User user = modelMapper.map(userRequestDTO, User.class);
+        MultipartFile image = userRequestDTO.getImage();
+        if (image != null) {
+            File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+            user.setImage(file);
+            // save image to Fisebase and file table
+        }
 
         String employeeCode = generateEmployeeCode(user.getName());
 
@@ -86,9 +84,6 @@ public class UserService {
         user.setActive(DataConst.ACTIVE_TRUE);
         user.setCreateAt(new Date());
         user.setCreateBy(systemService.getUserLogin());
-
-        File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
-        user.setImage(file);
 
         User userSaved = userRepository.saveAndFlush(user);
         if (userSaved != null) {
@@ -177,12 +172,16 @@ public class UserService {
         }
         // check image
         if (image != null) {
-            File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
             if (user.getImage() != null) {
-                fileService.delete(user.getImage().getId());
+                fileService.deleteFireStore(user.getImage().getName());
+
+                fileService.updateFile(image, ImageConst.CATEGORY_FOLDER, user.getImage());
+
+            } else {
+                File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+                user.setImage(file);
 
             }
-            user.setImage(file);
             User userSaved = userRepository.save(user);
             if (userSaved != null) {
 
@@ -266,10 +265,10 @@ public class UserService {
             case RequestParamConst.ACTIVE_ALL:
                 users = userRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 users = userRepository.findAllByActiveIsTrue().orElse(users);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 users = userRepository.findAllByActiveIsFalse().orElse(users);
                 break;
             default:

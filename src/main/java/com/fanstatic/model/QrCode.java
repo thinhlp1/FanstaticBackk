@@ -31,6 +31,7 @@ import lombok.NoArgsConstructor;
 public class QrCode  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private byte active;

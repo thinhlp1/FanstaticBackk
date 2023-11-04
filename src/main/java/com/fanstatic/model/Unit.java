@@ -26,7 +26,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "unit")
 public class Unit  {
-	
 	@Id
 	private String id;
 
