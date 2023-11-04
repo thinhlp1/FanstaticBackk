@@ -31,6 +31,7 @@ import lombok.NoArgsConstructor;
 public class OrderItem  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private String note;

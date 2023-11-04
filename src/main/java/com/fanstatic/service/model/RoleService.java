@@ -64,7 +64,7 @@ public class RoleService {
         role.setCreateAt(new Date());
         role.setCreateBy(systemService.getUserLogin());
 
-        Role roleSaved = roleRepository.save(role);
+        Role roleSaved = roleRepository.saveAndFlush(role);
 
         if (roleSaved != null) {
 
@@ -210,10 +210,10 @@ public class RoleService {
             case RequestParamConst.ACTIVE_ALL:
                 roles = roleRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 roles = roleRepository.findAllByActiveIsTrue().orElse(roles);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 roles = roleRepository.findAllByActiveIsFalse().orElse(roles);
                 break;
             default:

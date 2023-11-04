@@ -56,13 +56,11 @@ public class SizeService {
         size.setCreateAt(new Date());
         size.setCreateBy(systemService.getUserLogin());
 
-        Size sizeSaved = sizeRepository.save(size);
+        Size sizeSaved = sizeRepository.saveAndFlush(size);
 
         if (sizeSaved != null) {
 
-            Size sizeSaved2 = sizeRepository.findByCodeAndActiveIsTrue(sizeSaved.getCode()).orElse(null);
-
-            systemService.writeSystemLog(sizeSaved2.getId(), sizeSaved2.getName(), null);
+            systemService.writeSystemLog(sizeSaved.getId(), sizeSaved.getName(), null);
             return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
 
         }
@@ -179,10 +177,10 @@ public class SizeService {
             case RequestParamConst.ACTIVE_ALL:
                 sizes = sizeRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 sizes = sizeRepository.findAllByActiveIsTrue().orElse(sizes);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 sizes = sizeRepository.findAllByActiveIsFalse().orElse(sizes);
                 break;
             default:

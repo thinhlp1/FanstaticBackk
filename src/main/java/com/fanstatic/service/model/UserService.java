@@ -12,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.config.constants.DataConst;
+import com.fanstatic.config.constants.ImageConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.config.exception.ValidationException;
@@ -22,7 +23,10 @@ import com.fanstatic.dto.model.account.AccountRequestDTO;
 import com.fanstatic.dto.model.user.UserDTO;
 import com.fanstatic.dto.model.user.UserRequestDTO;
 import com.fanstatic.model.User;
+import com.fanstatic.model.File;
+import com.fanstatic.model.User;
 import com.fanstatic.repository.UserRepository;
+import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
 
@@ -34,6 +38,7 @@ public class UserService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final SystemService systemService;
+    private final FileService fileService;
 
     @Autowired
     @Lazy
@@ -63,16 +68,14 @@ public class UserService {
         }
 
         // check image
-        MultipartFile image = userRequestDTO.getImage();
-        if (image != null) {
-            String fileName = image.getOriginalFilename();
-            String contentType = image.getContentType();
-            long fileSize = image.getSize();
-
-            // save image to Fisebase and file table
-        }
 
         User user = modelMapper.map(userRequestDTO, User.class);
+        MultipartFile image = userRequestDTO.getImage();
+        if (image != null) {
+            File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+            user.setImage(file);
+            // save image to Fisebase and file table
+        }
 
         String employeeCode = generateEmployeeCode(user.getName());
 
@@ -82,16 +85,15 @@ public class UserService {
         user.setCreateAt(new Date());
         user.setCreateBy(systemService.getUserLogin());
 
-        User userSaved = userRepository.save(user);
+        User userSaved = userRepository.saveAndFlush(user);
         if (userSaved != null) {
 
             // get user saved againt
-            User user2 = userRepository.findByNumberPhoneAndActiveIsTrue(userSaved.getNumberPhone()).orElse(null);
             ResponseDTO accountReponse = accountService
                     .create(new AccountRequestDTO(user.getNumberPhone(), userRequestDTO.getPassword(),
-                            userRequestDTO.getRoleId(), user2.getId()));
+                            userRequestDTO.getRoleId(), user.getId()));
             if (accountReponse.isSuccess()) {
-                systemService.writeSystemLog(user2.getId(), userSaved.getName(), null);
+                systemService.writeSystemLog(user.getId(), userSaved.getName(), null);
                 return ResponseUtils.success(200, "Tạo thành công", null);
             } else {
                 return ResponseUtils.fail(accountReponse.getStatusCode(), accountReponse.getMessage(), null);
@@ -164,14 +166,33 @@ public class UserService {
     }
 
     public ResponseDTO updateImage(int id, MultipartFile image) {
-
+        User user = userRepository.findByIdAndActiveIsTrue(id).orElse(null);
+        if (user == null) {
+            return ResponseUtils.fail(404, "Danh mục không tồn tại", null);
+        }
         // check image
         if (image != null) {
-            String fileName = image.getOriginalFilename();
-            String contentType = image.getContentType();
-            long fileSize = image.getSize();
-            System.out.println(fileName);
-            // save image to Fisebase and file table
+            if (user.getImage() != null) {
+                fileService.deleteFireStore(user.getImage().getName());
+
+                fileService.updateFile(image, ImageConst.CATEGORY_FOLDER, user.getImage());
+
+            } else {
+                File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+                user.setImage(file);
+
+            }
+            User userSaved = userRepository.save(user);
+            if (userSaved != null) {
+
+                systemService.writeSystemLog(userSaved.getId(), userSaved.getName(), null);
+                return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
+
+            } else {
+                return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
+
+            }
+
         }
         return ResponseUtils.fail(200, "Uploadimage", null);
 
@@ -244,10 +265,10 @@ public class UserService {
             case RequestParamConst.ACTIVE_ALL:
                 users = userRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 users = userRepository.findAllByActiveIsTrue().orElse(users);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 users = userRepository.findAllByActiveIsFalse().orElse(users);
                 break;
             default:
@@ -259,7 +280,10 @@ public class UserService {
         for (User user : users) {
             UserDTO userDTO = new UserDTO();
             modelMapper.map(user, userDTO);
-
+            if (user.getImage() != null) {
+                String imageUrl = user.getImage().getLink();
+                userDTO.setImageUrl(imageUrl);
+            }
             userDTOs.add(userDTO);
         }
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
@@ -271,6 +295,10 @@ public class UserService {
         User user = userRepository.findById(id).orElse(null);
 
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+        if (user.getImage() != null) {
+            String imageUrl = user.getImage().getLink();
+            userDTO.setImageUrl(imageUrl);
+        }
 
         return ResponseUtils.success(200, "Chi tiết người dùng", userDTO);
     }

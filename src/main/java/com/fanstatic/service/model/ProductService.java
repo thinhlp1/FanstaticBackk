@@ -86,14 +86,12 @@ public class ProductService {
         product.setCreateAt(new Date());
         product.setCreateBy(systemService.getUserLogin());
 
-        Product productSaved = productRepository.save(product);
+        Product productSaved = productRepository.saveAndFlush(product);
 
         if (productSaved != null) {
 
-            Product productSaved2 = productRepository.findByCodeAndActiveIsTrue(productSaved.getCode()).orElse(null);
-
             // save product category
-            ResponseDTO productCategorySaved = saveProductCategory(categories, productSaved2);
+            ResponseDTO productCategorySaved = saveProductCategory(categories, productSaved);
             if (!productCategorySaved.isSuccess()) {
                 transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(productCategorySaved.getStatusCode(), productCategorySaved.getMessage(),
@@ -102,7 +100,7 @@ public class ProductService {
 
             // save product varient
             ResponseDTO productVarientSaved = productVarientService
-                    .saveProductVarient(productRequestDTO.getProductVarients(), productSaved2);
+                    .saveProductVarient(productRequestDTO.getProductVarients(), productSaved);
             if (!productVarientSaved.isSuccess()) {
                 transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(productVarientSaved.getStatusCode(),
@@ -318,10 +316,10 @@ public class ProductService {
             case RequestParamConst.ACTIVE_ALL:
                 products = productRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 products = productRepository.findAllByActiveIsTrue().orElse(products);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 products = productRepository.findAllByActiveIsFalse().orElse(products);
                 break;
             default:

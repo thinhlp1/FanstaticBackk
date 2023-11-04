@@ -26,6 +26,7 @@ import lombok.NoArgsConstructor;
 public class ComboProductDetail {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	// bi-directional many-to-one association to ComboProduct

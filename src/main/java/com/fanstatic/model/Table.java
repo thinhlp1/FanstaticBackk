@@ -1,16 +1,14 @@
 package com.fanstatic.model;
 
-
 import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
 
 /**
  * 
@@ -19,38 +17,29 @@ import lombok.NoArgsConstructor;
  * 
  */
 @Entity
+@jakarta.persistence.Table(name = "`table`")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Table  {
-	
+public class Table {
+
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private byte active;
 
-	private int capacity;
-
-	@Lob
-	private String description;
-
-	private String name;
-
 	@Column(name = "number_table")
 	private int numberTable;
-
-	@Column(name = "table_type")
-	private String tableType;
+	
+	@ManyToOne
+	@JoinColumn(name = "table_type")
+	private TableType tableType;
 
 	// bi-directional many-to-one association to OrderTable
 	@OneToMany(mappedBy = "table")
 	private List<OrderTable> orderTables;
-
-	// bi-directional many-to-one association to File
-	@ManyToOne
-	@JoinColumn(name = "image_id")
-	private File image;
 
 	// bi-directional many-to-one association to QrCode
 	@ManyToOne

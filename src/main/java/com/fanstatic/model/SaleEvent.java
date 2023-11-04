@@ -30,6 +30,7 @@ import lombok.NoArgsConstructor;
 public class SaleEvent  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private String description;

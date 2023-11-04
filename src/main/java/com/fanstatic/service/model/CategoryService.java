@@ -12,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.config.constants.DataConst;
+import com.fanstatic.config.constants.ImageConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.config.exception.ValidationException;
@@ -22,8 +23,10 @@ import com.fanstatic.dto.model.category.CategoryDTO;
 import com.fanstatic.dto.model.category.CategoryRequestDTO;
 import com.fanstatic.model.Category;
 import com.fanstatic.repository.CategoryRepository;
+import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
+import com.fanstatic.model.File;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +37,7 @@ public class CategoryService {
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
     private final SystemService systemService;
+    private final FileService fileService;
 
     private final int MAX_LEVEL = 4;
     private final int ROOT_LEVEL = 1;
@@ -85,8 +89,10 @@ public class CategoryService {
         } else {
             category.setLevel(ROOT_LEVEL);
         }
+        File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+        category.setImage(file);
 
-        Category categorySaved = categoryRepository.save(category);
+        Category categorySaved = categoryRepository.saveAndFlush(category);
         if (categorySaved != null) {
 
             systemService.writeSystemLog(categorySaved.getId(), categorySaved.getName(), null);
@@ -151,14 +157,33 @@ public class CategoryService {
     }
 
     public ResponseDTO updateImage(int id, MultipartFile image) {
-
+        Category category = categoryRepository.findByIdAndActiveIsTrue(id).orElse(null);
+        if (category == null) {
+            return ResponseUtils.fail(404, "Danh mục không tồn tại", null);
+        }
         // check image
         if (image != null) {
-            String fileName = image.getOriginalFilename();
-            String contentType = image.getContentType();
-            long fileSize = image.getSize();
-            System.out.println(fileName);
-            // save image to Fisebase and file table
+            if (category.getImage() != null) {
+                fileService.deleteFireStore(category.getImage().getName());
+
+                fileService.updateFile(image, ImageConst.CATEGORY_FOLDER, category.getImage());
+
+            } else {
+                File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+                category.setImage(file);
+
+            }
+            Category categorySaved = categoryRepository.save(category);
+            if (categorySaved != null) {
+
+                systemService.writeSystemLog(categorySaved.getId(), categorySaved.getName(), null);
+                return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
+
+            } else {
+                return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
+
+            }
+
         }
         return ResponseUtils.fail(200, "Uploadimage", null);
 
@@ -273,10 +298,10 @@ public class CategoryService {
             case RequestParamConst.ACTIVE_ALL:
                 rootCategories = categoryRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsTrue(ROOT_LEVEL).orElse(rootCategories);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsFalse(ROOT_LEVEL).orElse(rootCategories);
                 break;
             default:
@@ -303,10 +328,10 @@ public class CategoryService {
             case RequestParamConst.ACTIVE_ALL:
                 rootCategories = categoryRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsTrue(ROOT_LEVEL).orElse(rootCategories);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsFalse(ROOT_LEVEL).orElse(rootCategories);
                 break;
             default:
@@ -332,6 +357,8 @@ public class CategoryService {
 
             for (Category category2 : categories2) {
                 CategoryDTO categoryDTO2 = modelMapper.map(category2, CategoryDTO.class);
+                String imageUrl = category2.getImage() != null ? category2.getImage().getLink() : "";
+                categoryDTO2.setImageUrl(imageUrl);
                 categoryDTO2s.add(categoryDTO2);
                 List<Category> categories3 = categoryRepository.findByParentCategoryAndActiveIsTrue(category2)
                         .orElse(new ArrayList<>());
@@ -340,6 +367,10 @@ public class CategoryService {
 
                 for (Category category3 : categories3) {
                     CategoryDTO categoryDTO3 = modelMapper.map(category3, CategoryDTO.class);
+                    String imageUrl3 = category3.getImage() != null ? category3.getImage().getLink() : "";
+                    categoryDTO3.setImageUrl(imageUrl3);
+                    categoryDTO3.setImageUrl(category3.getImage().getLink());
+
                     categoryDTO3s.add(categoryDTO3);
                     List<Category> categories4 = categoryRepository.findByParentCategoryAndActiveIsTrue(category3)
                             .orElse(new ArrayList<>());
@@ -349,6 +380,9 @@ public class CategoryService {
 
                     for (Category category4 : categories4) {
                         CategoryDTO categoryDTO4 = modelMapper.map(category4, CategoryDTO.class);
+                        String imageUrl4 = category4.getImage() != null ? category4.getImage().getLink() : "";
+                        categoryDTO4.setImageUrl(imageUrl4);
+
                         categoryDTO4s.add(categoryDTO4);
 
                     }
@@ -379,6 +413,9 @@ public class CategoryService {
 
         for (Category category2 : categories2) {
             CategoryDTO categoryDTO2 = modelMapper.map(category2, CategoryDTO.class);
+            String imageUrl = category2.getImage() != null ? category2.getImage().getLink() : "";
+            categoryDTO2.setImageUrl(imageUrl);
+
             categoryDTO2s.add(categoryDTO2);
             List<Category> categories3 = categoryRepository.findByParentCategoryAndActiveIsTrue(category2)
                     .orElse(new ArrayList<>());
@@ -387,6 +424,9 @@ public class CategoryService {
 
             for (Category category3 : categories3) {
                 CategoryDTO categoryDTO3 = modelMapper.map(category3, CategoryDTO.class);
+                String imageUrl3 = category3.getImage() != null ? category3.getImage().getLink() : "";
+                categoryDTO3.setImageUrl(imageUrl3);
+
                 categoryDTO3s.add(categoryDTO3);
                 List<Category> categories4 = categoryRepository.findByParentCategoryAndActiveIsTrue(category3)
                         .orElse(new ArrayList<>());
@@ -395,6 +435,9 @@ public class CategoryService {
                 categoryDTO3.setChildCategories(categoryDTO4s);
                 for (Category category4 : categories4) {
                     CategoryDTO categoryDTO4 = modelMapper.map(category4, CategoryDTO.class);
+                    String imageUrl4 = category4.getImage() != null ? category4.getImage().getLink() : "";
+                    categoryDTO4.setImageUrl(imageUrl4);
+
                     categoryDTO4s.add(categoryDTO4);
 
                 }

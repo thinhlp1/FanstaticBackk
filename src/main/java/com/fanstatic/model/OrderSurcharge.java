@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 public class OrderSurcharge  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private String content;

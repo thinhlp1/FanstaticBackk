@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import java.util.Date;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
@@ -10,57 +9,57 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 /**
-
-/**
+ * 
+ * /**
  * The persistent class for the order_table database table.
  * 
  */
 
-@Table(name="order_table")
+@Table(name = "order_table")
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderTable  {
-	
+public class OrderTable {
+
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	//bi-directional many-to-one association to Order
+	// bi-directional many-to-one association to Order
 	@ManyToOne
-	@JoinColumn(name="order_id")
+	@JoinColumn(name = "order_id")
 	private Order order;
 
-	//bi-directional many-to-one association to Table
+	// bi-directional many-to-one association to Table
 	@ManyToOne
+	@JoinColumn(name = "table_id")
 	private com.fanstatic.model.Table table;
-	
+
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="update_at")
+	@Column(name = "update_at")
 	private Date updateAt;
 
 	@OneToOne
-	@JoinColumn(name="update_by")
+	@JoinColumn(name = "update_by")
 	private User updateBy;
 
-
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="create_at")
+	@Column(name = "create_at")
 	private Date createAt;
-	
+
 	@OneToOne
-	@JoinColumn(name="create_by")
+	@JoinColumn(name = "create_by")
 	private User createBy;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="delete_at")
+	@Column(name = "delete_at")
 	private Date deleteAt;
 
 	@OneToOne
-	@JoinColumn(name="delete_by")
+	@JoinColumn(name = "delete_by")
 	private User deleteBy;
 
 }
