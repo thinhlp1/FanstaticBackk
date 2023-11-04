@@ -1,17 +1,20 @@
 package com.fanstatic.dto.model.saleevent;
 
-import java.util.Date;
-
 import com.fanstatic.dto.ResponseDataDTO;
-
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
-public class SaleEventDTO extends ResponseDataDTO {
+public class SaleEventRequestDTO extends ResponseDataDTO {
     private int id;
 
+    @NotNull(message = "NotNull.saleevent.percent")
+    @Min(value = 1 , message = "Min.saleevent.percent")
     private double percent;
 
     private String description;

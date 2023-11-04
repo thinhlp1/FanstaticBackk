@@ -1,24 +1,20 @@
 package com.fanstatic.controller.manage;
 
-import com.fanstatic.dto.model.size.SizeRequestDTO;
+import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.model.shift.ShiftRequestDTO;
+import com.fanstatic.service.model.ShiftService;
+import com.fanstatic.util.ResponseUtils;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import com.fanstatic.dto.ResponseDTO;
-import com.fanstatic.dto.model.shift.ShiftRequestDTO;
-
-import com.fanstatic.service.model.SizeService;
-import com.fanstatic.util.ResponseUtils;
-
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-
 @Controller
-@RequestMapping("/api/manage/size")
+@RequestMapping("/api/manage/shift")
 @AllArgsConstructor
-public class SizeController {
-    private final SizeService sizeService;
+public class ShiftController {
+    private final ShiftService shiftService;
 
     // @GetMapping("/show/size-permission")
     // @ResponseBody
@@ -29,43 +25,43 @@ public class SizeController {
 
     @PostMapping("/create")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> create(@RequestBody @Valid SizeRequestDTO sizeRequestDTO) {
-        ResponseDTO reponseDTO = sizeService.create(sizeRequestDTO);
+    public ResponseEntity<ResponseDTO> create(@RequestBody @Valid ShiftRequestDTO shiftRequestDTO) {
+        ResponseDTO reponseDTO = shiftService.create(shiftRequestDTO);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @PutMapping("/update/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid SizeRequestDTO sizeRequestDTO, @PathVariable("id") int id) {
-        ResponseDTO reponseDTO = sizeService.update(sizeRequestDTO);
+    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid ShiftRequestDTO shiftRequestDTO, @PathVariable("id") String id) {
+        ResponseDTO reponseDTO = shiftService.update(shiftRequestDTO);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @DeleteMapping("/delete/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id) {
-        ResponseDTO reponseDTO = sizeService.delete(id);
+    public ResponseEntity<ResponseDTO> delete(@PathVariable("id") String id) {
+        ResponseDTO reponseDTO = shiftService.delete(id);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @PutMapping("/restore/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> restore(@PathVariable("id") int id) {
-        ResponseDTO reponseDTO = sizeService.restore(id);
+    public ResponseEntity<ResponseDTO> restore(@PathVariable("id") String id) {
+        ResponseDTO reponseDTO = shiftService.restore(id);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @GetMapping("/show")
     @ResponseBody
     public ResponseEntity<ResponseDTO> show(@RequestParam(name = "active") int active) {
-        ResponseDTO reponseDTO = sizeService.show(active);
+        ResponseDTO reponseDTO = shiftService.show(active);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
-    @GetMapping("/show/detail/{id}")
+     @GetMapping("/show/detail/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> detail(@PathVariable("id") int id) {
-        ResponseDTO reponseDTO = sizeService.detail(id);
+    public ResponseEntity<ResponseDTO> detail(@PathVariable("id") String id) {
+        ResponseDTO reponseDTO = shiftService.detail(id);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 }

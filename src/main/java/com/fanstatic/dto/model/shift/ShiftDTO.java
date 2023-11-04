@@ -1,25 +1,23 @@
-package com.fanstatic.dto.model.saleevent;
-
-import java.util.Date;
+package com.fanstatic.dto.model.shift;
 
 import com.fanstatic.dto.ResponseDataDTO;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
-public class SaleEventDTO extends ResponseDataDTO {
-    private int id;
+public class ShiftDTO extends ResponseDataDTO {
+    private String id;
 
-    private double percent;
+    private String shift;
 
-    private String description;
+    private String code;
 
     private Date startAt;
 
     private Date endAt;
 
     private boolean active;
-
 }

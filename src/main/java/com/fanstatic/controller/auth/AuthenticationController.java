@@ -2,11 +2,7 @@ package com.fanstatic.controller.auth;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.auth.ConfirmOtpDTO;
@@ -21,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @Controller
+@CrossOrigin("http://localhost:3000/")
 @RequestMapping("/auth")
 @AllArgsConstructor
 public class AuthenticationController {
