@@ -29,4 +29,6 @@ public class ExtraPortionRequestDTO {
 
     @NotNull(message = "{NotNull.extraPortion.categoryId}")
     private Integer categoryId;
+
+    private boolean active;
 }

@@ -20,4 +20,7 @@ public class ExtraPortionDTO extends ResponseDataDTO {
 
     private Integer categoryId;
 
+    private boolean active;
+
+
 }
