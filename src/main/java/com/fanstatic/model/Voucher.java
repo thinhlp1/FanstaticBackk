@@ -1,81 +1,87 @@
 package com.fanstatic.model;
 
 
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Table;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
 
 
 /**
- * 
- * 
  * /**
  * The persistent class for the voucher database table.
- * 
  */
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Voucher  {
-	
-	@Id
-	private int id;
+@Table(name = "voucher")
+public class Voucher {
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "end_at")
-	private Date endAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-	private String name;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "end_at")
+    private Date endAt;
 
-	private int percent;
+    private String name;
 
-	@Column(name = "price_condition")
-	private BigInteger priceCondition;
+    private int percent;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "start_at")
-	private Date startAt;
+    private byte active;
 
-	private BigInteger value;
+    @Column(name = "price_condition")
+    private BigInteger priceCondition;
 
-	@Column(name = "voucher_code")
-	private String voucherCode;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "start_at")
+    private Date startAt;
 
-	// bi-directional many-to-one association to OrderVoucher
-	@OneToMany(mappedBy = "voucher")
-	private List<OrderVoucher> orderVouchers;
+    private BigInteger value;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "update_at")
-	private Date updateAt;
+    @Column(name = "voucher_code")
+    private String voucherCode;
 
-	@OneToOne
-	@JoinColumn(name = "update_by")
-	private User updateBy;
+    // bi-directional many-to-one association to OrderVoucher
+    @JsonIgnore
+    @OneToMany(mappedBy = "voucher")
+    private List<OrderVoucher> orderVouchers;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_at")
-	private Date createAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "update_at")
+    private Date updateAt;
 
-	@OneToOne
-	@JoinColumn(name = "create_by")
-	private User createBy;
+    @JsonIgnore
+    @OneToOne
+    @JoinColumn(name = "update_by")
+    private User updateBy;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "delete_at")
-	private Date deleteAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "create_at")
+    private Date createAt;
 
-	@OneToOne
-	@JoinColumn(name = "delete_by")
-	private User deleteBy;
+    @JsonIgnore
+    @OneToOne
+    @JoinColumn(name = "create_by")
+    private User createBy;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "delete_at")
+    private Date deleteAt;
+
+    @JsonIgnore
+    @OneToOne
+    @JoinColumn(name = "delete_by")
+    private User deleteBy;
 
 }

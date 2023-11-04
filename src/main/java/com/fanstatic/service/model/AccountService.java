@@ -118,4 +118,7 @@ public class AccountService {
 
     }
 
+    public Account getByUserID(Integer userId) {
+        return accountRepository.findByUserId(userId).orElse(null);
+    }
 }

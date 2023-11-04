@@ -5,18 +5,21 @@ import java.util.Date;
 import com.fanstatic.dto.ResponseDataDTO;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class SaleEventDTO extends ResponseDataDTO{
-    int id;
-    double percent;
-    String description;
-    Date startAt;
-    Date endAt;
-    Date updateAt;
-    Date deleteAt;
-    Date createAt;
-    int updateBy;
-    int deleteBy;
-    Boolean active;
+@NoArgsConstructor
+public class SaleEventDTO extends ResponseDataDTO {
+    private int id;
+
+    private double percent;
+
+    private String description;
+
+    private Date startAt;
+
+    private Date endAt;
+
+    private boolean active;
+
 }
