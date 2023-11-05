@@ -20,7 +20,8 @@ public class OTPService {
 
     public boolean sendOTP() {
         String otp = OtpGenerator.generateOtp("otp");
-        smsService.sendSMS( "+84336311520", "Mã xác nhận của bạn là: " + otp);
+        String phone = "+84" +sessionUtils.get("numberPhone").toString().substring(1);
+        smsService.sendSMS( phone, "Mã xác nhận của bạn là: " + otp);
         setOTP(otp);
         return true;
 
