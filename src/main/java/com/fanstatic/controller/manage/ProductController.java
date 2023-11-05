@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -36,9 +35,9 @@ public class ProductController {
     @PostMapping("/create")
     @ResponseBody
     public ResponseEntity<ResponseDTO> create(@RequestPart @Valid ProductRequestDTO data,
-            @RequestPart List<MultipartFile> imageFiles, @RequestPart MultipartFile descriptionFile) {
-        data.setImageFiles(imageFiles);
-        data.setDescriptionFile(descriptionFile);
+            @RequestPart List<MultipartFile> images, @RequestPart MultipartFile description) {
+        data.setImageFiles(images);
+        data.setDescriptionFile(description);
         ResponseDTO reponseDTO = productService.create(data);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
@@ -61,9 +60,11 @@ public class ProductController {
 
     @PutMapping("/update/image/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> updateImage(@RequestPart List<MultipartFile> images,
+    public ResponseEntity<ResponseDTO> updateImage(@RequestPart List<Integer> removeImages,
+            @RequestPart List<MultipartFile> newImages,
+
             @PathVariable("id") Integer id) {
-        ResponseDTO reponseDTO = productService.updateImage(id, images);
+        ResponseDTO reponseDTO = productService.updateImage(id, newImages, removeImages);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 

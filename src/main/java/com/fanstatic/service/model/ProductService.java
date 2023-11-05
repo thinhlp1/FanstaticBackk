@@ -15,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.config.constants.DataConst;
+import com.fanstatic.config.constants.ImageConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.config.exception.ValidationException;
@@ -27,13 +28,17 @@ import com.fanstatic.dto.model.product.ProductDTO;
 import com.fanstatic.dto.model.product.ProductRequestDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
 import com.fanstatic.model.Category;
+import com.fanstatic.model.File;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductCategory;
+import com.fanstatic.model.ProductImage;
 import com.fanstatic.model.ProductVarient;
 import com.fanstatic.repository.CategoryRepository;
 import com.fanstatic.repository.ProductCategoryRepository;
+import com.fanstatic.repository.ProductImageRepository;
 import com.fanstatic.repository.ProductRepository;
 import com.fanstatic.repository.ProductVarientRepository;
+import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +54,8 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductVarientRepository productVarientRepository;
+    private final ProductImageRepository productImageRepository;
+    private final FileService fileService;
 
     @Autowired
     @Lazy
@@ -62,6 +69,11 @@ public class ProductService {
         if (productRepository.findByCodeAndActiveIsTrue(productRequestDTO.getCode()).isPresent()) {
             errors.add(new FieldError("productRequestDTO", "code", "Code đã tồn tại"));
         }
+
+        if (productRequestDTO.getImageFiles().isEmpty() || productRequestDTO.getImageFiles() == null){
+             errors.add(new FieldError("productRequestDTO", "image", "Vui lòng chọn ảnh"));
+        }
+
         // Nếu có lỗi, ném ra một lượt với danh sách lỗi
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
@@ -108,6 +120,15 @@ public class ProductService {
                         null);
             }
 
+            // save product image
+            ResponseDTO productImageSaved = saveProductImage(productRequestDTO.getImageFiles(), productSaved);
+            if (!productImageSaved.isSuccess()) {
+                transactionManager.rollback(transactionStatus);
+                return ResponseUtils.fail(productImageSaved.getStatusCode(),
+                        productImageSaved.getMessage(),
+                        null);
+            }
+
             systemService.writeSystemLog(product.getId(), product.getName(), null);
             transactionManager.commit(transactionStatus);
             return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
@@ -124,8 +145,6 @@ public class ProductService {
         // save product category
         try {
 
-            // delete cac danh muc cu va insert lai cac danh muc moi
-
             productCategoryRepository.deleteByProductId(product.getId());
 
             for (Category category : categories) {
@@ -139,6 +158,28 @@ public class ProductService {
             transactionManager.rollback(transactionStatus);
             return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
+        return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
+    }
+
+    public ResponseDTO saveProductImage(List<MultipartFile> images, Product product) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        // save product category
+        try {
+
+            for (MultipartFile image : images) {
+                File file = fileService.upload(image, ImageConst.PRODUCT_FOLDER);
+                System.out.println("FILE ID:  " + file.getId() );
+                ProductImage productImage = new ProductImage();
+                productImage.setImage(file);
+                productImage.setProduct(product);
+                ProductImage productImage2 = productImageRepository.saveAndFlush(productImage);
+                System.out.println("Lưu thành công: " + productImage2.getId());
+            }
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
+        }
+
         return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
     }
 
@@ -187,16 +228,6 @@ public class ProductService {
                         null);
             }
 
-            // save product varient
-            // ResponseDTO productVarientSaved = productVarientService
-            // .updateProductVarient(productRequestDTO.getProductVarients(), productSaved);
-            // if (!productVarientSaved.isSuccess()) {
-            // transactionManager.rollback(transactionStatus);
-            // return ResponseUtils.fail(productVarientSaved.getStatusCode(),
-            // productVarientSaved.getMessage(),
-            // null);
-            // }
-
             systemService.writeSystemLog(product.getId(), product.getName(), null);
             transactionManager.commit(transactionStatus);
             return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
@@ -207,17 +238,31 @@ public class ProductService {
         return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
     }
 
-    public ResponseDTO updateImage(int id, List<MultipartFile> images) {
+    public ResponseDTO updateImage(int id, List<MultipartFile> newImage, List<Integer> removeImagesId) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
-        // check image
-        // if (image != null) {
-        // String fileName = image.getOriginalFilename();
-        // String contentType = image.getContentType();
-        // long fileSize = image.getSize();
-        // System.out.println(fileName);
-        // // save image to Fisebase and file table
-        // }
-        return ResponseUtils.fail(200, "Uploadimage", null);
+        Product product = productRepository.findByIdAndActiveIsTrue(id).orElse(null);
+
+        if (product == null) {
+            return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+        }
+
+        for (Integer imageId : removeImagesId) {
+            fileService.delete(imageId);
+            productImageRepository.deleteByImageId(imageId);
+        }
+
+        ResponseDTO productImageSaved = saveProductImage(newImage, product);
+        if (!productImageSaved.isSuccess()) {
+            transactionManager.rollback(transactionStatus);
+            return ResponseUtils.fail(productImageSaved.getStatusCode(),
+                    productImageSaved.getMessage(),
+                    null);
+        }
+
+        transactionManager.commit(transactionStatus);
+
+        return ResponseUtils.success(200, "Cập nhật hình ảnh thành công", null);
 
     }
 
@@ -297,10 +342,10 @@ public class ProductService {
         List<ProductVarient> productVarients = productVarientRepository.findByProduct(product);
         List<ProductVarientDTO> productVarientDTOs = new ArrayList<>();
 
-        for (ProductVarient productVarient : productVarients){
+        for (ProductVarient productVarient : productVarients) {
             ProductVarientDTO productVarientDTO = modelMapper.map(productVarient, ProductVarientDTO.class);
             productVarientDTOs.add(productVarientDTO);
-            
+
         }
 
         productDTO.setCategories(categoryDTOs);

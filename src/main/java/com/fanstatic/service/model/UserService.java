@@ -72,7 +72,7 @@ public class UserService {
         User user = modelMapper.map(userRequestDTO, User.class);
         MultipartFile image = userRequestDTO.getImage();
         if (image != null) {
-            File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+            File file = fileService.upload(image, ImageConst.USER_FOLDER);
             user.setImage(file);
             // save image to Fisebase and file table
         }

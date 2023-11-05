@@ -82,6 +82,7 @@ public class AuthenticationService {
     }
 
     public ResponseDTO login(LoginDTO loginDTO) {
+        System.out.println("LOGINN");
         User user = userRepository.findByNumberPhoneAndActiveIsTrue(loginDTO.getNumberPhone()).orElse(null);
         if (user == null) {
             sessionUtils.set("numberPhone", loginDTO.getNumberPhone());
@@ -96,7 +97,7 @@ public class AuthenticationService {
         sessionUtils.set("numberPhone", loginDTO.getNumberPhone());
         sessionUtils.set("accountExits", true);
 
-        return ResponseUtils.success(200, "Tài khoản có tồn tại", null);
+        return ResponseUtils.success(201, "Tài khoản có tồn tại", null);
 
     }
 
@@ -176,6 +177,7 @@ public class AuthenticationService {
 
     public ResponseDTO loginPassword(LoginPasswordDTO loginDTO) {
         String numberPhone = sessionUtils.get("numberPhone");
+        System.err.println(numberPhone);
         if (numberPhone == null || sessionUtils.get("accountExits") == null) {
             return ResponseUtils.fail(500, "Chưa đăng nhập", null);
         }
