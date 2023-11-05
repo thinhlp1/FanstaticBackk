@@ -8,9 +8,8 @@ import java.util.List;
 
 import org.apache.commons.codec.digest.HmacUtils;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.google.api.client.util.Value;
 
 @Service
 public class PayOS {
@@ -37,8 +36,8 @@ public class PayOS {
         return list.iterator();
     }
 
-    public String generateSignature(String data) {
-        JSONObject jsonObject = new JSONObject(data);
+    public String generateSignature(JSONObject data) {
+        JSONObject jsonObject = data;
         Iterator<String> sortedIt = sortedIterator(jsonObject.keys(), (a, b) -> a.compareTo(b));
 
         StringBuilder transactionStr = new StringBuilder();
@@ -57,10 +56,14 @@ public class PayOS {
         return signature;
     }
 
-    public String transaction(int orderCode, Long amount, String description, String transactionDatetime) {
-        String data = "{" + "\"orderCode\":" + orderCode + "," + "\"amount\":" + amount + "," + "\"description\":"
-                + description + "," + "\"transactionDatetime\":" + transactionDatetime + "}" + "," + "\"cancelUrl\":"
-                + cancelUrl + "," + "\"returnUrl\":" + returnUrl + "," + "\"checkoutUrl\":" + checkoutUrl + "}";
+    public JSONObject transaction(int orderCode, Long amount, String description) {
+        JSONObject data = new JSONObject();
+        data.put("orderCode", orderCode);
+        data.put("amount", amount);
+        data.put("description", description);
+        data.put("cancelUrl", cancelUrl);
+        data.put("returnUrl", returnUrl);
+        data.put("signature", generateSignature(data));
         return data;
     }
 }
