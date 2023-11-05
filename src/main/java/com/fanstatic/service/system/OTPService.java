@@ -1,22 +1,26 @@
 package com.fanstatic.service.system;
 
-import java.util.Date;
-import java.util.Random;
-
+import com.fanstatic.dto.system.OtpDTO;
+import com.fanstatic.extensions.OtpGenerator;
+import com.fanstatic.service.sms.SMSService;
+import com.fanstatic.util.SessionUtils;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fanstatic.dto.system.OtpDTO;
-import com.fanstatic.util.SessionUtils;
-
-import lombok.AllArgsConstructor;
+import java.util.Date;
+import java.util.Random;
 
 @Service
 @AllArgsConstructor
 public class OTPService {
     private final SessionUtils sessionUtils;
+    @Autowired
+    SMSService smsService;
 
     public boolean sendOTP() {
-        String otp = generateOtpCode();
+        String otp = OtpGenerator.generateOtp("otp");
+        smsService.sendSMS( "+84336311520", "Mã xác nhận của bạn là: " + otp);
         setOTP(otp);
         return true;
 
