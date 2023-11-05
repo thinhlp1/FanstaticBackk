@@ -62,7 +62,7 @@ public class SizeController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
-     @GetMapping("/show/detail/{id}")
+    @GetMapping("/show/detail/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> detail(@PathVariable("id") int id) {
         ResponseDTO reponseDTO = sizeService.detail(id);

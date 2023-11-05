@@ -69,6 +69,4 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", configuration); // Thay đổi đường dẫn tương ứng với API đăng nhập
         return source;
     }
-
-
 }

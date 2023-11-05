@@ -1,5 +1,7 @@
 package com.fanstatic.config;
 
+import com.fanstatic.repository.AccountRepository;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.MessageSource;
@@ -14,10 +16,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.fanstatic.repository.AccountRepository;
-
-import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
@@ -68,7 +66,10 @@ public class ApplicationConfig {
                 "classpath:validate-message/productvarient",
                 "classpath:validate-message/category",
                 "classpath:validate-message/user",
-                "classpath:validate-message/role");
+                "classpath:validate-message/role",
+                "classpath:validate-message/voucher",
+                "classpath:validate-message/extraPortion"
+        );
         ms.setDefaultEncoding("utf-8");
         return ms;
     }
