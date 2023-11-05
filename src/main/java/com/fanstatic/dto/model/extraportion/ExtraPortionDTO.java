@@ -1,6 +1,7 @@
 package com.fanstatic.dto.model.extraportion;
 
 import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.model.category.CategoryDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,9 +17,9 @@ public class ExtraPortionDTO extends ResponseDataDTO {
 
     private String type;
 
-    private Integer imageId;
+    private String imageFileUrl;
 
-    private Integer categoryId;
+    private CategoryDTO categoryDto;
 
     private boolean active;
 
