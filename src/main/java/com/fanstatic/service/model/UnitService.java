@@ -1,5 +1,13 @@
 package com.fanstatic.service.model;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.FieldError;
+
 import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.constants.RequestParamConst;
@@ -9,21 +17,12 @@ import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.unit.UnitDTO;
 import com.fanstatic.dto.model.unit.UnitRequestDTO;
-import com.fanstatic.model.Shift;
 import com.fanstatic.model.Unit;
 import com.fanstatic.repository.UnitRepository;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.FieldError;
 
-import java.sql.Time;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
