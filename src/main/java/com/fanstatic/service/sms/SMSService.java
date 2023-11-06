@@ -15,11 +15,14 @@ public class SMSService {
     @Value("${twilio.sms.auth.token}")
     private String AUTH_TOKEN;
 
+    @Value("${twilio.sms.from.number}")
+    private String FROM_NUMBER;
+
     public boolean sendSMS(String to, String message) {
         try {
             Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
             Message.creator(new PhoneNumber(to),
-            new PhoneNumber("+13345084368"), message).create();
+            new PhoneNumber(FROM_NUMBER), message).create();
             return true;
         } catch (Exception e) {
             return false;
