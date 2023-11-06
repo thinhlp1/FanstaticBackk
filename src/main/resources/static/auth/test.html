@@ -14,11 +14,11 @@
     <div id="response"></div>
 
     <script>
-        var stompClient = Stomp.over(new SockJS('/auth/stomp-endpoint'));
+        var stompClient = Stomp.over(new SockJS('/purchage/order'));
 
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/greetings', function (greeting) {
+            stompClient.subscribe('/purcharse/order', function (greeting) {
                 showMessage(JSON.parse(greeting.body).message);
             });
         });
@@ -26,7 +26,7 @@
         function sendMessage() {
             var messageInput = document.getElementById('messageInput');
             var message = messageInput.value;
-            stompClient.send("/app/hello", {}, JSON.stringify({ 'numberPhone': message }));
+            stompClient.send("/ws/purcharse/order/create", {}, JSON.stringify({ 'numberPhone': message }));
             messageInput.value = '';
         }
 

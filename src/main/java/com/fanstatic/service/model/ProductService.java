@@ -25,6 +25,7 @@ import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.category.CategoryDTO;
 import com.fanstatic.dto.model.permissioin.RoleDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
+import com.fanstatic.dto.model.product.ProductImageDTO;
 import com.fanstatic.dto.model.product.ProductRequestDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
 import com.fanstatic.model.Category;
@@ -70,8 +71,8 @@ public class ProductService {
             errors.add(new FieldError("productRequestDTO", "code", "Code đã tồn tại"));
         }
 
-        if (productRequestDTO.getImageFiles().isEmpty() || productRequestDTO.getImageFiles() == null){
-             errors.add(new FieldError("productRequestDTO", "image", "Vui lòng chọn ảnh"));
+        if (productRequestDTO.getImageFiles().isEmpty() || productRequestDTO.getImageFiles() == null) {
+            errors.add(new FieldError("productRequestDTO", "image", "Vui lòng chọn ảnh"));
         }
 
         // Nếu có lỗi, ném ra một lượt với danh sách lỗi
@@ -168,7 +169,7 @@ public class ProductService {
 
             for (MultipartFile image : images) {
                 File file = fileService.upload(image, ImageConst.PRODUCT_FOLDER);
-                System.out.println("FILE ID:  " + file.getId() );
+                System.out.println("FILE ID:  " + file.getId());
                 ProductImage productImage = new ProductImage();
                 productImage.setImage(file);
                 productImage.setProduct(product);
@@ -348,8 +349,23 @@ public class ProductService {
 
         }
 
+        List<ProductImage> productImages = productImageRepository.findByProduct(product);
+        List<ProductImageDTO> productImageDTOs = new ArrayList<>();
+        for (ProductImage productImage : productImages) {
+            ProductImageDTO productImageDTO = new ProductImageDTO();
+            File image = productImage.getImage();
+            if (image != null) {
+                productImageDTO.setId(id);
+                productImageDTO.setImageUrl(image.getLink());
+                productImageDTOs.add(productImageDTO);
+
+            }
+
+        }`
+
         productDTO.setCategories(categoryDTOs);
         productDTO.setProductVarients(productVarientDTOs);
+        productDTO.setImageUrl(productImageDTOs);
         return ResponseUtils.success(200, "Chi tiết sản phẩm", productDTO);
 
     }

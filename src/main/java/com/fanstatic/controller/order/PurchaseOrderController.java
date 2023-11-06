@@ -1,4 +1,5 @@
-package com.fanstatic.controller;
+package com.fanstatic.controller.order;
+
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -13,7 +14,7 @@ import com.fanstatic.dto.model.account.AccountDTO;
 import com.fanstatic.util.ResponseUtils;
 
 @Controller
-public class TestWebsocketController {
+public class PurchaseOrderController {
 
     @MessageMapping("/order/create")
     @SendTo("/topic/order/create")
@@ -47,3 +48,4 @@ public class TestWebsocketController {
         return ResponseUtils.success(200, "XÓA ORDER", accountDTO);
     }
 }
+

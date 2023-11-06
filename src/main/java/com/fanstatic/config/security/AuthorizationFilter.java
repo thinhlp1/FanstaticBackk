@@ -32,21 +32,22 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         // khong tim thay token o jwt filter
         if (!jwtFilterValided || jwtFilterValided == null) {
             // kiem tra xem api co can check quyen khong
-            if (currentUrl.contains("home") || currentUrl.contains("auth")) {
-                filterChain.doFilter(request, response);
-                return;
-
-            } else {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
+            for (String path : urlPaths) {
+                if (path.equals("home") || path.equals("auth") || path.equals("u")) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
             }
+
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+
         } else {
             // lay thong tin user neu dang co dang nhap
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated()) {
                 Account account = (Account) authentication.getPrincipal();
-
 
                 // kiem tra url api xem co hop le hay khong
                 if (urlPaths[1].equals("api")) {

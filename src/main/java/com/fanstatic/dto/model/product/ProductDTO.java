@@ -26,7 +26,7 @@ public class ProductDTO extends ResponseDataDTO {
 
     private List<ProductVarientDTO> productVarients;
 
-    private List<String> imageUrl;
+    private List<ProductImageDTO> imageUrl;
 
     private String descriptionUrl;
 
