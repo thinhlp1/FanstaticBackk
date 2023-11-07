@@ -18,7 +18,7 @@ public class ProductDTO extends ResponseDataDTO {
 
     private String name;
 
-    private BigInteger price;
+    private Long price;
 
     private byte active;
 

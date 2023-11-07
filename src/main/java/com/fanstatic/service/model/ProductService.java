@@ -165,16 +165,15 @@ public class ProductService {
     public ResponseDTO saveProductImage(List<MultipartFile> images, Product product) {
         TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
         // save product category
+        
         try {
 
             for (MultipartFile image : images) {
                 File file = fileService.upload(image, ImageConst.PRODUCT_FOLDER);
-                System.out.println("FILE ID:  " + file.getId());
                 ProductImage productImage = new ProductImage();
                 productImage.setImage(file);
                 productImage.setProduct(product);
-                ProductImage productImage2 = productImageRepository.saveAndFlush(productImage);
-                System.out.println("Lưu thành công: " + productImage2.getId());
+                productImageRepository.saveAndFlush(productImage);
             }
         } catch (Exception e) {
             transactionManager.rollback(transactionStatus);
@@ -361,7 +360,7 @@ public class ProductService {
 
             }
 
-        }`
+        }
 
         productDTO.setCategories(categoryDTOs);
         productDTO.setProductVarients(productVarientDTOs);

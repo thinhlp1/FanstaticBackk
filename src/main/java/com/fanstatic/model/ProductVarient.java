@@ -34,7 +34,7 @@ public class ProductVarient {
 
 	private String code;
 
-	private BigInteger price;
+	private Long price;
 
 	// bi-directional many-to-one association to OrderItem
 	@OneToMany(mappedBy = "productVarient")

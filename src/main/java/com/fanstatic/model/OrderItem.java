@@ -41,16 +41,16 @@ public class OrderItem  {
 	private int quantity;
 
 	// bi-directional many-to-one association to Order
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "order_id")
 	private Order order;
 
 	// bi-directional many-to-one association to Product
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	private Product product;
 
 	// bi-directional many-to-one association to ProductVarient
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "product_variant_id")
 	private ProductVarient productVarient;
 
@@ -59,7 +59,7 @@ public class OrderItem  {
 	private Status status;
 
 	// bi-directional many-to-one association to OrderItemOption
-	@OneToMany(mappedBy = "orderItem")
+	@OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL)
 	private List<OrderItemOption> orderItemOptions;
 
 	@Temporal(TemporalType.TIMESTAMP)

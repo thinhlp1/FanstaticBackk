@@ -39,7 +39,7 @@ public class Product  {
 
 	private String name;
 
-	private BigInteger price;
+	private Long price;
 
 
 	//bi-directional many-to-one association to ComboProductDetail
