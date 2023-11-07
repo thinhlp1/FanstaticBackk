@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/api/manage/extraportion")
@@ -18,8 +19,9 @@ public class ExtraPortionController {
 
     @PostMapping("/create")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> create(@RequestBody @Valid ExtraPortionRequestDTO extraPortionRequestDTO) {
-        ResponseDTO responseDTO = extraPortionService.create(extraPortionRequestDTO);
+    public ResponseEntity<ResponseDTO> create(@RequestPart @Valid ExtraPortionRequestDTO data, @RequestPart MultipartFile imageFile) {
+        data.setImageFile(imageFile);
+        ResponseDTO responseDTO = extraPortionService.create(data);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
@@ -27,6 +29,14 @@ public class ExtraPortionController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> update(@RequestBody @Valid ExtraPortionRequestDTO extraPortionRequestDTO, @PathVariable("id") int id) {
         ResponseDTO responseDTO = extraPortionService.update(extraPortionRequestDTO);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/update/image/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile imageFile,
+                                                   @PathVariable("id") Integer id) {
+        ResponseDTO responseDTO = extraPortionService.updateImage(id, imageFile);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

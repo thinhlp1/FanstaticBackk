@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @NoArgsConstructor
@@ -23,10 +24,11 @@ public class ExtraPortionRequestDTO {
     private int price;
 
     private String type;
-
-    @NotNull(message = "{NotNull.extraPortion.imageId}")
-    private Integer imageId;
+    
+    private MultipartFile imageFile;
 
     @NotNull(message = "{NotNull.extraPortion.categoryId}")
     private Integer categoryId;
+
+    private boolean active;
 }

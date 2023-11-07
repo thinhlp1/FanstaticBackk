@@ -47,7 +47,6 @@ public class VoucherService {
                 vouchers = voucherRepository.findAllByActiveIsFalse().orElse(vouchers);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                System.out.println("Chạy vào đây");
                 vouchers = voucherRepository.findAllByActiveIsTrue().orElse(vouchers);
                 break;
             default:

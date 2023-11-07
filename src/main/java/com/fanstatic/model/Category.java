@@ -1,21 +1,19 @@
 package com.fanstatic.model;
 
-import java.util.Date;
-import java.util.List;
-
-import jakarta.persistence.*;
 import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+
 /**
- * 
  * /**
  * The persistent class for the category database table.
- * 
  */
 @Entity
 @Table(name = "category")
@@ -23,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Category {
+public class Category implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,6 +63,7 @@ public class Category {
 	// bi-directional many-to-one association to Product
 	@OneToMany(mappedBy = "category")
 	private List<ProductCategory> productCategories;
+
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")
