@@ -1,16 +1,5 @@
 package com.fanstatic.service.model;
 
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.FieldError;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.ImageConst;
 import com.fanstatic.config.constants.MessageConst;
@@ -22,13 +11,20 @@ import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.category.CategoryDTO;
 import com.fanstatic.dto.model.category.CategoryRequestDTO;
 import com.fanstatic.model.Category;
+import com.fanstatic.model.File;
 import com.fanstatic.repository.CategoryRepository;
 import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
-import com.fanstatic.model.File;
-
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.FieldError;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -85,7 +81,6 @@ public class CategoryService {
             } else {
                 return ResponseUtils.fail(404, "Danh mục cha không tồn tại", null);
             }
-
         } else {
             category.setLevel(ROOT_LEVEL);
         }
@@ -369,7 +364,6 @@ public class CategoryService {
                     CategoryDTO categoryDTO3 = modelMapper.map(category3, CategoryDTO.class);
                     String imageUrl3 = category3.getImage() != null ? category3.getImage().getLink() : "";
                     categoryDTO3.setImageUrl(imageUrl3);
-                    categoryDTO3.setImageUrl(category3.getImage().getLink());
 
                     categoryDTO3s.add(categoryDTO3);
                     List<Category> categories4 = categoryRepository.findByParentCategoryAndActiveIsTrue(category3)
