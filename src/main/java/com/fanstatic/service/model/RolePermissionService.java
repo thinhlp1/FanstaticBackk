@@ -184,8 +184,8 @@ public class RolePermissionService {
         for (RolePermission rolePermission : rolePermissions) {
             FeaturePermission featurePermission = rolePermission.getFeaturePermission();
             ManagerFeature managerFeature = featurePermission.getManagerFeature();
-            
-            if (managerFeature == null){
+
+            if (managerFeature == null) {
                 continue;
             }
 
@@ -200,8 +200,13 @@ public class RolePermissionService {
             featurePermissionDTO.setManageFeature(manageFeatureDTO);
 
             // lay cac permission lien quan den feature
-            List<FeaturePermission> featurePermissions = featurePermissionRepository
-                    .findByManagerFeature(managerFeature);
+            // List<FeaturePermission> featurePermissions = featurePermissionRepository
+            // .findByManagerFeature(managerFeature);
+
+            List<FeaturePermission> featurePermissions = new ArrayList<>();
+            for (RolePermission rolePermission2 : rolePermissions) {
+                featurePermissions.add(rolePermission2.getFeaturePermission());
+            }
 
             List<PermissionDTO> permissionDTOs = new ArrayList<>();
 
