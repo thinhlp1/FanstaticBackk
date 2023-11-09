@@ -46,7 +46,7 @@ public class ComboProduct  {
 
 	private String name;
 
-	private BigInteger price;
+	private Long price;
 
 	// bi-directional many-to-one association to Category
 	@ManyToOne

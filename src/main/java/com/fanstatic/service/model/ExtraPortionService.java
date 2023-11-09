@@ -272,7 +272,7 @@ public class ExtraPortionService {
             ExtraPortionDTO extraPortionDTO = new ExtraPortionDTO();
             extraPortionDTO.setImageFileUrl(extraPortion.getImageFile().getLink());
             CategoryDTO categoryDTO = modelMapper.map(extraPortion.getCategory(), CategoryDTO.class);
-            extraPortionDTO.setCategoryDto(categoryDTO);
+            extraPortionDTO.setCategory(categoryDTO);
             modelMapper.map(extraPortion, extraPortionDTO);
             extraPortionDtos.add(extraPortionDTO);
         }
@@ -304,7 +304,7 @@ public class ExtraPortionService {
         }
         if (extraPortion.getCategory() != null) {
             CategoryDTO categoryDto = modelMapper.map(extraPortion.getCategory(), CategoryDTO.class);
-            extraPortionDTO.setCategoryDto(categoryDto);
+            extraPortionDTO.setCategory(categoryDto);
         }
         return ResponseUtils.success(200, "Chi tiết món ăn kèm", extraPortionDTO);
     }

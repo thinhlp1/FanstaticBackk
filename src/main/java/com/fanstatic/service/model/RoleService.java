@@ -11,6 +11,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.validation.FieldError;
 
+import com.fanstatic.config.constants.ApplicationConst;
 import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.constants.RequestParamConst;
@@ -25,6 +26,7 @@ import com.fanstatic.repository.AccountRepository;
 import com.fanstatic.repository.RoleRepository;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
+import com.twilio.rest.api.v2010.account.Application;
 
 import lombok.RequiredArgsConstructor;
 
@@ -147,6 +149,17 @@ public class RoleService {
         Role role = roleRepository.findByIdAndActiveIsTrue(id).orElse(null);
         if (role == null) {
             return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
+        }
+
+        switch (id) {
+            case ApplicationConst.CUSTOMER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là khách hàng. Không được xóa", null);
+            case ApplicationConst.CASHIER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là khách hàng. Không được xóa", null);
+            case ApplicationConst.ADNIN_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là khách hàng. Không được xóa", null);
+            default:
+                break;
         }
 
         role.setActive(DataConst.ACTIVE_FALSE);

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 public class OrderExtraPortionDTO {
     private int id;
 
-    private ExtraPortionDTO extraPortionDTO;
+    private ExtraPortionDTO extraPortion;
 
     private String note;
 

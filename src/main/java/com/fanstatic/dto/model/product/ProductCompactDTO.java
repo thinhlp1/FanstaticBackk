@@ -2,23 +2,21 @@ package com.fanstatic.dto.model.product;
 
 import java.util.List;
 
-import com.fanstatic.dto.ResponseDataDTO;
-import com.fanstatic.dto.model.size.SizeDTO;
+import com.fanstatic.dto.model.category.CategoryDTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ProductVarientDTO extends ResponseDataDTO {
+public class ProductCompactDTO {
     private int id;
 
     private String code;
 
+    private String name;
+
     private Long price;
 
-    private SizeDTO size;
-
     private List<ProductImageDTO> imageUrl;
-
 }

@@ -1,12 +1,15 @@
 package com.fanstatic.dto.model.order;
 
+import java.util.Date;
 import java.util.List;
 
+import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.table.TableDTO;
+import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
 import com.fanstatic.model.ExtraPortion;
 import com.fanstatic.model.OrderExtraPortion;
@@ -17,14 +20,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class OrderDTO {
+public class OrderDTO extends ResponseDataDTO {
     private int id;
 
     private String orderType;
 
     private String note;
-
-    private TableDTO table;
 
     private int people;
 
@@ -36,7 +37,19 @@ public class OrderDTO {
 
     private VoucherDTO voucher;
 
+    private List<OrderItemDTO> orderItems;
+
     private List<OrderExtraPortionDTO> extraPortions;
 
-    private List<OrderItemDTO> orderItems;
+    private List<TableDTO> tables;
+
+    private Date createAt;
+
+    private Date updateAt;
+
+    private Date deleteAt;
+
+    private UserCompactDTO emploeeConfirmed;
+
+    private UserCompactDTO canceler;
 }

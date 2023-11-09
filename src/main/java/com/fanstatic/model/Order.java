@@ -3,7 +3,6 @@ package com.fanstatic.model;
 import java.util.Date;
 import java.util.List;
 
-
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 
@@ -50,6 +49,15 @@ public class Order {
 	private OrderType orderType;
 
 	private Long total;
+
+	private Integer people;
+
+	// @ManyToOne
+	// @JoinColumn(name = "root_order")
+	// private Order rootOrder;
+
+	@Column(name = "root_order")
+	private Integer rootOrder;
 
 	// bi-directional many-to-one association to Status
 	@ManyToOne

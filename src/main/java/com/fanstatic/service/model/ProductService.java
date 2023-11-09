@@ -165,7 +165,7 @@ public class ProductService {
     public ResponseDTO saveProductImage(List<MultipartFile> images, Product product) {
         TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
         // save product category
-        
+
         try {
 
             for (MultipartFile image : images) {
@@ -344,29 +344,55 @@ public class ProductService {
 
         for (ProductVarient productVarient : productVarients) {
             ProductVarientDTO productVarientDTO = modelMapper.map(productVarient, ProductVarientDTO.class);
+
+            productVarientDTO.setImageUrl(getProductVarientImage(productVarient));
             productVarientDTOs.add(productVarientDTO);
 
         }
 
+        productDTO.setCategories(categoryDTOs);
+        productDTO.setProductVarients(productVarientDTOs);
+        productDTO.setImageUrl(getProductImage(product));
+        return ResponseUtils.success(200, "Chi tiết sản phẩm", productDTO);
+
+    }
+
+    public List<ProductImageDTO> getProductImage(Product product) {
         List<ProductImage> productImages = productImageRepository.findByProduct(product);
         List<ProductImageDTO> productImageDTOs = new ArrayList<>();
         for (ProductImage productImage : productImages) {
             ProductImageDTO productImageDTO = new ProductImageDTO();
             File image = productImage.getImage();
             if (image != null) {
-                productImageDTO.setId(id);
+                productImageDTO.setId(image.getId());
                 productImageDTO.setImageUrl(image.getLink());
                 productImageDTOs.add(productImageDTO);
 
             }
+            productImageDTOs.add(productImageDTO);
 
         }
 
-        productDTO.setCategories(categoryDTOs);
-        productDTO.setProductVarients(productVarientDTOs);
-        productDTO.setImageUrl(productImageDTOs);
-        return ResponseUtils.success(200, "Chi tiết sản phẩm", productDTO);
+        return productImageDTOs;
+    }
 
+    public List<ProductImageDTO> getProductVarientImage(ProductVarient productVarient) {
+        List<ProductImage> productImages = productImageRepository.findByProductVarient(productVarient);
+        List<ProductImageDTO> productImageDTOs = new ArrayList<>();
+        for (ProductImage productImage : productImages) {
+            ProductImageDTO productImageDTO = new ProductImageDTO();
+            File image = productImage.getImage();
+            if (image != null) {
+                productImageDTO.setId(image.getId());
+                productImageDTO.setImageUrl(image.getLink());
+                productImageDTOs.add(productImageDTO);
+
+            }
+            productImageDTOs.add(productImageDTO);
+
+        }
+
+        return productImageDTOs;
     }
 
     public ResponseDTO show(int active) {

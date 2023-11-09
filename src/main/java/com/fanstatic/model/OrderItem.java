@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import java.util.Date;
 import java.util.List;
 
@@ -11,8 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
 
 /**
  * 
@@ -28,17 +25,20 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderItem  {
-	
+public class OrderItem {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private String note;
 
-	private int priority;
+	private Integer priority;
 
-	private int quantity;
+	private Integer quantity;
+
+	@Column(name = "quantity_completed")
+	private Integer quantityCompleted;
 
 	// bi-directional many-to-one association to Order
 	@ManyToOne(cascade = CascadeType.ALL)
@@ -54,6 +54,9 @@ public class OrderItem  {
 	@JoinColumn(name = "product_variant_id")
 	private ProductVarient productVarient;
 
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "combo_id")
+	private ComboProduct comboProduct;
 	// bi-directional many-to-one association to Status
 	@ManyToOne
 	private Status status;

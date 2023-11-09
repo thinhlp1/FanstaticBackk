@@ -19,7 +19,7 @@ public class ExtraPortionDTO extends ResponseDataDTO {
 
     private String imageFileUrl;
 
-    private CategoryDTO categoryDto;
+    private CategoryDTO category;
 
     private boolean active;
 

@@ -14,12 +14,14 @@ public class OrderItemRequestDTO {
 
     private Integer productVariantId;
 
+    private Integer comboId;
+
     private String note;
 
     private int quantity;
 
     private boolean priority;
-    
+
     private List<Integer> optionsId;
 
 }
