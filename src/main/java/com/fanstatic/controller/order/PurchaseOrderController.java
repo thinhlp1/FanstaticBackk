@@ -106,7 +106,7 @@ public class PurchaseOrderController {
 
     @PutMapping("/api/purchase/order/confirm/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> confirmOrder(@PathVariable Integer id) {
+    public ResponseEntity<ResponseDTO> confirm(@PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.confirm(id);
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
@@ -121,7 +121,20 @@ public class PurchaseOrderController {
 
     @PutMapping("/api/purchase/order/cancel/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> cancelOrder(@RequestBody Integer cancelId, @PathVariable Integer id) {
+    public ResponseEntity<ResponseDTO> cancel(@RequestBody Integer cancelId, @PathVariable Integer id) {
+        ResponseDTO responseDTO = orderService.cancel(id, cancelId);
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+
+        }
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/api/purchase/order/switch")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> swith(@RequestBody Integer cancelId, @PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.cancel(id, cancelId);
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
