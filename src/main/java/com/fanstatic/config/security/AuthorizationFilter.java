@@ -29,16 +29,16 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String currentUrl = request.getRequestURI();
         String[] urlPaths = currentUrl.split("/");
 
+        for (String path : urlPaths) {
+            if (path.equals("home") || path.equals("auth") || path.equals("u")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+
         // khong tim thay token o jwt filter
         if (!jwtFilterValided || jwtFilterValided == null) {
-            // kiem tra xem api co can check quyen khong
-            for (String path : urlPaths) {
-                if (path.equals("home") || path.equals("auth") || path.equals("u")) {
-                    filterChain.doFilter(request, response);
-                    return;
-                }
-            }
-
+        
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -50,10 +50,13 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                 Account account = (Account) authentication.getPrincipal();
 
                 // kiem tra url api xem co hop le hay khong
-                if (urlPaths[1].equals("api")) {
+                if (urlPaths[1].equals("api") || urlPaths[1].equals("ws")) {
                     String managerFeatureId = (urlPaths[2] + "_" + urlPaths[3]).toUpperCase();
                     String permissionId = urlPaths[4].toUpperCase();
                     int roleId = account.getRole().getId();
+
+                    System.out.println(permissionId);
+                    System.out.println(managerFeatureId);
                     boolean isAuthentization = rolePermissionService.checkUserRolePermission(roleId, managerFeatureId,
                             permissionId);
                     System.out.println(isAuthentization);
@@ -61,10 +64,15 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                         filterChain.doFilter(request, response);
                         return;
                     } else {
+
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                         return;
                     }
+                } else {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
                 }
 
                 // Ví dụ: In ra tên người dùng

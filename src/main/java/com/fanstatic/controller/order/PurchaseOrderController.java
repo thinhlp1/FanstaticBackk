@@ -39,69 +39,96 @@ public class PurchaseOrderController {
     private final OrderService orderService;
     private final WSPurcharseOrderController wsPurcharseOrderController;
 
-    @PostMapping("/purcharse/order/create")
+    @PostMapping("/api/purchase/order/create")
     @ResponseBody
     public ResponseEntity<ResponseDTO> create(@RequestBody @Valid OrderRequestDTO orderRequestDTO) {
         ResponseDTO responseDTO = orderService.create(orderRequestDTO);
-        wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
+        }
+
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @GetMapping("/purcharse/order/show/detail/{id}")
+    @GetMapping("/api/purchase/order/detail/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> detail(@PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.detail(id);
-        wsPurcharseOrderController.sendWebSocketResponse(id, responseDTO);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+
+        }
+
         return ResponseUtils.returnReponsetoClient(responseDTO);
 
     }
 
-    @GetMapping("/purcharse/order/update/{id}")
+    @GetMapping("/api/purchase/order/update/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> update(@PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.detail(id);
-        wsPurcharseOrderController.sendWebSocketResponse(id, responseDTO);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+
+        }
+
         return ResponseUtils.returnReponsetoClient(responseDTO);
 
     }
 
-    @GetMapping("/purcharse/order/show/current-order")
+    @GetMapping("/api/purchase/order/show/current-order")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showCurrentOrder() {
         ResponseDTO responseDTO = orderService.getListOrder();
-        wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_CURRENT_ORDER);
+
         return ResponseUtils.returnReponsetoClient(responseDTO);
 
     }
 
-    @PostMapping("/purcharse/order/create/re-order/{id}")
+    @PostMapping("/api/purchase/order/create/re-order/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> reOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO,
             @PathVariable Integer id) {
-        System.out.println("===============================1");
         ResponseDTO responseDTO = orderService.reOrder(orderRequestDTO, id);
-        wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_WAIT_CONFIRM_ORDER);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
+
+        }
+
         return ResponseUtils.returnReponsetoClient(responseDTO);
 
     }
 
-    @PutMapping("/purcharse/order/confirm/{id}")
+    @PutMapping("/api/purchase/order/confirm/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> confirmOrder(@PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.confirm(id);
-        wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_CURRENT_ORDER);
-        wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_DETAILS);
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+
+        }
 
         return ResponseUtils.returnReponsetoClient(responseDTO);
 
     }
 
-    @PutMapping("/purcharse/order/delete/cancel/{id}")
+    @PutMapping("/api/purchase/order/cancel/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> cancelOrder(@PathVariable Integer id) {
-        ResponseDTO responseDTO = orderService.cancel(id);
-        wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_CURRENT_ORDER);
-        wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_DETAILS);
+    public ResponseEntity<ResponseDTO> cancelOrder(@RequestBody Integer cancelId, @PathVariable Integer id) {
+        ResponseDTO responseDTO = orderService.cancel(id, cancelId);
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+
+        }
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

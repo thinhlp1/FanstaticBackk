@@ -30,6 +30,7 @@ import com.fanstatic.dto.model.order.request.OrderRequestDTO;
 import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
+import com.fanstatic.model.CancelReason;
 import com.fanstatic.model.ComboProduct;
 import com.fanstatic.model.ExtraPortion;
 import com.fanstatic.model.File;
@@ -44,6 +45,7 @@ import com.fanstatic.model.ProductCategory;
 import com.fanstatic.model.ProductVarient;
 import com.fanstatic.model.Status;
 import com.fanstatic.model.Table;
+import com.fanstatic.repository.CancelReasonRepository;
 import com.fanstatic.repository.ComboProductRepository;
 import com.fanstatic.repository.ExtraPortionRepository;
 import com.fanstatic.repository.OptionRepository;
@@ -83,6 +85,7 @@ public class OrderService {
     private final OrderTypeRepository orderTypeRepository;
     private final OrderExtraPortionRepository orderExtraPortionRepository;
     private final ComboProductRepository comboProductRepository;
+    private final CancelReasonRepository cancelReasonRepository;
 
     private final ProductRepository productRepository;
     private final ProductVarientRepository productVarientRepository;
@@ -154,7 +157,7 @@ public class OrderService {
             transactionManager.rollback(transactionStatus);
             return ResponseUtils.fail(500, "Tạo order không thành công", null);
         }
-
+        systemService.writeSystemLog(orderSaved.getOrderId(), "", null);
         transactionManager.commit(transactionStatus);
 
         return ResponseUtils.success(200, "Tạo order thành công", null);
@@ -223,6 +226,8 @@ public class OrderService {
             order.setEmployeeConfirmed(systemService.getUserLogin());
 
             orderRepository.save(order);
+            systemService.writeSystemLog(order.getOrderId(), "", null);
+
             transactionManager.commit(transactionStatus);
             return ResponseUtils.success(200, "Duyệt order thành công", null);
         } else {
@@ -239,6 +244,11 @@ public class OrderService {
         Order rootOrder = orderRepository.findById(id).orElse(null);
         if (rootOrder == null) {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
+
+        }
+        
+        if (rootOrder.getStatus().getId().equals(ApplicationConst.OrderStatus.CONFIRMING)) {
+            return ResponseUtils.fail(404, "Order trước của bạn đang chờ duyệt", null);
 
         }
 
@@ -300,6 +310,8 @@ public class OrderService {
             return ResponseUtils.fail(500, "Tạo order không thành công", null);
         }
 
+        systemService.writeSystemLog(orderSaved.getOrderId(), "", null);
+
         transactionManager.commit(transactionStatus);
 
         return ResponseUtils.success(200, "Tạo order thành công", null);
@@ -323,7 +335,7 @@ public class OrderService {
         return ResponseUtils.success(200, "Chi tiết order", orderDTO);
     }
 
-    public ResponseDTO cancel(Integer id) {
+    public ResponseDTO cancel(Integer id, Integer cancelId) {
         Order order = orderRepository.findById(id).orElse(null);
         if (order == null) {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
@@ -341,11 +353,19 @@ public class OrderService {
         }
 
         Status status = statusRepository.findById(ApplicationConst.OrderStatus.CANCEL).get();
+        CancelReason cancelReason = cancelReasonRepository.findById(cancelId).orElse(null);
+
+        if (cancelReason != null) {
+            order.setCancelReason(cancelReason);
+        }
+
         order.setStatus(status);
         order.setDeleteAt(new Date());
+
         order.setDeleteBy(systemService.getUserLogin());
 
         orderRepository.save(order);
+        systemService.writeSystemLog(order.getOrderId(), "", null);
 
         return ResponseUtils.success(200, "Hủy thành công", null);
     }

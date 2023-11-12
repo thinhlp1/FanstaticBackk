@@ -2,11 +2,30 @@ package com.fanstatic.config.constants;
 
 public class WebsocketConst {
     public static final String TOPIC = "/topic";
+
     public static final String TOPIC_PURCHARSE_ORDER = TOPIC + "/purcharse/order";
-    public static final String TOPIC_ORDER_DETAILS = TOPIC + "/purcharse/order/detail";
-    public static final String TOPIC_ORDER_NEW = TOPIC + "/purcharse/order/new";
-    public static final String TOPIC_ORDER_UPDATE = TOPIC + "/purcharse/order/update";
-    public static final String TOPIC_CURRENT_ORDER = TOPIC + "/purcharse/order/current-order";
-    public static final String TOPIC_WAIT_CONFIRM_ORDER = TOPIC + "/purcharse/order/wait-confirming";
+
+    /*
+     * Lắng nghe thay đổi khi order thay đổi
+     * data trả về là order
+     */
+    public static final String TOPIC_ORDER_DETAILS = TOPIC + "/purchase/order/detail";
+
+    /*
+     * Lắng nghe các sự kiện khi có order mới đc tạo
+     * data : dữ liệu order mới tạo
+     */
+    public static final String TOPIC_ORDER_NEW = TOPIC + "/purchase/order/new";
+
+    /*
+     * lắng nghe sự kiện update order như : xác nhận, hủy, cập nhật,...
+     * data : dữ liệu order vừa mới update
+     */
+    public static final String TOPIC_ORDER_UPDATE = TOPIC + "/purchase/order/update";
+
+    
+    public static final String TOPIC_CURRENT_ORDER = TOPIC + "/purchase/order/current-order";
+
+
 
 }

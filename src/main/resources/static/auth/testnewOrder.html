@@ -17,11 +17,11 @@
       var stompClient = null;
 
       function connect() {
-        var socket = new SockJS("/purcharse/order"); // Thay đổi địa chỉ WebSocket endpoint theo cấu hình của bạn
+        var socket = new SockJS("/u/purchase/order"); // Thay đổi địa chỉ WebSocket endpoint theo cấu hình của bạn
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
           console.log("Connected: " + frame);
-          stompClient.subscribe("/topic/purcharse/order/new", function (response) {
+          stompClient.subscribe("/topic/purchase/order/new", function (response) {
             var orderData = JSON.parse(response.body);
             console.log("Received new order: ", orderData);
             // Xử lý thông điệp về đơn hàng ở đây
@@ -40,7 +40,7 @@
         var orderData = {
           orderType: 1,
           note: "mặn",
-          tableId: 13,
+          tableId: 16,
           people: 5,
           orderItems: [
             {
@@ -70,7 +70,7 @@
         };
 
         // stompClient.send("/app/purchase/order/create", {}, JSON.stringify(orderData));
-        fetch("/purcharse/order/create", {
+        fetch("/api/purchase/order/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

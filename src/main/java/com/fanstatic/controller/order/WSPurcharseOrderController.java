@@ -22,12 +22,6 @@ public class WSPurcharseOrderController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public void sendWebSocketResponse(Integer orderId, ResponseDTO responseDTO) {
-        System.err.println("/topic/order/detail/" + orderId);
-        messagingTemplate.convertAndSend("/topic/order/detail/" + orderId,
-                responseDTO);
-
-    }
 
     public void sendWebSocketResponse(ResponseDTO responseDTO, String topic) {
         // Gửi thông điệp tới các khách hàng WebSocket
