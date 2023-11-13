@@ -205,7 +205,10 @@ public class RolePermissionService {
 
             List<FeaturePermission> featurePermissions = new ArrayList<>();
             for (RolePermission rolePermission2 : rolePermissions) {
-                featurePermissions.add(rolePermission2.getFeaturePermission());
+                if (rolePermission2.getFeaturePermission().getManagerFeature().getId().equals(managerFeature.getId())) {
+                    featurePermissions.add(rolePermission2.getFeaturePermission());
+
+                }
             }
 
             List<PermissionDTO> permissionDTOs = new ArrayList<>();
