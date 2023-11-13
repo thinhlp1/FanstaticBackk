@@ -127,9 +127,17 @@ public class TableService {
                         return ResponseUtils.fail(404, "Bàn không tồn tại", null);
                     }
 
-                    table.setNumberTable(updateTable.getNumberTable());
+                    TableType tableType = tableTypeRepository.findByIdAndActiveIsTrue(updateTable.getTableType())
+                            .orElse(null);
+                    if (tableType == null) {
+                        transactionManager.rollback(transactionStatus);
+
+                        return ResponseUtils.fail(404, "Loại bàn không tồn tại", null);
+                    }
 
                     table.setNumberTable(updateTable.getNumberTable());
+
+                    table.setTableType(tableType);
                     table.setUpdateAt(new Date());
                     table.setUpdateBy(systemService.getUserLogin());
                     tableRepository.save(table);
