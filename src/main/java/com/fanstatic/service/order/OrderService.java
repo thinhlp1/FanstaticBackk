@@ -24,9 +24,11 @@ import com.fanstatic.dto.model.order.OptionDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.OrderItemDTO;
+import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
+import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
 import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
@@ -246,7 +248,7 @@ public class OrderService {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
 
         }
-        
+
         if (rootOrder.getStatus().getId().equals(ApplicationConst.OrderStatus.CONFIRMING)) {
             return ResponseUtils.fail(404, "Order trước của bạn đang chờ duyệt", null);
 
@@ -335,8 +337,8 @@ public class OrderService {
         return ResponseUtils.success(200, "Chi tiết order", orderDTO);
     }
 
-    public ResponseDTO cancel(Integer id, Integer cancelId) {
-        Order order = orderRepository.findById(id).orElse(null);
+    public ResponseDTO cancel(CancalOrderRequestDTO cancalOrderRequestDTO) {
+        Order order = orderRepository.findById(cancalOrderRequestDTO.getOrderId()).orElse(null);
         if (order == null) {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
 
@@ -353,7 +355,7 @@ public class OrderService {
         }
 
         Status status = statusRepository.findById(ApplicationConst.OrderStatus.CANCEL).get();
-        CancelReason cancelReason = cancelReasonRepository.findById(cancelId).orElse(null);
+        CancelReason cancelReason = cancelReasonRepository.findById(cancalOrderRequestDTO.getCancelId()).orElse(null);
 
         if (cancelReason != null) {
             order.setCancelReason(cancelReason);
@@ -368,6 +370,40 @@ public class OrderService {
         systemService.writeSystemLog(order.getOrderId(), "", null);
 
         return ResponseUtils.success(200, "Hủy thành công", null);
+    }
+
+    public ResponseDTO switchOrder(SwitchOrderRequestDTO switchOrderRequestDTO) {
+        Order order = orderRepository.findById(switchOrderRequestDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        Table table = tableRepository.findByIdAndActiveIsTrue(switchOrderRequestDTO.getDestinationTable()).orElse(null);
+        if (table == null) {
+            return ResponseUtils.fail(404, "Bàn không tồn tại", null);
+
+        }
+
+        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        }
+
+        Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
+        int isOpcciped = orderTableRepository.checkTalbeOccupied(switchOrderRequestDTO.getDestinationTable(),
+                twentyFourHoursAgo);
+        if (isOpcciped > 0) {
+            return ResponseUtils.fail(201, "Bàn đã được đặt", null);
+
+        }
+
+        ResponseDTO switchResposne = switchOrderTable(order.getOrderTables(), table);
+        if (switchResposne.isSuccess()) {
+            systemService.writeSystemLog(order.getOrderId(), "", null);
+            return ResponseUtils.success(200, "Đổi thành công", null);
+
+        }
+        return ResponseUtils.fail(200, "Đổi không thành công", null);
+
     }
 
     public ResponseDTO getListOrder() {
@@ -853,6 +889,27 @@ public class OrderService {
             return ResponseUtils.fail(500, "Tạo order không thành công", null);
         } catch (Exception e) {
             return ResponseUtils.fail(500, "Tạo order không thành công", null);
+        }
+    }
+
+    private ResponseDTO switchOrderTable(List<OrderTable> orderTables, Table destinationTable) {
+        List<OrderTable> syncOrderTables = new ArrayList<>();
+        for (OrderTable orderTable : orderTables) {
+            orderTable.setTable(destinationTable);
+            orderTable.setUpdateAt(new Date());
+            orderTable.setUpdateBy(systemService.getUserLogin());
+            syncOrderTables.add(orderTable);
+        }
+
+        try {
+            List<OrderTable> listSaved = orderTableRepository.saveAll(syncOrderTables);
+
+            if (listSaved != null) {
+                return ResponseUtils.success(200, "Đổi bàn thành công!", null);
+            }
+            return ResponseUtils.fail(500, "Đổi bàn không thành công", null);
+        } catch (Exception e) {
+            return ResponseUtils.fail(500, "Đổi bàn không thành công", null);
         }
     }
 

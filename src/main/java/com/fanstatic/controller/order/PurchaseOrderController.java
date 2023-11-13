@@ -22,7 +22,9 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.auth.LoginDTO;
 import com.fanstatic.dto.model.account.AccountDTO;
+import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
+import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
 import com.fanstatic.service.order.OrderService;
 import com.fanstatic.service.system.WebsocketService;
 import com.fanstatic.util.ResponseUtils;
@@ -119,13 +121,13 @@ public class PurchaseOrderController {
 
     }
 
-    @PutMapping("/api/purchase/order/cancel/{id}")
+    @PutMapping("/api/purchase/order/cancel")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> cancel(@RequestBody Integer cancelId, @PathVariable Integer id) {
-        ResponseDTO responseDTO = orderService.cancel(id, cancelId);
+    public ResponseEntity<ResponseDTO> cancel(@RequestBody @Valid CancalOrderRequestDTO cancalOrderRequestDTO) {
+        ResponseDTO responseDTO = orderService.cancel(cancalOrderRequestDTO);
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
-                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + cancalOrderRequestDTO.getOrderId());
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
 
         }
@@ -134,11 +136,11 @@ public class PurchaseOrderController {
 
     @PutMapping("/api/purchase/order/switch")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> swith(@RequestBody Integer cancelId, @PathVariable Integer id) {
-        ResponseDTO responseDTO = orderService.cancel(id, cancelId);
+    public ResponseEntity<ResponseDTO> swith(@RequestBody @Valid SwitchOrderRequestDTO switchOrderRequestDTO) {
+        ResponseDTO responseDTO = orderService.switchOrder(switchOrderRequestDTO);
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
-                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + switchOrderRequestDTO.getOrderId());
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
 
         }

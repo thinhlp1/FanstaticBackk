@@ -7,11 +7,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CancalOrderRequestDTO {
+public class SwitchOrderRequestDTO {
+    @NotNull
+    private Integer destinationTable;
 
     @NotNull
     private Integer orderId;
-
-    @NotNull
-    private Integer cancelId;
 }

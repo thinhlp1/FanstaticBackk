@@ -15,4 +15,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findOrdersCreated(Date time);
 
     List<Order> findByRootOrder(Integer rootOrder);
+
+    
 }
