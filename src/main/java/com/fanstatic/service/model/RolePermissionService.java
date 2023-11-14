@@ -199,6 +199,8 @@ public class RolePermissionService {
             for (FeaturePermission fePermission : featurePermissions) {
                 PermissionDTO permissionDTO = new PermissionDTO();
                 permissionDTO = modelMapper.map(fePermission.getPermission(), PermissionDTO.class);
+                permissionDTO.setFeaturePermissionId(fePermission.getId());
+
                 permissionDTOs.add(permissionDTO);
             }
             // featurePermissionDTO.setId(featurePermission.getId());
