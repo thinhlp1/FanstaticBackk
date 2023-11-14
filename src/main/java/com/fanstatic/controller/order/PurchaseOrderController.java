@@ -22,6 +22,8 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.auth.LoginDTO;
 import com.fanstatic.dto.model.account.AccountDTO;
+import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
+import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
 import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
@@ -91,6 +93,15 @@ public class PurchaseOrderController {
 
     }
 
+    @GetMapping("/api/purchase/order/show/await-checkout")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showAwaitCheckout() {
+        ResponseDTO responseDTO = orderService.getListOrderAwaitCheckout();
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
     @PostMapping("/api/purchase/order/create/re-order/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> reOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO,
@@ -136,7 +147,7 @@ public class PurchaseOrderController {
 
     @PutMapping("/api/purchase/order/switch")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> swith(@RequestBody @Valid SwitchOrderRequestDTO switchOrderRequestDTO) {
+    public ResponseEntity<ResponseDTO> swithOrder(@RequestBody @Valid SwitchOrderRequestDTO switchOrderRequestDTO) {
         ResponseDTO responseDTO = orderService.switchOrder(switchOrderRequestDTO);
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
@@ -144,6 +155,28 @@ public class PurchaseOrderController {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
 
         }
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/api/purchase/order/create/checkout-request")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> checkoutOrderRequest(@RequestBody @Valid CheckoutRequestDTO checkoutRequestDTO) {
+        ResponseDTO responseDTO = orderService.checkoutRequest(checkoutRequestDTO);
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + checkoutRequestDTO.getOrderId());
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_CHECKOUT);
+
+        }
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/api/purchase/order/create/check-voucher")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> checkVoucner(@RequestBody @Valid CheckVoucherRequestDTO checkoutRequestDTO) {
+        ResponseDTO responseDTO = orderService.checkVoucherApply(checkoutRequestDTO);
+
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

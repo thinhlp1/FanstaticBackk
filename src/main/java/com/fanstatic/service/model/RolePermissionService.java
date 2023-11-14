@@ -48,60 +48,43 @@ public class RolePermissionService {
         rolePermissionRepository.deleteByRoleId(roleRequestDTO.getId());
 
         // kiem tra va gan quyen
-        for (FeaturePermissonDTO featurePermissonDTO : roleRequestDTO.getFeaturePermissions()) {
+        for (Integer featurePermissionId : roleRequestDTO.getFeaturePermissionsId()) {
 
-            for (String permissionId : featurePermissonDTO.getPermissionIds()) {
-                RolePermission rolePermission = new RolePermission();
-                Role role = roleRepository.findByCodeAndActiveIsTrue(roleRequestDTO.getCode()).orElse(null);
+            RolePermission rolePermission = new RolePermission();
+            Role role = roleRepository.findByCodeAndActiveIsTrue(roleRequestDTO.getCode()).orElse(null);
 
-                if (role == null) {
-                    transactionManager.rollback(transactionStatus);
+            if (role == null) {
+                transactionManager.rollback(transactionStatus);
 
-                    return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
+                return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
 
-                }
-
-                ManagerFeature managerFeature = managerFeatureRepository.findById(featurePermissonDTO.getFeatureId())
-                        .orElse(null);
-                if (managerFeature == null) {
-                    transactionManager.rollback(transactionStatus);
-
-                    return ResponseUtils.fail(404, "Chức năng không tồn tại", null);
-
-                }
-
-                Permission permission = permissionRepository.findById(permissionId).orElse(null);
-                if (permission == null) {
-                    transactionManager.rollback(transactionStatus);
-
-                    return ResponseUtils.fail(404, "Quyền này không tồn tại", null);
-
-                }
-                FeaturePermission featurePermission = featurePermissionRepository
-                        .findByManagerFeatureAndPermission(managerFeature, permission)
-                        .orElse(null);
-                if (featurePermission == null) {
-                    transactionManager.rollback(transactionStatus);
-
-                    return ResponseUtils.fail(404, "Quyền không tồn tại", null);
-
-                }
-
-                rolePermission.setFeaturePermission(featurePermission);
-                rolePermission.setCreateAt(new Date());
-                rolePermission.setCreateBy(systemService.getUserLogin());
-                rolePermission.setRole(role);
-
-                try {
-
-                    rolePermissionRepository.save(rolePermission);
-                } catch (Exception e) {
-                    transactionManager.rollback(transactionStatus);
-
-                    e.printStackTrace();
-                    return ResponseUtils.fail(500, "Gán quyền thất bại", null);
-                }
             }
+
+            FeaturePermission featurePermission = featurePermissionRepository
+                    .findById(featurePermissionId)
+                    .orElse(null);
+            if (featurePermission == null) {
+                transactionManager.rollback(transactionStatus);
+
+                return ResponseUtils.fail(404, "Quyền không tồn tại", null);
+
+            }
+
+            rolePermission.setFeaturePermission(featurePermission);
+            rolePermission.setCreateAt(new Date());
+            rolePermission.setCreateBy(systemService.getUserLogin());
+            rolePermission.setRole(role);
+
+            try {
+
+                rolePermissionRepository.save(rolePermission);
+            } catch (Exception e) {
+                transactionManager.rollback(transactionStatus);
+
+                e.printStackTrace();
+                return ResponseUtils.fail(500, "Gán quyền thất bại", null);
+            }
+
         }
         transactionManager.commit(transactionStatus);
 
@@ -260,6 +243,8 @@ public class RolePermissionService {
             for (FeaturePermission fePermission : featPermissions) {
                 PermissionDTO permissionDTO = new PermissionDTO();
                 permissionDTO = modelMapper.map(fePermission.getPermission(), PermissionDTO.class);
+                permissionDTO.setFeaturePermissionId(fePermission.getId());
+
                 permissionDTOs.add(permissionDTO);
             }
             // featurePermissionDTO.setId(featurePermission.getId());

@@ -23,9 +23,12 @@ public class WebsocketConst {
      */
     public static final String TOPIC_ORDER_UPDATE = TOPIC + "/purchase/order/update";
 
-    
+    /*
+     * lắng nghe sự kiện khi yêu cầu thanh toán order 
+     * data : dữ liệu order vừa mới update
+     */
+    public static final String TOPIC_ORDER_CHECKOUT = TOPIC + "/purchase/order/checkout";
+
     public static final String TOPIC_CURRENT_ORDER = TOPIC + "/purchase/order/current-order";
-
-
 
 }

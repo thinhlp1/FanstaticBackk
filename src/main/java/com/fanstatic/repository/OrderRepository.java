@@ -14,7 +14,11 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
             "AND o.createAt >= :time")
     List<Order> findOrdersCreated(Date time);
 
+    @Query("SELECT o FROM Order o " +
+            "WHERE o.status.status = 'AWAIT_CHECKOUT' " +
+            "AND o.createAt >= :time")
+    List<Order> findOrdersCreatedAwaitCheckout(Date time);
+
     List<Order> findByRootOrder(Integer rootOrder);
 
-    
 }

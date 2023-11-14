@@ -12,6 +12,9 @@ public class ApplicationConst {
         public static final String COMPLETE = "COMPLETE";
         public static final String PROCESSING = "PROCESSING";
         public static final String CANCEL = "CANCEL";
+        public static final String AWAIT_CHECKOUT = "AWAIT_CHECKOUT";
+
+    
 
         public static final String ITEM_COMPLETE = "ITEM_COMPLETE";
         public static final String ITEM_PROCESSING = "ITEM_PROCESSING";

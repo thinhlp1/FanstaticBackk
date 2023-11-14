@@ -24,6 +24,9 @@ import com.fanstatic.dto.model.order.OptionDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.OrderItemDTO;
+import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
+import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
+import com.fanstatic.dto.model.order.checkout.ApplyVoucherDTO;
 import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
@@ -42,11 +45,13 @@ import com.fanstatic.model.OrderItem;
 import com.fanstatic.model.OrderItemOption;
 import com.fanstatic.model.OrderTable;
 import com.fanstatic.model.OrderType;
+import com.fanstatic.model.PaymentMethod;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductCategory;
 import com.fanstatic.model.ProductVarient;
 import com.fanstatic.model.Status;
 import com.fanstatic.model.Table;
+import com.fanstatic.model.Voucher;
 import com.fanstatic.repository.CancelReasonRepository;
 import com.fanstatic.repository.ComboProductRepository;
 import com.fanstatic.repository.ExtraPortionRepository;
@@ -56,11 +61,13 @@ import com.fanstatic.repository.OrderItemRepository;
 import com.fanstatic.repository.OrderRepository;
 import com.fanstatic.repository.OrderTableRepository;
 import com.fanstatic.repository.OrderTypeRepository;
+import com.fanstatic.repository.PaymentMethodRepository;
 import com.fanstatic.repository.ProductRepository;
 import com.fanstatic.repository.ProductVarientRepository;
 import com.fanstatic.repository.StatusRepository;
 import com.fanstatic.repository.TableRepository;
 import com.fanstatic.repository.UserRepository;
+import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.TableService;
 import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
@@ -88,6 +95,8 @@ public class OrderService {
     private final OrderExtraPortionRepository orderExtraPortionRepository;
     private final ComboProductRepository comboProductRepository;
     private final CancelReasonRepository cancelReasonRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
+    private final VoucherRepository voucherRepository;
 
     private final ProductRepository productRepository;
     private final ProductVarientRepository productVarientRepository;
@@ -404,6 +413,122 @@ public class OrderService {
         }
         return ResponseUtils.fail(200, "Đổi không thành công", null);
 
+    }
+
+    public ResponseDTO checkoutRequest(CheckoutRequestDTO checkoutRequestDTO) {
+
+        Order order = orderRepository.findById(checkoutRequestDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+
+        }
+        if (!order.getStatus().getId().equals(ApplicationConst.OrderStatus.PROCESSING)) {
+            return ResponseUtils.fail(500, "Order không thể thanh toán", null);
+
+        }
+
+        PaymentMethod paymentMethod = paymentMethodRepository.findById(checkoutRequestDTO.getPaymentMethod())
+                .orElse(null);
+        if (paymentMethod == null) {
+            return ResponseUtils.fail(500, "Phương thức thanh toán không hợp lệ", null);
+
+        }
+
+        Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(checkoutRequestDTO.getVoucherId()).orElse(null);
+        if (voucher == null) {
+            return ResponseUtils.fail(500, "Voucher không hợp lệ", null);
+
+        } else {
+            ResponseDTO voucherValid = checkVoucherApply(
+                    new CheckVoucherRequestDTO(checkoutRequestDTO.getOrderId(), voucher.getId()));
+            if (!voucherValid.isSuccess()) {
+                return ResponseUtils.fail(500, "Voucher không hợp lệ", null);
+
+            }
+        }
+
+        Status status = statusRepository.findById(ApplicationConst.OrderStatus.AWAIT_CHECKOUT).get();
+        order.setStatus(status);
+        order.setVoucher(voucher);
+
+        order.setUpdateAt(new Date());
+        order.setUpdateBy(systemService.getUserLogin());
+
+        orderRepository.save(order);
+
+        return ResponseUtils.success(200, "Yêu cầu thanh toán thành công", null);
+
+    }
+
+    public ResponseDTO checkVoucherApply(CheckVoucherRequestDTO checkVoucherRequestDTO) {
+
+        Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(checkVoucherRequestDTO.getVoucherId()).orElse(null);
+        if (voucher == null) {
+            return ResponseUtils.fail(500, "Voucher không hợp lệ", null);
+        }
+
+        Order order = orderRepository.findById(checkVoucherRequestDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        Date currentDate = new Date();
+        Date startAt = voucher.getStartAt();
+        Date endAt = voucher.getEndAt();
+
+        Long total = order.getTotal();
+
+        if (currentDate.after(startAt) && currentDate.before(endAt)) {
+            // Hôm nay nằm giữa startAt và endAt
+            System.out.println("Voucher thời gian hợp lệ vl");
+
+            if (voucher.getPriceCondition().intValue() <= total) {
+
+                ApplyVoucherDTO applyVoucherDTO = new ApplyVoucherDTO();
+
+                long discount = (long) (total * ((double) voucher.getPercent() / 100));
+                System.out.println(discount);
+
+                if (discount > voucher.getValue()) {
+                    discount = voucher.getValue();
+                }
+                long finalTotal = total - discount;
+
+                applyVoucherDTO.setDiscount(discount);
+                applyVoucherDTO.setFinalTotal(finalTotal);
+                applyVoucherDTO.setTotal(total);
+
+                return ResponseUtils.success(200, "Áp dụng thành công", applyVoucherDTO);
+            } else {
+                return ResponseUtils.fail(400, "Chưa đủ điều kiện áp dụng", null);
+            }
+
+        } else if (currentDate.after(endAt)) {
+            // Hôm nay không nằm giữa startAt và endAt
+            System.out.println("Voucher đã hết hạn");
+            return ResponseUtils.fail(400, "Voucher đã hết hạn", null);
+
+        } else if (currentDate.before(startAt)) {
+            // Hôm nay không nằm giữa startAt và endAt
+            System.out.println("Voucher chưa bắt đầu áp dụng");
+            return ResponseUtils.fail(400, "Voucher chưa áp dụng", null);
+        }
+        return ResponseUtils.fail(400, "Chưa đủ điều kiện áp dụng", null);
+
+    }
+
+    public ResponseDTO getListOrderAwaitCheckout() {
+        Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
+        List<Order> orders = orderRepository.findOrdersCreatedAwaitCheckout(twentyFourHoursAgo);
+        List<ResponseDataDTO> orderDTOs = new ArrayList<>();
+        for (Order order : orders) {
+            OrderDTO orderDTO = convertOrderToDTO(order);
+            orderDTOs.add(orderDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(orderDTOs);
+        return ResponseUtils.success(200, "Danh sách order chờ thanh toán", responseListDataDTO);
     }
 
     public ResponseDTO getListOrder() {
