@@ -9,10 +9,16 @@ import java.util.List;
 import org.apache.commons.codec.digest.HmacUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
-public class PayOS {
+public class PayOSService {
 
     @Value("${payos.checkout.url}")
     private String checkoutUrl;
@@ -25,6 +31,12 @@ public class PayOS {
 
     @Value("${payos.cancel.url}")
     private String cancelUrl;
+
+    @Value("${payos.x-api-key}")
+    private String xApiKey;
+
+    @Value("${payos.x-client-id}")
+    private String xClientId;
 
     public static Iterator<String> sortedIterator(Iterator<String> it, Comparator<String> comparator) {
         List<String> list = new ArrayList<String>();
@@ -66,4 +78,24 @@ public class PayOS {
         data.put("signature", generateSignature(data));
         return data;
     }
+
+    public String getCheckoutUrl(int orderCode, Long amount, String description) {
+        String url = checkoutUrl + "/v2/payment-requests";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-key", xApiKey);
+        headers.set("x-client-id", xClientId);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject data = transaction(orderCode, amount, description);
+        HttpEntity<String> entity = new HttpEntity<>(data.toString(), headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        JSONObject jsonObject = new JSONObject(response.getBody());
+        String codeId = jsonObject.getString("code");
+        if (codeId.equals("00")) {
+            String reponseCheckoutUrl =  jsonObject.getJSONObject("data").getString("checkoutUrl").toString();
+            return reponseCheckoutUrl;
+        }
+        return null;
+    }
+
 }
