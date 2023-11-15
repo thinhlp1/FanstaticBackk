@@ -41,24 +41,19 @@ public class RolePermissionService {
     @Lazy
     private RoleService roleService;
 
-    public ResponseDTO setRolePermission(RoleRequestDTO roleRequestDTO) {
+    public ResponseDTO setRolePermission(SetRolePermissionDTO setRolePermissionDTO) {
         TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
-        // kiem tra xem đang update hay create, neu update xoa các role permission cu
-        rolePermissionRepository.deleteByRoleId(roleRequestDTO.getId());
+        Role role = roleRepository.findByIdAndActiveIsTrue(setRolePermissionDTO.getRoleId()).orElse(null);
+        if (role == null) {
+            return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
+        }
+        rolePermissionRepository.deleteByRoleId(setRolePermissionDTO.getRoleId());
 
         // kiem tra va gan quyen
-        for (Integer featurePermissionId : roleRequestDTO.getFeaturePermissionsId()) {
+        for (Integer featurePermissionId : setRolePermissionDTO.getFeaturePermissionsId()) {
 
             RolePermission rolePermission = new RolePermission();
-            Role role = roleRepository.findByCodeAndActiveIsTrue(roleRequestDTO.getCode()).orElse(null);
-
-            if (role == null) {
-                transactionManager.rollback(transactionStatus);
-
-                return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
-
-            }
 
             FeaturePermission featurePermission = featurePermissionRepository
                     .findById(featurePermissionId)

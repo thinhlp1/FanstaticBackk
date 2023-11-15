@@ -28,6 +28,5 @@ public class RoleRequestDTO {
     @Size(min = 5, max = 50, message = "{Size.role.description}")
     private String description;
 
-    private List<Integer> featurePermissionsId;
 
 }

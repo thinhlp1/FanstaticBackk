@@ -41,7 +41,6 @@ public class RoleService {
     private final AccountRepository accountRepository;
 
     public ResponseDTO create(RoleRequestDTO roleRequestDTO) {
-        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
         List<FieldError> errors = new ArrayList<>();
         if (roleRepository.findByCodeAndActiveIsTrue(roleRequestDTO.getCode()).isPresent()) {
@@ -70,20 +69,9 @@ public class RoleService {
 
         if (roleSaved != null) {
 
-            ResponseDTO setiRolePermission = rolePermissionService.setRolePermission(roleRequestDTO);
-            if (setiRolePermission.isSuccess()) {
-                systemService.writeSystemLog(role.getId(), role.getName(), null);
+            systemService.writeSystemLog(role.getId(), role.getName(), null);
 
-                transactionManager.commit(transactionStatus);
-
-                return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
-
-            } else {
-                transactionManager.rollback(transactionStatus);
-
-                return ResponseUtils.fail(setiRolePermission.getStatusCode(), setiRolePermission.getMessage(), null);
-
-            }
+            return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
 
         }
         return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
@@ -126,20 +114,10 @@ public class RoleService {
         Role roleSaved = roleRepository.save(role);
 
         if (roleSaved != null) {
-            ResponseDTO setiRolePermission = rolePermissionService.setRolePermission(roleRequestDTO);
-            if (setiRolePermission.isSuccess()) {
-                systemService.writeSystemLog(role.getId(), role.getName(), null);
 
-                transactionManager.commit(transactionStatus);
+            systemService.writeSystemLog(role.getId(), role.getName(), null);
 
-                return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
-
-            } else {
-                transactionManager.rollback(transactionStatus);
-
-                return ResponseUtils.fail(setiRolePermission.getStatusCode(), setiRolePermission.getMessage(), null);
-
-            }
+            return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 
         }
         return ResponseUtils.fail(500, "Cập nhật thất bại", null);
