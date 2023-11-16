@@ -79,7 +79,6 @@ public class RoleService {
     }
 
     public ResponseDTO update(RoleRequestDTO roleRequestDTO) {
-        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
         Role role = roleRepository.findById(roleRequestDTO.getId()).orElse(null);
 
