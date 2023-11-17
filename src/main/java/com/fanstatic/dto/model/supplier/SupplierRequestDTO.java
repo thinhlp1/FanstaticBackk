@@ -10,7 +10,7 @@ public class SupplierRequestDTO {
 
     private String name;
 
-    private String number_phone;
+    private String phone;
 
     private String address;
 

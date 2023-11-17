@@ -67,44 +67,44 @@ public class SaleProductService {
 
     // }
 
-    // public ResponseDTO delete(int id) {
+    public ResponseDTO delete(int id) {
 
-    //     SaleProduct saleProduct = saleProductRepository.findByIdAndActiveIsTrue(id).orElse(null);
+        SaleProduct saleProduct = saleProductRepository.findByIdAndActiveIsTrue(id).orElse(null);
 
-    //     if (saleProduct == null) {
-    //         return ResponseUtils.fail(401, "Sự kiện không tồn tại", null);
-    //     }
+        if (saleProduct == null) {
+            return ResponseUtils.fail(401, "Sự kiện không tồn tại", null);
+        }
 
-    //     saleProduct.setActive(DataConst.ACTIVE_FALSE);
-    //     saleProduct.setDeleteAt(new Date());
-    //     saleProduct.setDeleteBy(systemService.getUserLogin());
+        saleProduct.setActive(DataConst.ACTIVE_FALSE);
+        saleProduct.setDeleteAt(new Date());
+        saleProduct.setDeleteBy(systemService.getUserLogin());
 
-    //     SaleProduct saleProductSaved = saleProductRepository.save(saleProduct);
+        SaleProduct saleProductSaved = saleProductRepository.save(saleProduct);
 
-    //     systemService.writeSystemLog(saleProductSaved.getId(), null, null);
-    //     return ResponseUtils.success(200, MessageConst.DELETE_SUCCESS, null);
+        systemService.writeSystemLog(saleProductSaved.getId(), null, null);
+        return ResponseUtils.success(200, MessageConst.DELETE_SUCCESS, null);
 
-    // }
+    }
 
-    // public ResponseDTO restore(int id) {
+    public ResponseDTO restore(int id) {
 
-    //     SaleProduct saleProduct = saleProductRepository.findByIdAndActiveIsFalse(id).orElse(null);
+        SaleProduct saleProduct = saleProductRepository.findByIdAndActiveIsFalse(id).orElse(null);
 
-    //     if (saleProduct == null) {
-    //         return ResponseUtils.fail(401, "Sự kiện không tồn tại", null);
-    //     }
+        if (saleProduct == null) {
+            return ResponseUtils.fail(401, "Sự kiện không tồn tại", null);
+        }
 
-    //     saleProduct.setActive(DataConst.ACTIVE_TRUE);
-    //     saleProduct.setUpdateAt(new Date());
-    //     saleProduct.setUpdateBy(systemService.getUserLogin());
+        saleProduct.setActive(DataConst.ACTIVE_TRUE);
+        saleProduct.setUpdateAt(new Date());
+        saleProduct.setUpdateBy(systemService.getUserLogin());
 
-    //     SaleProduct saleProductSaved = saleProductRepository.save(saleProduct);
+        SaleProduct saleProductSaved = saleProductRepository.save(saleProduct);
 
-    //     systemService.writeSystemLog(saleProductSaved.getId(), null, null);
+        systemService.writeSystemLog(saleProductSaved.getId(), null, null);
 
-    //     return ResponseUtils.success(200, MessageConst.RESTORE_SUCCESS, null);
+        return ResponseUtils.success(200, MessageConst.RESTORE_SUCCESS, null);
 
-    // }
+    }
 
     // public ResponseDTO detail(int id) {
 
