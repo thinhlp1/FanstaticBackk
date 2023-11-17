@@ -9,7 +9,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 public class ShiftDTO extends ResponseDataDTO {
-    private String id;
+    private int id;
 
     private String shift;
 
@@ -19,5 +19,5 @@ public class ShiftDTO extends ResponseDataDTO {
 
     private Date endAt;
 
-    private boolean active;
+    private byte active;
 }
