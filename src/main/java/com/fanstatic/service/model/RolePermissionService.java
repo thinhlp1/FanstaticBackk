@@ -102,15 +102,15 @@ public class RolePermissionService {
             List<FeaturePermissionDTO> featurePermissionDTOs = new ArrayList<>();
 
             // kiem tra vong lap cac role permission
-            String addedFeatureId = "";
+            List<String> addedFeatureId = new ArrayList<>();
             for (RolePermission rolePermission : rolePermissions) {
                 FeaturePermission featurePermission = rolePermission.getFeaturePermission();
                 ManagerFeature managerFeature = featurePermission.getManagerFeature();
 
-                if (managerFeature.getId().equals(addedFeatureId)) {
+                if (addedFeatureId.contains(managerFeature.getId())) {
                     continue;
                 }
-                addedFeatureId = managerFeature.getId();
+                addedFeatureId.add(managerFeature.getId());
 
                 FeaturePermissionDTO featurePermissionDTO = new FeaturePermissionDTO();
                 ManageFeatureDTO manageFeatureDTO = modelMapper.map(managerFeature, ManageFeatureDTO.class);
@@ -158,7 +158,8 @@ public class RolePermissionService {
         List<FeaturePermissionDTO> featurePermissionDTOs = new ArrayList<>();
 
         // kiem tra vong lap cac role permission
-        String addedFeatureId = "";
+        List<String> addedFeatureId = new ArrayList<>();
+
         for (RolePermission rolePermission : rolePermissions) {
             FeaturePermission featurePermission = rolePermission.getFeaturePermission();
             ManagerFeature managerFeature = featurePermission.getManagerFeature();
@@ -167,10 +168,10 @@ public class RolePermissionService {
                 continue;
             }
 
-            if (managerFeature.getId().equals(addedFeatureId)) {
-                continue;
-            }
-            addedFeatureId = managerFeature.getId();
+             if (addedFeatureId.contains(managerFeature.getId())) {
+                    continue;
+                }
+                addedFeatureId.add(managerFeature.getId());
 
             FeaturePermissionDTO featurePermissionDTO = new FeaturePermissionDTO();
             ManageFeatureDTO manageFeatureDTO = modelMapper.map(managerFeature, ManageFeatureDTO.class);
@@ -217,14 +218,15 @@ public class RolePermissionService {
         List<ResponseDataDTO> featurePermissionDTOs = new ArrayList<>();
 
         // kiem tra vong lap cac role permission
-        String addedFeatureId = "";
+        List<String> addedFeatureId = new ArrayList<>();
+
         for (FeaturePermission featurePermission : featurePermissions) {
             ManagerFeature managerFeature = featurePermission.getManagerFeature();
 
-            if (managerFeature.getId().equals(addedFeatureId)) {
-                continue;
-            }
-            addedFeatureId = managerFeature.getId();
+             if (addedFeatureId.contains(managerFeature.getId())) {
+                    continue;
+                }
+                addedFeatureId.add(managerFeature.getId());
 
             FeaturePermissionDTO featurePermissionDTO = new FeaturePermissionDTO();
             ManageFeatureDTO manageFeatureDTO = modelMapper.map(managerFeature, ManageFeatureDTO.class);

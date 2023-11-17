@@ -24,10 +24,28 @@ public class WebsocketConst {
     public static final String TOPIC_ORDER_UPDATE = TOPIC + "/purchase/order/update";
 
     /*
-     * lắng nghe sự kiện khi yêu cầu thanh toán order 
+     * lắng nghe sự kiện khi yêu cầu thanh toán order
      * data : dữ liệu order vừa mới update
      */
-    public static final String TOPIC_ORDER_CHECKOUT = TOPIC + "/purchase/order/checkout";
+    public static final String TOPIC_ORDER_CHECKOUT_REQUEST = TOPIC + "/purchase/order/checkout-request";
+
+    /*
+     * lắng nghe sự kiện khi thanh toán thành công
+     * data : dữ liệu order vừa mới update
+     */
+    public static final String TOPIC_ORDER_CHECKOUT_PAID = TOPIC + "/purchase/order/checkout-paid";
+
+    /*
+     * lắng nghe sự kiện khi yêu cầu thanh toán đc nhân viên xác nhạn
+     * data : dữ liệu order vừa mới update
+     */
+    public static final String TOPIC_ORDER_AWAIT_CHECKOUT = TOPIC + "/purchase/order/await-checkout";
+
+    /*
+     * lắng nghe sự kiện khi yêu cầu thanh toán đc nhân viên xác nhạn
+     * data : dữ liệu order vừa mới update
+     */
+    public static final String TOPIC_ORDER_CANCEL_CHECKOUT = TOPIC + "/purchase/order/cancel-checkout";
 
     public static final String TOPIC_CURRENT_ORDER = TOPIC + "/purchase/order/current-order";
 

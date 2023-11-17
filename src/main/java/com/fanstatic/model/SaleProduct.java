@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import java.util.Date;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
@@ -9,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
 
 /**
  * 
@@ -25,8 +22,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SaleProduct  {
-	
+public class SaleProduct {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
@@ -39,6 +36,10 @@ public class SaleProduct  {
 	@ManyToOne
 	@JoinColumn(name = "product_variant_id")
 	private ProductVarient productVarient;
+
+	@ManyToOne
+	@JoinColumn(name = "combo_product_id")
+	private ComboProduct comboProduct;
 
 	// bi-directional many-to-one association to SaleEvent
 	@ManyToOne

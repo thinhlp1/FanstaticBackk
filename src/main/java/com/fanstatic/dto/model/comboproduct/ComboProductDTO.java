@@ -3,6 +3,7 @@ package com.fanstatic.dto.model.comboproduct;
 import java.util.List;
 
 import com.fanstatic.dto.model.product.ProductImageDTO;
+import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,4 +20,7 @@ public class ComboProductDTO {
     private Long price;
 
     private List<ProductImageDTO> imageUrl;
+
+    private SaleEventDTO saleEvent;
+
 }

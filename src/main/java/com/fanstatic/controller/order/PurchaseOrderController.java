@@ -1,38 +1,26 @@
 package com.fanstatic.controller.order;
 
-import java.sql.SQLException;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.util.HtmlUtils;
-
 import com.fanstatic.config.constants.WebsocketConst;
-import com.fanstatic.config.websocket.WebSocketResponseController;
 import com.fanstatic.dto.ResponseDTO;
-import com.fanstatic.dto.ResponseDataDTO;
-import com.fanstatic.dto.auth.LoginDTO;
-import com.fanstatic.dto.model.account.AccountDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
+import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
 import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
 import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
 import com.fanstatic.service.order.OrderService;
-import com.fanstatic.service.system.WebsocketService;
 import com.fanstatic.util.ResponseUtils;
-import com.fanstatic.util.SessionUtils;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -166,7 +154,22 @@ public class PurchaseOrderController {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
                     WebsocketConst.TOPIC_ORDER_DETAILS + "/" + checkoutRequestDTO.getOrderId());
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
-            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_CHECKOUT);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_CHECKOUT_REQUEST);
+
+        }
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/api/purchase/order/checkout")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> checkoutOrder(
+            @RequestBody @Valid ConfirmCheckoutRequestDTO confirmCheckoutRequestDTO) {
+        ResponseDTO responseDTO = orderService.confirmCheckoutOrder(confirmCheckoutRequestDTO);
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + confirmCheckoutRequestDTO.getOrderId());
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_AWAIT_CHECKOUT);
 
         }
         return ResponseUtils.returnReponsetoClient(responseDTO);
@@ -176,6 +179,45 @@ public class PurchaseOrderController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> checkVoucner(@RequestBody @Valid CheckVoucherRequestDTO checkoutRequestDTO) {
         ResponseDTO responseDTO = orderService.checkVoucherApply(checkoutRequestDTO);
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/api/purchase/order/create/test")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> test() {
+        ResponseDTO responseDTO = orderService.test();
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/handle-checkout")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> handleCheckout(@RequestParam("orderCode") Integer ordercode) {
+
+        ResponseDTO responseDTO = orderService.handleCheckout(ordercode);
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderService.getOrderIdFromOrderCode(ordercode));
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_CHECKOUT_PAID);
+
+        }
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/cancel-checkout")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> cancelCheckout(@RequestParam("orderCode") Integer ordercode) {
+
+        ResponseDTO responseDTO = orderService.cacncelCheckout(ordercode);
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderService.getOrderIdFromOrderCode(ordercode));
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_CANCEL_CHECKOUT);
+
+        }
 
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }

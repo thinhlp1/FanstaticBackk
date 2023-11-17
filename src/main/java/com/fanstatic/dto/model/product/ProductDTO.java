@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.category.CategoryDTO;
+import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,5 +30,7 @@ public class ProductDTO extends ResponseDataDTO {
     private List<ProductImageDTO> imageUrl;
 
     private String descriptionUrl;
+
+    private SaleEventDTO saleEvent;
 
 }

@@ -64,6 +64,9 @@ public class Order {
 	@JoinColumn(name = "status_id")
 	private Status status;
 
+	@OneToMany(mappedBy = "order",fetch = FetchType.LAZY)
+	private List<Bill> bill;
+
 	// bi-directional many-to-one association to OrderExtraPortion
 	@OneToMany(mappedBy = "order")
 	private List<OrderExtraPortion> orderExtraPortions;
@@ -84,6 +87,10 @@ public class Order {
 	@ManyToOne
 	@JoinColumn(name = "voucher_id")
 	private Voucher voucher;
+
+	@ManyToOne
+	@JoinColumn(name = "payment_method_id")
+	private PaymentMethod paymentMethod;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")

@@ -2,6 +2,7 @@ package com.fanstatic.dto.model.product;
 
 import java.util.List;
 
+import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.dto.model.size.SizeDTO;
 
 import lombok.Data;
@@ -19,5 +20,7 @@ public class ProductVarientCompactDTO {
     private SizeDTO size;
 
     private List<ProductImageDTO> imageUrl;
+
+    private SaleEventDTO saleEvent;
 
 }

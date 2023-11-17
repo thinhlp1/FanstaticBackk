@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -29,8 +30,12 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String currentUrl = request.getRequestURI();
         String[] urlPaths = currentUrl.split("/");
 
+        String[] allowedPaths = { "home", "auth", "u", "handle-checkout","cancel-checkout" };
+
         for (String path : urlPaths) {
-            if (path.equals("home") || path.equals("auth") || path.equals("u")) {
+            // Sử dụng phương thức Arrays.asList để chuyển mảng thành danh sách và sử dụng
+            // contains để kiểm tra
+            if (Arrays.asList(allowedPaths).contains(path)) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -38,7 +43,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
         // khong tim thay token o jwt filter
         if (!jwtFilterValided || jwtFilterValided == null) {
-        
+
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;

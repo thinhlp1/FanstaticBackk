@@ -14,11 +14,16 @@ public class ApplicationConst {
         public static final String CANCEL = "CANCEL";
         public static final String AWAIT_CHECKOUT = "AWAIT_CHECKOUT";
 
-    
-
         public static final String ITEM_COMPLETE = "ITEM_COMPLETE";
         public static final String ITEM_PROCESSING = "ITEM_PROCESSING";
 
+    }
+
+    public static class BillStatus {
+        public static final String PAID = "PAID";
+        public static final String AWAIT_PAYMENT = "AWAIT_PAYMENT";
+        public static final String CANCELLED = "CANCELLED";
+        
     }
 
 }

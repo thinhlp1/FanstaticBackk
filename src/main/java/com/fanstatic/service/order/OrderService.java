@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 import org.apache.tomcat.util.http.ResponseUtil;
 import org.aspectj.weaver.ast.Or;
@@ -18,6 +20,7 @@ import com.fanstatic.config.constants.ApplicationConst;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.model.bill.BillDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
 import com.fanstatic.dto.model.order.OptionDTO;
@@ -26,15 +29,19 @@ import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.OrderItemDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
+import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ApplyVoucherDTO;
 import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
 import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
+import com.fanstatic.dto.model.payment.PaymentMethodDTO;
+import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
+import com.fanstatic.model.Bill;
 import com.fanstatic.model.CancelReason;
 import com.fanstatic.model.ComboProduct;
 import com.fanstatic.model.ExtraPortion;
@@ -49,9 +56,11 @@ import com.fanstatic.model.PaymentMethod;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductCategory;
 import com.fanstatic.model.ProductVarient;
+import com.fanstatic.model.SaleEvent;
 import com.fanstatic.model.Status;
 import com.fanstatic.model.Table;
 import com.fanstatic.model.Voucher;
+import com.fanstatic.repository.BillRepository;
 import com.fanstatic.repository.CancelReasonRepository;
 import com.fanstatic.repository.ComboProductRepository;
 import com.fanstatic.repository.ExtraPortionRepository;
@@ -64,11 +73,14 @@ import com.fanstatic.repository.OrderTypeRepository;
 import com.fanstatic.repository.PaymentMethodRepository;
 import com.fanstatic.repository.ProductRepository;
 import com.fanstatic.repository.ProductVarientRepository;
+import com.fanstatic.repository.SaleEventRepository;
+import com.fanstatic.repository.SaleProductRepository;
 import com.fanstatic.repository.StatusRepository;
 import com.fanstatic.repository.TableRepository;
 import com.fanstatic.repository.UserRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.TableService;
+import com.fanstatic.service.payos.PayOSService;
 import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
@@ -82,6 +94,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final SystemService systemService;
     private final FileService fileService;
+    private final PayOSService payOSService;
 
     private final TableService tableService;
     private final ExtraPortionRepository extraPortionRepository;
@@ -97,6 +110,9 @@ public class OrderService {
     private final CancelReasonRepository cancelReasonRepository;
     private final PaymentMethodRepository paymentMethodRepository;
     private final VoucherRepository voucherRepository;
+    private final BillRepository billRepository;
+    private final SaleProductRepository saleProductRepository;
+    private final SaleEventRepository saleEventRepository;
 
     private final ProductRepository productRepository;
     private final ProductVarientRepository productVarientRepository;
@@ -460,6 +476,82 @@ public class OrderService {
 
     }
 
+    public ResponseDTO confirmCheckoutOrder(ConfirmCheckoutRequestDTO confirmCheckoutRequestDTO) {
+        Order order = orderRepository.findById(confirmCheckoutRequestDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(400, "Order không tồn tại", null);
+        }
+
+        Bill b = billRepository.findBillCheckouted(confirmCheckoutRequestDTO.getOrderId()).orNull();
+        if (b != null) {
+            return ResponseUtils.fail(400, "Order đã được xác nhận thanh toán", null);
+        }
+
+        if (!order.getStatus().getId().equals(ApplicationConst.OrderStatus.AWAIT_CHECKOUT)) {
+            return ResponseUtils.fail(400, "Order không thể thanh toán", null);
+
+        }
+
+        PaymentMethod paymentMethod = paymentMethodRepository.findById(confirmCheckoutRequestDTO.getPaymentMethod())
+                .orElse(null);
+        if (paymentMethod == null) {
+            return ResponseUtils.fail(400, "Phương thức thanh toán không hợp lệ", null);
+        }
+
+        Long receiveMoney = confirmCheckoutRequestDTO.getReceiveMoney();
+        Status status = statusRepository.findById(ApplicationConst.BillStatus.AWAIT_PAYMENT).get();
+
+        Bill bill = new Bill();
+        bill.setCreateAt(new Date());
+        bill.setCreateBy(systemService.getUserLogin());
+        bill.setPaymentMethod(paymentMethod);
+        bill.setReceiveMoney(receiveMoney);
+        bill.setTotal(total(order));
+        bill.setStatus(status);
+        bill.setOrder(order);
+
+        bill.setCheckoutUrl(generateOrderCheckoutUrl(order, bill.getTotal()));
+
+        Bill billSaved = billRepository.saveAndFlush(bill);
+        if (billSaved != null) {
+
+            OrderDTO orderDTO = convertOrderToDTO(order);
+            return ResponseUtils.success(200, "Xác nhận thanh toán thành công", orderDTO);
+        }
+
+        return ResponseUtils.fail(500, "Xác nhận thanh toán không thành công ở dưới", null);
+
+    }
+
+    public ResponseDTO handleCheckout(Integer orderCode) {
+        System.out.println("HANDEL");
+        return ResponseUtils.success(200, "OKE", null);
+    }
+
+    public ResponseDTO cacncelCheckout(Integer orderCode) {
+        Integer orderId = getOrderIdFromOrderCode(orderCode);
+
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(400, "Order không tồn tại", null);
+        }
+
+        Bill bill = billRepository.findBillByOrderIdAndStatus(orderId, ApplicationConst.BillStatus.AWAIT_PAYMENT)
+                .orNull();
+        if (bill == null) {
+            return ResponseUtils.fail(400, "Không tìm thấy yêu cầu thanh toán", null);
+        }
+
+        Status status = statusRepository.findById(ApplicationConst.BillStatus.CANCELLED).get();
+        bill.setStatus(status);
+        bill.setUpdateAt(new Date());
+        billRepository.save(bill);
+
+        OrderDTO orderDTO = convertOrderToDTO(order);
+
+        return ResponseUtils.success(200, "Thanh toán order đã bị hủy", orderDTO);
+    }
+
     public ResponseDTO checkVoucherApply(CheckVoucherRequestDTO checkVoucherRequestDTO) {
 
         Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(checkVoucherRequestDTO.getVoucherId()).orElse(null);
@@ -559,6 +651,7 @@ public class OrderService {
         orderDTO.setExtraPortions(getOrderExtraPortions(order.getOrderExtraPortions()));
         orderDTO.setOrderItems(getOrderItems(order.getOrderItems()));
         orderDTO.setTables(getTables(order.getOrderTables()));
+        orderDTO.setBill(modelMapper.map(order.getBill(), BillDTO.class));
 
         orderDTO.setCreateAt(order.getCreateAt());
         orderDTO.setDeleteAt(order.getDeleteAt());
@@ -575,6 +668,18 @@ public class OrderService {
 
         if (order.getVoucher() != null) {
             orderDTO.setVoucher(modelMapper.map(order.getVoucher(), VoucherDTO.class));
+        }
+
+        if (order.getPaymentMethod() != null) {
+            orderDTO.setPaymentMethodDTO(modelMapper.map(orderDTO, PaymentMethodDTO.class));
+        }
+
+        Bill bill = billRepository.findBillCheckouted(order.getOrderId()).orNull();
+        if (bill != null) {
+            String status = bill.getStatus().getStatus();
+            bill.setStatus(null);
+            orderDTO.setBill(modelMapper.map(bill, BillDTO.class));
+            orderDTO.getBill().setStatus(status);
         }
 
         return orderDTO;
@@ -716,6 +821,45 @@ public class OrderService {
 
     }
 
+    public ResponseDTO test() {
+        SaleEvent saleEvent = saleProductRepository.findSaleByProductId(11).orNull();
+        // SaleEvent saleEvent =
+        // saleProductRepository.findSaleByProductVarientId(19).orNull();
+
+        // SaleEvent saleEvent = saleProductRepository.findSaleByComboId(1).orNull();
+
+        // SaleEvent saleEvent = saleEventRepository.findById(9).get();
+        // System.out.println(saleEvent.getSaleProducts().size());
+        return ResponseUtils.success(200, "ID SẢN PHẢM: " + saleEvent.getId(), null);
+    }
+
+    private Long total(Order order) {
+        long orderTotal = 0;
+
+        // Lặp qua danh sách các mục đơn hàng
+        if (order.getOrderItems() != null) {
+            for (OrderItem orderItem : order.getOrderItems()) {
+                // Tính tổng tiền cho từng mục đơn hàng và cộng vào tổng tiền của đơn hàng
+                long itemTotal = calculateItemTotal(orderItem);
+                orderTotal += itemTotal;
+            }
+
+        }
+
+        if (order.getOrderExtraPortions() != null) {
+            for (OrderExtraPortion orderExtraPortion : order.getOrderExtraPortions()) {
+                // Tính tổng tiền cho từng mục đơn hàng và cộng vào tổng tiền của đơn hàng
+                long itemTotal = calculateExtraPortionTotal(orderExtraPortion);
+                System.out.println("EXTRA: " + itemTotal);
+
+                orderTotal += itemTotal;
+            }
+        }
+
+        return orderTotal;
+
+    }
+
     private Long total(OrderRequestDTO orderRequestDTO) {
         long orderTotal = 0;
 
@@ -724,6 +868,8 @@ public class OrderService {
             for (OrderItemRequestDTO orderItemDTO : orderRequestDTO.getOrderItems()) {
                 // Tính tổng tiền cho từng mục đơn hàng và cộng vào tổng tiền của đơn hàng
                 long itemTotal = calculateItemTotal(orderItemDTO);
+                System.out.println("ITEM: " + itemTotal);
+
                 orderTotal += itemTotal;
             }
         }
@@ -732,6 +878,8 @@ public class OrderService {
             for (ExtraPortionOrderRequestDTO extraPortionOrderRequestDTO : orderRequestDTO.getExtraPortions()) {
                 // Tính tổng tiền cho từng mục đơn hàng và cộng vào tổng tiền của đơn hàng
                 long itemTotal = calculateExtraPortionTotal(extraPortionOrderRequestDTO);
+                System.out.println("EXTRA: " + itemTotal);
+
                 orderTotal += itemTotal;
             }
         }
@@ -741,24 +889,43 @@ public class OrderService {
 
     private long calculateItemTotal(OrderItemRequestDTO orderItemDTO) {
         long itemTotal = 0;
+        SaleEvent saleEvent;
         // Lấy thông tin sản phẩm và biến thể sản phẩm
         if (orderItemDTO.getProductId() != null) {
             Product product = productRepository.findByIdAndActiveIsTrue(orderItemDTO.getProductId()).orElse(null);
 
             if (product != null) {
-                long productPrice = product.getPrice();
+                long itemPrice = 0;
 
                 if (orderItemDTO.getProductVariantId() != null) {
                     ProductVarient productVariant = productVarientRepository
                             .findByIdAndActiveIsTrue(orderItemDTO.getProductVariantId())
                             .orElse(null);
                     if (productVariant != null) {
-                        productPrice = productVariant.getPrice();
+
+                        saleEvent = saleProductRepository.findSaleByProductVarientId(productVariant.getId()).orNull();
+                        if (saleEvent != null) {
+                            itemPrice = (long) (productVariant.getPrice()
+                                    - (productVariant.getPrice() * ((double) saleEvent.getPercent() / 100)));
+                        } else {
+                            itemPrice = productVariant.getPrice();
+
+                        }
+                    }
+                } else {
+                    saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
+
+                    if (saleEvent != null) {
+                        itemPrice = (long) (product.getPrice()
+                                - (product.getPrice() * ((double) saleEvent.getPercent() / 100)));
+                    } else {
+                        itemPrice = product.getPrice();
                     }
                 }
 
-                long itemPrice = productPrice;
                 itemTotal = itemPrice * orderItemDTO.getQuantity();
+            } else {
+
             }
         }
 
@@ -767,9 +934,71 @@ public class OrderService {
             ComboProduct comboProduct = comboProductRepository.findByIdAndActiveIsTrue(orderItemDTO.getComboId())
                     .orElse(null);
             if (comboProduct != null) {
-                itemTotal = itemTotal + comboProduct.getPrice();
+                long itemPrice = 0;
+
+                saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orNull();
+
+                if (saleEvent != null) {
+                    itemPrice = (long) (comboProduct.getPrice()
+                            - (comboProduct.getPrice() * ((double) saleEvent.getPercent() / 100)));
+                } else {
+                    itemPrice = comboProduct.getPrice();
+                }
+                itemTotal = itemTotal + itemPrice;
             }
 
+        }
+
+        return itemTotal;
+    }
+
+    private long calculateItemTotal(OrderItem orderItem) {
+        long itemTotal = 0;
+        // Lấy thông tin sản phẩm và biến thể sản phẩm
+        SaleEvent saleEvent;
+        Product product = orderItem.getProduct();
+
+        if (product != null) {
+            long itemPrice = 0;
+
+            ProductVarient productVariant = orderItem.getProductVarient();
+            if (productVariant != null) {
+
+                saleEvent = saleProductRepository.findSaleByProductVarientId(productVariant.getId()).orNull();
+                if (saleEvent != null) {
+                    itemPrice = (long) (productVariant.getPrice()
+                            - (productVariant.getPrice() * ((double) saleEvent.getPercent() / 100)));
+                } else {
+                    itemPrice = productVariant.getPrice();
+
+                }
+
+            } else {
+                saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
+
+                if (saleEvent != null) {
+                    itemPrice = (long) (product.getPrice()
+                            - (product.getPrice() * ((double) saleEvent.getPercent() / 100)));
+                } else {
+                    itemPrice = product.getPrice();
+                }
+            }
+            itemTotal = itemPrice * orderItem.getQuantity();
+        }
+
+        ComboProduct comboProduct = orderItem.getComboProduct();
+        if (comboProduct != null) {
+            long itemPrice = 0;
+
+            saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orNull();
+
+            if (saleEvent != null) {
+                itemPrice = (long) (comboProduct.getPrice()
+                        - (comboProduct.getPrice() * ((double) saleEvent.getPercent() / 100)));
+            } else {
+                itemPrice = comboProduct.getPrice();
+            }
+            itemTotal = itemTotal + itemPrice;
         }
 
         return itemTotal;
@@ -778,12 +1007,28 @@ public class OrderService {
     private long calculateExtraPortionTotal(ExtraPortionOrderRequestDTO extraPortionOrderRequestDTO) {
         long itemTotal = 0;
         // Lấy thông tin sản phẩm và biến thể sản phẩm
-        ExtraPortion extraPortion = extraPortionRepository.findById(extraPortionOrderRequestDTO.getId()).orElse(null);
+        ExtraPortion extraPortion = extraPortionRepository
+                .findByExtraPortionIdAndActiveIsTrue(extraPortionOrderRequestDTO.getId())
+                .orElse(null);
 
         if (extraPortion != null) {
 
             long itemPrice = extraPortion.getPrice();
-            itemTotal = itemPrice * extraPortion.getPrice();
+            itemTotal = itemPrice * extraPortionOrderRequestDTO.getQuantity();
+
+        }
+
+        return itemTotal;
+    }
+
+    private long calculateExtraPortionTotal(OrderExtraPortion orderExtraPortion) {
+        long itemTotal = 0;
+        ExtraPortion extraPortion = orderExtraPortion.getExtraPortion();
+
+        if (extraPortion != null) {
+
+            long itemPrice = extraPortion.getPrice();
+            itemTotal = itemPrice * orderExtraPortion.getQuantity();
 
         }
 
@@ -856,6 +1101,7 @@ public class OrderService {
                     if (orderItemDTO.getProductVarient().getId() == productVarient.getId()) {
                         orderItemDTO.setQuantity(orderItemDTO.getQuantity() + quantity);
                         orderItemDTO.setNote(orderItemDTO.getNote() + " - " + orderItem.getNote());
+
                         found = true;
                         break;
                     }
@@ -878,8 +1124,31 @@ public class OrderService {
                     }
                 }
             }
+            OrderItemDTO newOrderItemDTO = modelMapper.map(orderItem, OrderItemDTO.class);
+            if (productVarient != null) {
+                SaleEvent saleEvent = saleProductRepository.findSaleByProductVarientId(productVarient.getId()).orNull();
+                if (saleEvent != null) {
+                    newOrderItemDTO.getProductVarient().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+                }
 
-            OrderItemDTO orderItemDTO = modelMapper.map(orderItem, OrderItemDTO.class);
+            } else if (product != null) {
+                SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
+                if (saleEvent != null) {
+
+                    newOrderItemDTO.getProduct().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+                }
+
+            } else if (comboProduct != null) {
+                SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orNull();
+                if (saleEvent != null) {
+                    newOrderItemDTO.getComboProduct().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+                }
+
+            }
+
+            Long total = calculateItemTotal(orderItem);
+
+            newOrderItemDTO.setTotal(total);
 
             if (!found) {
                 List<OptionDTO> optionDTOs = new ArrayList<>();
@@ -888,8 +1157,8 @@ public class OrderService {
                             OptionDTO.class);
                     optionDTOs.add(optionDTO);
                 }
-                orderItemDTO.setOptions(optionDTOs);
-                orderItemDTOs.add(orderItemDTO);
+                newOrderItemDTO.setOptions(optionDTOs);
+                orderItemDTOs.add(newOrderItemDTO);
             }
 
         }
@@ -1036,6 +1305,30 @@ public class OrderService {
         } catch (Exception e) {
             return ResponseUtils.fail(500, "Đổi bàn không thành công", null);
         }
+    }
+
+    private String generateOrderCheckoutUrl(Order order, Long total) {
+        int orderCodePrefix = 100000;
+        String checkoutUrl = null;
+        while (true) {
+            int orderCode = Integer.valueOf(orderCodePrefix + String.valueOf(order.getOrderId()));
+            System.out.println(orderCode);
+            checkoutUrl = payOSService.getCheckoutUrl(orderCode, total,
+                    "Thanh toán hóa đơn");
+
+            if (checkoutUrl == null) {
+                System.out.println(orderCode);
+                orderCodePrefix++;
+                continue;
+            }
+            return checkoutUrl;
+        }
+    }
+
+    public Integer getOrderIdFromOrderCode(Integer orderCode) {
+        String orderCodeStr = String.valueOf(orderCode);
+        String orderId = orderCodeStr.substring(orderCodeStr.length(), 0);
+        return Integer.valueOf(orderId);
     }
 
 }

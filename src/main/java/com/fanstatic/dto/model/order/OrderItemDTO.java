@@ -7,6 +7,7 @@ import com.fanstatic.dto.model.product.ProductCompactDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
 import com.fanstatic.dto.model.product.ProductVarientCompactDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
+import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,5 +29,8 @@ public class OrderItemDTO {
 
     private boolean priority;
 
+    private Long total;
+
     private List<OptionDTO> options;
+    
 }

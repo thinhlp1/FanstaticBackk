@@ -4,10 +4,12 @@ import java.util.Date;
 import java.util.List;
 
 import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.model.bill.BillDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
+import com.fanstatic.dto.model.payment.PaymentMethodDTO;
 import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
@@ -37,6 +39,8 @@ public class OrderDTO extends ResponseDataDTO {
 
     private VoucherDTO voucher;
 
+    private PaymentMethodDTO paymentMethodDTO;
+
     private List<OrderItemDTO> orderItems;
 
     private List<OrderExtraPortionDTO> extraPortions;
@@ -52,4 +56,6 @@ public class OrderDTO extends ResponseDataDTO {
     private UserCompactDTO emploeeConfirmed;
 
     private UserCompactDTO canceler;
+
+    private BillDTO bill;
 }
