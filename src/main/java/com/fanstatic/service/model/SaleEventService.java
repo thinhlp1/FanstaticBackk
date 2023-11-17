@@ -57,7 +57,7 @@ public class SaleEventService {
 
         saleevent.setUpdateAt(new Date());
         saleevent.setUpdateBy(systemService.getUserLogin());
-
+        saleevent.setActive(DataConst.ACTIVE_TRUE);
         SaleEvent saleeventSaved = saleEventRepository.save(saleevent);
 
         systemService.writeSystemLog(saleeventSaved.getId(), saleeventSaved.getPercent() + "", null);

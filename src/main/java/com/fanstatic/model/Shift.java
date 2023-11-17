@@ -19,14 +19,15 @@ import java.util.List;
  */
 @Entity
 @Data
+@Table(name = "shift")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "shift")
 public class Shift {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
     private byte active;
 

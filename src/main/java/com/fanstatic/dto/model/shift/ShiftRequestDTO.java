@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ShiftRequestDTO {
 
-    private String id;
+    private int id;
 
     @NotNull(message = "{NotNull.shift.code}")
     @Pattern(regexp = "^[A-Z0-9]*$", message = "{Pattern.shift.code}")
