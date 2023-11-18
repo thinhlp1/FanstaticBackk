@@ -150,6 +150,11 @@ public class OrderService {
 
         order.setCreateAt(new Date());
         order.setCreateBy(systemService.getUserLogin());
+
+        //TODO Nếu người dùng đang đăng nhập là nhân viên thì ko cần set customer Id
+        //TODO Nếu người dùng có tài khoản nhưng ko đem điện thoại thì có thể nhập số điện thoại trên điện thoại nhân viên rồi gán cho order
+        //TODO Nếu người tạo order là nhân viên thì trạng thái sẽ chuyển sang đang proccessing liền luôn
+        
         order.setCustomer(systemService.getUserLogin());
         order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.CONFIRMING).get());
         order.setTotal(total(orderRequestDTO));
@@ -159,11 +164,14 @@ public class OrderService {
 
         if (orderSaved != null) {
             // create order item
-            ResponseDTO orderItemSaved = createOrderItem(orderRequestDTO.getOrderItems(), orderSaved);
-            if (!orderItemSaved.isSuccess()) {
-                transactionManager.rollback(transactionStatus);
-                return ResponseUtils.fail(orderItemSaved.getStatusCode(), orderItemSaved.getMessage(), null);
+            List<OrderItemRequestDTO> orderItemRequestDTOs = orderRequestDTO.getOrderItems();
+            if (orderItemRequestDTOs != null && !orderItemRequestDTOs.isEmpty()) {
+                ResponseDTO orderItemSaved = createOrderItem(orderRequestDTO.getOrderItems(), orderSaved);
+                if (!orderItemSaved.isSuccess()) {
+                    transactionManager.rollback(transactionStatus);
+                    return ResponseUtils.fail(orderItemSaved.getStatusCode(), orderItemSaved.getMessage(), null);
 
+                }
             }
 
             ResponseDTO orderTableSaved = createOrderTable(List.of(orderRequestDTO.getTableId()), orderSaved);
@@ -173,11 +181,14 @@ public class OrderService {
 
             }
 
-            ResponseDTO orderExtraSaved = createExtraPortion(orderRequestDTO.getExtraPortions(), orderSaved);
-            if (!orderExtraSaved.isSuccess()) {
-                transactionManager.rollback(transactionStatus);
-                return ResponseUtils.fail(orderExtraSaved.getStatusCode(), orderExtraSaved.getMessage(), null);
+            List<ExtraPortionOrderRequestDTO> extraPortionDTOs = orderRequestDTO.getExtraPortions();
+            if (extraPortionDTOs != null && !extraPortionDTOs.isEmpty()) {
+                ResponseDTO orderExtraSaved = createExtraPortion(orderRequestDTO.getExtraPortions(), orderSaved);
+                if (!orderExtraSaved.isSuccess()) {
+                    transactionManager.rollback(transactionStatus);
+                    return ResponseUtils.fail(orderExtraSaved.getStatusCode(), orderExtraSaved.getMessage(), null);
 
+                }
             }
 
         } else {
@@ -450,22 +461,25 @@ public class OrderService {
 
         }
 
-        Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(checkoutRequestDTO.getVoucherId()).orElse(null);
-        if (voucher == null) {
-            return ResponseUtils.fail(500, "Voucher không hợp lệ", null);
-
-        } else {
-            ResponseDTO voucherValid = checkVoucherApply(
-                    new CheckVoucherRequestDTO(checkoutRequestDTO.getOrderId(), voucher.getId()));
-            if (!voucherValid.isSuccess()) {
+        if (checkoutRequestDTO.getVoucherId() != null) {
+            Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(checkoutRequestDTO.getVoucherId()).orElse(null);
+            if (voucher == null) {
                 return ResponseUtils.fail(500, "Voucher không hợp lệ", null);
+
+            } else {
+                ResponseDTO voucherValid = checkVoucherApply(
+                        new CheckVoucherRequestDTO(checkoutRequestDTO.getOrderId(), voucher.getId()));
+                if (!voucherValid.isSuccess()) {
+                    return ResponseUtils.fail(500, "Voucher không hợp lệ", null);
+
+                }
+                order.setVoucher(voucher);
 
             }
         }
 
         Status status = statusRepository.findById(ApplicationConst.OrderStatus.AWAIT_CHECKOUT).get();
         order.setStatus(status);
-        order.setVoucher(voucher);
 
         order.setUpdateAt(new Date());
         order.setUpdateBy(systemService.getUserLogin());
@@ -524,8 +538,33 @@ public class OrderService {
     }
 
     public ResponseDTO handleCheckout(Integer orderCode) {
-        System.out.println("HANDEL");
-        return ResponseUtils.success(200, "OKE", null);
+        Integer orderId = getOrderIdFromOrderCode(orderCode);
+
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(400, "Order không tồn tại", null);
+        }
+
+        Bill bill = billRepository.findBillByOrderIdAndStatus(orderId, ApplicationConst.BillStatus.AWAIT_PAYMENT)
+                .orNull();
+        if (bill == null) {
+            return ResponseUtils.fail(400, "Không tìm thấy yêu cầu thanh toán", null);
+        }
+
+        Status status = statusRepository.findById(ApplicationConst.BillStatus.PAID).get();
+        Status orderStatus = statusRepository.findById(ApplicationConst.OrderStatus.COMPLETE).get();
+
+        bill.setStatus(status);
+        bill.setUpdateAt(new Date());
+        billRepository.save(bill);
+
+        order.setStatus(orderStatus);
+        order.setUpdateAt(new Date());
+        orderRepository.save(order);
+
+        OrderDTO orderDTO = convertOrderToDTO(order);
+
+        return ResponseUtils.success(200, "Thanh toán order đã bị hủy", orderDTO);
     }
 
     public ResponseDTO cacncelCheckout(Integer orderCode) {
@@ -1327,7 +1366,8 @@ public class OrderService {
 
     public Integer getOrderIdFromOrderCode(Integer orderCode) {
         String orderCodeStr = String.valueOf(orderCode);
-        String orderId = orderCodeStr.substring(orderCodeStr.length(), 0);
+        String orderId = orderCodeStr.substring(6,orderCodeStr.length() );
+        int a = Integer.valueOf(orderId);
         return Integer.valueOf(orderId);
     }
 

@@ -30,7 +30,22 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String currentUrl = request.getRequestURI();
         String[] urlPaths = currentUrl.split("/");
 
-        String[] allowedPaths = { "home", "auth", "u", "handle-checkout","cancel-checkout" };
+        String[] allowedPaths = { "home", "auth", "u", "handle-checkout", "cancel-checkout" };
+
+        for (String path : urlPaths) {
+            // Sử dụng phương thức Arrays.asList để chuyển mảng thành danh sách và sử dụng
+            // contains để kiểm tra
+            if (path.equals("handle-checkout") || path.equals("cancel-checkout")) {
+                String remoteHost = request.getRemoteHost();
+                System.out.println("Remote Host: " + remoteHost);
+
+                // Lấy IP của nguồn gửi request
+                String remoteAddr = request.getRemoteAddr();
+                System.out.println("Remote IP Address: " + remoteAddr);
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
 
         for (String path : urlPaths) {
             // Sử dụng phương thức Arrays.asList để chuyển mảng thành danh sách và sử dụng
