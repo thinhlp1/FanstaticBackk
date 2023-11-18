@@ -35,4 +35,6 @@ public class VoucherRequestDTO {
 
     @Future(message = "{Future.voucher.endAt}")
     private Date endAt;
+
+    private boolean active;
 }

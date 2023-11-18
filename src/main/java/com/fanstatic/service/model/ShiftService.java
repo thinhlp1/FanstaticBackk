@@ -35,6 +35,7 @@ public class ShiftService {
     public ResponseDTO create(ShiftRequestDTO shiftRequestDTO) {
 
         List<FieldError> errors = new ArrayList<>();
+        
         if (shiftRepository.findByCodeAndActiveIsTrue(shiftRequestDTO.getCode()).isPresent()) {
             errors.add(new FieldError("shiftRequestDTO", "code", "Code đã tồn tại"));
         }
@@ -92,14 +93,14 @@ public class ShiftService {
         }
 
         modelMapper.map(shiftRequestDTO, shift);
-
+        shift.setShift(shiftRequestDTO.getShift());
         shift.setUpdateAt(new Date());
         shift.setUpdateBy(systemService.getUserLogin());
         LocalTime start = LocalTime.parse(shiftRequestDTO.getStartAt());
         LocalTime end = LocalTime.parse(shiftRequestDTO.getEndAt());
         shift.setStartAt(Time.valueOf(start));
         shift.setEndAt(Time.valueOf(end));
-
+      
         Shift shiftSaved = shiftRepository.save(shift);
 
         systemService.writeSystemLog(shiftSaved.getId(), shiftSaved.getShift(), null);
@@ -108,7 +109,7 @@ public class ShiftService {
 
     }
 
-    public ResponseDTO delete(String id) {
+    public ResponseDTO delete(int id) {
 
         Shift shift = shiftRepository.findByIdAndActiveIsTrue(id).orElse(null);
 
@@ -127,7 +128,7 @@ public class ShiftService {
 
     }
 
-    public ResponseDTO restore(String id) {
+    public ResponseDTO restore(int id) {
 
         Shift shift = shiftRepository.findByIdAndActiveIsFalse(id).orElse(null);
 
@@ -147,7 +148,7 @@ public class ShiftService {
 
     }
 
-    public ResponseDTO detail(String id) {
+    public ResponseDTO detail(int id) {
 
         Shift shift = shiftRepository.findById(id).orElse(null);
 
@@ -190,7 +191,7 @@ public class ShiftService {
         return ResponseUtils.success(200, "Danh sách shift", reponseListDataDTO);
     }
 
-    public ShiftDTO getDTOById(String id) {
+    public ShiftDTO getDTOById(int id) {
         Shift shift = shiftRepository.findById(id).orElse(null);
         if (shift != null) {
             return modelMapper.map(shift, ShiftDTO.class);

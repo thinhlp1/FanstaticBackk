@@ -25,4 +25,5 @@ public class VoucherDTO extends ResponseDataDTO {
 
     private Date endAt;
 
+    private boolean active;
 }

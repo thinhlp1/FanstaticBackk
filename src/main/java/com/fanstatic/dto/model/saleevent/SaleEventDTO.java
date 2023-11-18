@@ -14,12 +14,16 @@ public class SaleEventDTO extends ResponseDataDTO {
 
     private double percent;
 
+    private String code;
+
     private String description;
+
+    private String name;
 
     private Date startAt;
 
     private Date endAt;
 
-    private boolean active;
+    private byte active;
 
 }
