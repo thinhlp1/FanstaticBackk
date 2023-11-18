@@ -13,7 +13,7 @@ public class SupplierDTO extends ResponseDataDTO {
 
     private String name;
 
-    private String number_phone;
+    private String phone;
 
     private String address;
 

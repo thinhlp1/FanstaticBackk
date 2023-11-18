@@ -36,19 +36,19 @@ public class SaleProductController {
     //     return ResponseUtils.returnReponsetoClient(reponseDTO);
     // }
 
-    // @DeleteMapping("/delete/{id}")
-    // @ResponseBody
-    // public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id) {
-    //     ResponseDTO reponseDTO = saleProductService.delete(id);
-    //     return ResponseUtils.returnReponsetoClient(reponseDTO);
-    // }
+    @DeleteMapping("/delete/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id) {
+        ResponseDTO reponseDTO = saleProductService.delete(id);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
 
-    // @PutMapping("/restore/{id}")
-    // @ResponseBody
-    // public ResponseEntity<ResponseDTO> restore(@PathVariable("id") int id) {
-    //     ResponseDTO reponseDTO = saleProductService.restore(id);
-    //     return ResponseUtils.returnReponsetoClient(reponseDTO);
-    // }
+    @PutMapping("/restore/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> restore(@PathVariable("id") int id) {
+        ResponseDTO reponseDTO = saleProductService.restore(id);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
   
   
 

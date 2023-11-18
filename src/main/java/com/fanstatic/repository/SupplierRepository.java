@@ -21,5 +21,5 @@ public interface SupplierRepository extends JpaRepository<Supplier, Integer> {
 
     public Optional<Supplier> findByNameAndActiveIsTrue(String name);
 
-       public Optional<Size> findByNameAndActiveIsTrueAndIdNot(String name, int id);
+       public Optional<Supplier> findByNameAndActiveIsTrueAndIdNot(String name, int id);
 }

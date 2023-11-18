@@ -38,8 +38,7 @@ public class Supplier  {
 
 	private String name;
 
-	@Column(name = "number_phone")
-	private String numberPhone;
+	private String phone;
 
 	// bi-directional many-to-one association to WarehouseReceive
 	@OneToMany(mappedBy = "supplier")

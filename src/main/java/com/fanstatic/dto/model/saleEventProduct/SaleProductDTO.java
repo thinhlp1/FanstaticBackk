@@ -2,6 +2,7 @@ package com.fanstatic.dto.model.saleEventProduct;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.comboProduct.ComboProductDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
+import com.fanstatic.dto.model.product.ProductForSaleDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.model.ComboProduct;
@@ -21,7 +22,7 @@ import lombok.Builder;
 public class SaleProductDTO extends ResponseDataDTO {
      private int id;
 
-    private ProductDTO product;
+    private ProductForSaleDTO product;
 
     private ProductVarientDTO productVarient;
 
