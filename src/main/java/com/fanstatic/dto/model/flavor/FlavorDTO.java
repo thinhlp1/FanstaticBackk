@@ -1,7 +1,7 @@
 package com.fanstatic.dto.model.flavor;
 
 import com.fanstatic.dto.ResponseDataDTO;
-import com.fanstatic.dto.model.category.CategoryDTO;
+import com.fanstatic.dto.model.flavorcategory.FlavorCategoryDTO;
 import com.fanstatic.dto.model.unit.UnitDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ public class FlavorDTO extends ResponseDataDTO {
 
     private UnitDTO unitDTO;
 
-    private CategoryDTO categoryDTO;
+    private FlavorCategoryDTO flavorCategoryDTO;
 
     private boolean active;
 }

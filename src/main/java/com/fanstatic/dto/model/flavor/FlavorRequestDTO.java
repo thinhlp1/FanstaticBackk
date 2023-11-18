@@ -21,7 +21,6 @@ public class FlavorRequestDTO {
     @NotBlank(message = "{NotBlank.flavor.unit}")
     private String unitId;
 
-    @NotNull(message = "{NotNull.flavor.category}")
-    private Integer categoryId;
-
+    @NotNull(message = "{NotNull.flavor.flavorCategory}")
+    private int flavorCategoryId;
 }

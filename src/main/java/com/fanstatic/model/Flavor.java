@@ -36,6 +36,7 @@ public class Flavor {
 
     //bi-directional many-to-one association to Category
     @ManyToOne
+    @JoinColumn(name = "flavor_category_id")
     private FlavorCategory flavorCategory;
 
     //bi-directional many-to-one association to Unit
