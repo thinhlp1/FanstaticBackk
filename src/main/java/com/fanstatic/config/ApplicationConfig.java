@@ -69,7 +69,8 @@ public class ApplicationConfig {
                 "classpath:validate-message/role",
                 "classpath:validate-message/voucher",
                 "classpath:validate-message/extraPortion",
-                "classpath:validate-message/flavor"
+                "classpath:validate-message/flavor",
+                "classpath:validate-message/flavorcategory"
         );
         ms.setDefaultEncoding("utf-8");
         return ms;
