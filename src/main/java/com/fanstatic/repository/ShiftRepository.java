@@ -1,12 +1,10 @@
 package com.fanstatic.repository;
 
 import com.fanstatic.model.Shift;
-import com.fanstatic.model.Size;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
-
 
 public interface ShiftRepository extends JpaRepository<Shift, Integer> {
     public Optional<List<Shift>> findAllByActiveIsTrue();

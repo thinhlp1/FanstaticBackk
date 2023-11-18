@@ -92,7 +92,7 @@ public class AuthenticationService {
         sessionUtils.set("numberPhone", loginDTO.getNumberPhone());
         sessionUtils.set("accountExits", true);
 
-        return ResponseUtils.success(200, "Tài khoản có tồn tại", null);
+        return ResponseUtils.success(201, "Tài khoản có tồn tại", null);
 
     }
 
