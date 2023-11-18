@@ -1,20 +1,24 @@
 package com.fanstatic.model;
 
 
-import jakarta.persistence.Table;
+import java.util.Date;
+import java.util.List;
+
 import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
-import java.util.List;
+import jakarta.persistence.Table;
 
 
 /**
+ * 
+ * 
  * /**
  * The persistent class for the supplier database table.
+ * 
  */
 @Entity
 @Data
@@ -22,46 +26,45 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Supplier {
+public class Supplier  {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+	private byte active;
 
-    private byte active;
+	private String address;
 
-    private String address;
+	private String name;
 
-    private String name;
+	private String phone;
 
-    @Column(name = "phone")
-    private String numberPhone;
+	// bi-directional many-to-one association to WarehouseReceive
+	@OneToMany(mappedBy = "supplier")
+	private List<WarehouseReceive> warehouseReceives;
 
-    // bi-directional many-to-one association to WarehouseReceive
-    @OneToMany(mappedBy = "supplier")
-    private List<WarehouseReceive> warehouseReceives;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "update_at")
+	private Date updateAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "update_at")
-    private Date updateAt;
+	@OneToOne
+	@JoinColumn(name = "update_by")
+	private User updateBy;
 
-    @OneToOne
-    @JoinColumn(name = "update_by")
-    private User updateBy;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "create_at")
+	private Date createAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "create_at")
-    private Date createAt;
+	@OneToOne
+	@JoinColumn(name = "create_by")
+	private User createBy;
 
-    @OneToOne
-    @JoinColumn(name = "create_by")
-    private User createBy;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "delete_at")
+	private Date deleteAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "delete_at")
-    private Date deleteAt;
-
-    @OneToOne
-    @JoinColumn(name = "delete_by")
-    private User deleteBy;
+	@OneToOne
+	@JoinColumn(name = "delete_by")
+	private User deleteBy;
 }
