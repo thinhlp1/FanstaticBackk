@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.Table;
 
 
 /**
@@ -22,25 +22,19 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Data
+@Table(name = "supplier")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Supplier  {
 	
 	@Id
-	private String id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
 
 	private byte active;
 
 	private String address;
-
-	private String bank;
-
-	@Column(name = "card_number")
-	private String cardNumber;
-
-	@Column(name = "fax_number")
-	private String faxNumber;
 
 	private String name;
 
