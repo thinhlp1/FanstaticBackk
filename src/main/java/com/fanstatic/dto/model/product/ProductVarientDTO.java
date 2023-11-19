@@ -3,6 +3,7 @@ package com.fanstatic.dto.model.product;
 import java.util.List;
 
 import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.dto.model.size.SizeDTO;
 
 import lombok.Data;
@@ -20,5 +21,7 @@ public class ProductVarientDTO extends ResponseDataDTO {
     private SizeDTO size;
 
     private List<ProductImageDTO> imageUrl;
+    
+    private SaleEventDTO saleEvent;
 
 }

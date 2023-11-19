@@ -28,17 +28,20 @@ import com.fanstatic.dto.model.product.ProductDTO;
 import com.fanstatic.dto.model.product.ProductImageDTO;
 import com.fanstatic.dto.model.product.ProductRequestDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
+import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.model.Category;
 import com.fanstatic.model.File;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductCategory;
 import com.fanstatic.model.ProductImage;
 import com.fanstatic.model.ProductVarient;
+import com.fanstatic.model.SaleEvent;
 import com.fanstatic.repository.CategoryRepository;
 import com.fanstatic.repository.ProductCategoryRepository;
 import com.fanstatic.repository.ProductImageRepository;
 import com.fanstatic.repository.ProductRepository;
 import com.fanstatic.repository.ProductVarientRepository;
+import com.fanstatic.repository.SaleProductRepository;
 import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
@@ -56,6 +59,7 @@ public class ProductService {
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductVarientRepository productVarientRepository;
     private final ProductImageRepository productImageRepository;
+    private final SaleProductRepository saleProductRepository;
     private final FileService fileService;
 
     @Autowired
@@ -362,6 +366,11 @@ public class ProductService {
         productDTO.setPrice(product.getPrice());
         productDTO.setActive(product.getActive());
 
+        SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
+        if (saleEvent != null) {
+            productDTO.setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+        }
+
         List<ProductCategory> productCategories = productCategoryRepository.findByProduct(product);
         List<CategoryDTO> categoryDTOs = new ArrayList<>();
         for (ProductCategory productCategory : productCategories) {
@@ -375,7 +384,11 @@ public class ProductService {
 
         for (ProductVarient productVarient : productVarients) {
             ProductVarientDTO productVarientDTO = modelMapper.map(productVarient, ProductVarientDTO.class);
-
+            SaleEvent saleEventVarient = saleProductRepository.findSaleByProductVarientId(productVarient.getId())
+                    .orNull();
+            if (saleEventVarient != null) {
+                productVarientDTO.setSaleEvent(modelMapper.map(saleEventVarient, SaleEventDTO.class));
+            }
             productVarientDTO.setImageUrl(getProductVarientImage(productVarient));
             productVarientDTOs.add(productVarientDTO);
 
