@@ -1,6 +1,6 @@
 package com.fanstatic.dto.model.warehouseReceive;
 
-import com.fanstatic.model.WarehouseReceiveItem;
+import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemRequestDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +21,6 @@ public class WarehouseReceiveRequestDTO {
     private String description;
 
     private boolean active;
-    
-    List<WarehouseReceiveItem> warehouseReceiveItemList;
+
+    List<WarehouseReceiveItemRequestDTO> warehouseReceiveItemRequestDTOList;
 }

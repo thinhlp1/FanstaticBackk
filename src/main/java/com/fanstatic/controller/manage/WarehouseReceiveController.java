@@ -25,21 +25,21 @@ public class WarehouseReceiveController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @PutMapping("/update/{id}")
-    @ResponseBody
-    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid WarehouseReceiveRequestDTO data, @PathVariable("id") int id) {
-        ResponseDTO responseDTO = warehouseReceiveService.update(data);
-        return ResponseUtils.returnReponsetoClient(responseDTO);
-    }
-
-    @PutMapping("/update/image/{id}")
-    @ResponseBody
-    public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile imageFile,
-                                                   @PathVariable("id") Integer id) {
-        ResponseDTO responseDTO = warehouseReceiveService.updateImage(id, imageFile);
-        return ResponseUtils.returnReponsetoClient(responseDTO);
-    }
-
+    //    @PutMapping("/update/{id}")
+//    @ResponseBody
+//    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid WarehouseReceiveRequestDTO data, @PathVariable("id") int id) {
+//        ResponseDTO responseDTO = warehouseReceiveService.update(data);
+//        return ResponseUtils.returnReponsetoClient(responseDTO);
+//    }
+//
+//    @PutMapping("/update/image/{id}")
+//    @ResponseBody
+//    public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile imageFile,
+//                                                   @PathVariable("id") Integer id) {
+//        ResponseDTO responseDTO = warehouseReceiveService.updateImage(id, imageFile);
+//        return ResponseUtils.returnReponsetoClient(responseDTO);
+//    }
+//
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id) {

@@ -2,7 +2,6 @@ package com.fanstatic.dto.model.warehouseReceiveItem;
 
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.flavor.FlavorDTO;
-import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +11,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class WarehouseReceiveItemDTO extends ResponseDataDTO {
     private int id;
-    private WarehouseReceiveDTO warehouseReceiveDTO;
+//    private WarehouseReceiveDTO warehouseReceiveDTO;
 
     private FlavorDTO flavorDTO;
 

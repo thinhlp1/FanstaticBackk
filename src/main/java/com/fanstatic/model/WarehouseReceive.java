@@ -70,4 +70,21 @@ public class WarehouseReceive {
     @JoinColumn(name = "delete_by")
     private User deleteBy;
 
+    @Override
+    public String toString() {
+        return "WarehouseReceive{" +
+                "id=" + id +
+                ", active=" + active +
+                ", description='" + description + '\'' +
+                ", imageFile=" + imageFile +
+                ", supplier=" + supplier +
+                ", warehouseReceiveItemList=" + warehouseReceiveItemList +
+                ", updateAt=" + updateAt +
+                ", updateBy=" + updateBy +
+                ", createAt=" + createAt +
+                ", createBy=" + createBy +
+                ", deleteAt=" + deleteAt +
+                ", deleteBy=" + deleteBy +
+                '}';
+    }
 }

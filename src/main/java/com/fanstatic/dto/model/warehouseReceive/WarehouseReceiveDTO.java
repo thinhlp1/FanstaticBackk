@@ -2,7 +2,7 @@ package com.fanstatic.dto.model.warehouseReceive;
 
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.supplier.SupplierDTO;
-import com.fanstatic.model.WarehouseReceiveItem;
+import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,5 +21,5 @@ public class WarehouseReceiveDTO extends ResponseDataDTO {
 
     private boolean active;
 
-    List<WarehouseReceiveItem> warehouseReceiveItemList;
+    List<WarehouseReceiveItemDTO> warehouseReceiveItemDTOList;
 }
