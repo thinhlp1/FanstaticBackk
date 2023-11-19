@@ -99,6 +99,12 @@ public class ProductService {
         product.setCreateAt(new Date());
         product.setCreateBy(systemService.getUserLogin());
 
+        if (productRequestDTO.getDescriptionFile() != null) {
+            File file = fileService.upload(productRequestDTO.getDescriptionFile(), ImageConst.PRODUCT_FOLDER);
+            product.setDescription(file);
+
+        }
+
         Product productSaved = productRepository.saveAndFlush(product);
 
         if (productSaved != null) {
@@ -129,6 +135,8 @@ public class ProductService {
                         productImageSaved.getMessage(),
                         null);
             }
+
+            // save product description
 
             systemService.writeSystemLog(product.getId(), product.getName(), null);
             transactionManager.commit(transactionStatus);
@@ -266,6 +274,29 @@ public class ProductService {
 
     }
 
+    public ResponseDTO updateDescriptionProduct(Integer productId, MultipartFile fileDescription) {
+        Product product = productRepository.findByIdAndActiveIsTrue(productId).orElse(null);
+        if (product == null) {
+            return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+        }
+
+        File description = product.getDescription();
+
+        if (description != null) {
+            fileService.updateFile(fileDescription, ImageConst.PRODUCT_FOLDER, description);
+            product.setDescription(description);
+
+        } else {
+            File file = fileService.upload(fileDescription, ImageConst.PRODUCT_FOLDER);
+
+            product.setDescription(file);
+        }
+        productRepository.save(product);
+
+        return ResponseUtils.success(200, "Cập nhật mô tả thành công", null);
+
+    }
+
     public ResponseDTO delete(int id) {
         Product product = productRepository.findByIdAndActiveIsTrue(id).orElse(null);
 
@@ -353,6 +384,13 @@ public class ProductService {
         productDTO.setCategories(categoryDTOs);
         productDTO.setProductVarients(productVarientDTOs);
         productDTO.setImageUrl(getProductImage(product));
+
+        File description = product.getDescription();
+        if (description != null) {
+            productDTO.setDescriptionUrl(description.getLink());
+
+        }
+
         return ResponseUtils.success(200, "Chi tiết sản phẩm", productDTO);
 
     }

@@ -1,24 +1,34 @@
 package com.fanstatic.repository;
 
 import com.fanstatic.model.Order;
+import com.google.common.base.Optional;
 
 import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
-    @Query("SELECT o FROM Order o " +
-            "WHERE o.status.status != 'COMPLETE' " +
-            "AND o.createAt >= :time")
-    List<Order> findOrdersCreated(Date time);
+        @Query("SELECT o FROM Order o " +
+                        "WHERE o.status.id != 'COMPLETE' " +
+                        "AND o.createAt >= :time")
+        List<Order> findOrdersCreated(Date time);
 
-    @Query("SELECT o FROM Order o " +
-            "WHERE o.status.status = 'AWAIT_CHECKOUT' " +
-            "AND o.createAt >= :time")
-    List<Order> findOrdersCreatedAwaitCheckout(Date time);
+        @Query("SELECT o FROM Order o " +
+                        "WHERE o.status.id = 'AWAIT_CHECKOUT' " +
+                        "AND o.createAt >= :time")
+        List<Order> findOrdersCreatedAwaitCheckout(Date time);
 
-    List<Order> findByRootOrder(Integer rootOrder);
+        @Query("SELECT o FROM Order o " +
+                        "WHERE (o.status.id = 'AWAIT_CHECKOUT' " +
+                        "OR o.status.id = 'PROCESSING' " +
+                        "OR o.status.id = 'CONFIRMING') " +
+                        "AND o.customer.id = :customerId " +
+                        "AND o.createAt >= :time")
+        Optional<Order> findOrderUser(@Param("customerId") Integer customerId,@Param("time") Date time);
+
+        List<Order> findByRootOrder(Integer rootOrder);
 
 }

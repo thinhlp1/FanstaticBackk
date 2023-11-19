@@ -68,6 +68,14 @@ public class ProductController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
+    @PutMapping("/update/description/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateDescription(@RequestPart MultipartFile description,
+            @PathVariable("id") Integer id) {
+        ResponseDTO reponseDTO = productService.updateDescriptionProduct(id, description);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id) {

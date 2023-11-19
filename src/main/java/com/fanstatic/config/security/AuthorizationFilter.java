@@ -30,7 +30,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String currentUrl = request.getRequestURI();
         String[] urlPaths = currentUrl.split("/");
 
-        String[] allowedPaths = { "home", "auth", "u", "handle-checkout", "cancel-checkout" };
+        String[] allowedPaths = { "home", "auth", "u", "handle-checkout", "cancel-checkout", "notification" };
 
         for (String path : urlPaths) {
             // Sử dụng phương thức Arrays.asList để chuyển mảng thành danh sách và sử dụng

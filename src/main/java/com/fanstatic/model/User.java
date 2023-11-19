@@ -72,7 +72,6 @@ public class User {
 	// @OneToMany(mappedBy = "employee")
 	// private List<RegisterShift> registerShifts;
 
-	// bi-directional many-to-one association to Systemlog
 	// @OneToMany(mappedBy = "user")
 	// private List<Systemlog> systemlogs;
 

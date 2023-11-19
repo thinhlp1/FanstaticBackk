@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket Demo</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+  </head>
+
+  <body>
+    <h1>Nhận thông báo</h1>
+
+    <button onclick="sendSubscriptionToServer()">Gửi Nhận thông báo</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+      function subscribe() {
+        // Đảm bảo browser hỗ trợ Service Worker
+        // if ('serviceWorker' in navigator) {
+        //   console.log("HÊRE");
+        //   navigator.serviceWorker.ready.then(function(registration) {
+        //     // Yêu cầu người dùng cho phép thông báo
+        //     console.log("HÊREdfdf");
+
+        //     Notification.requestPermission().then(function(permission) {
+        //       if (permission === 'granted') {
+        //         // Lấy thông báo từ service worker
+        //         registration.pushManager.subscribe({ userVisibleOnly: true })
+        //           .then(function(subscription) {
+        //             // Gửi thông tin subscription (bao gồm browserToken) đến API
+        //             // sendSubscriptionToServer(subscription);
+        //             console.log(subscription);
+        //           })
+        //           .catch(function(error) {
+        //             console.error('Lỗi khi đăng ký Push Notifications:', error);
+        //           });
+        //       }
+        //     });
+        //   });
+        // }
+        
+      }
+      
+
+      function sendSubscriptionToServer() {
+        // Extract thông tin từ subscription
+        var browserToken = "";
+        var browser = "Google"; // Lấy thông tin trình duyệt
+
+        // Tạo đối tượng data chứa thông tin
+        var subscribeData = {
+          browserToken: browserToken,
+          browser: browser
+        };
+
+        // Gửi thông tin đến API
+        fetch("/notification/subscribe", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(subscribeData),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("API Response: ", data);
+            // Xử lý kết quả từ REST API tại đây
+          })
+          .catch((error) => {
+            console.error("API Error: ", error);
+          });
+      }
+    </script>
+  </body>
+</html>

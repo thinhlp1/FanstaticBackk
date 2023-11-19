@@ -59,6 +59,7 @@ import com.fanstatic.model.ProductVarient;
 import com.fanstatic.model.SaleEvent;
 import com.fanstatic.model.Status;
 import com.fanstatic.model.Table;
+import com.fanstatic.model.User;
 import com.fanstatic.model.Voucher;
 import com.fanstatic.repository.BillRepository;
 import com.fanstatic.repository.CancelReasonRepository;
@@ -82,6 +83,7 @@ import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.TableService;
 import com.fanstatic.service.payos.PayOSService;
 import com.fanstatic.service.system.FileService;
+import com.fanstatic.service.system.PushNotificationService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
 
@@ -95,6 +97,7 @@ public class OrderService {
     private final SystemService systemService;
     private final FileService fileService;
     private final PayOSService payOSService;
+    private final PushNotificationService pushNotificationService;
 
     private final TableService tableService;
     private final ExtraPortionRepository extraPortionRepository;
@@ -122,12 +125,35 @@ public class OrderService {
     public ResponseDTO checkTableOrdered(int tableId) {
         Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
 
+        Table table = tableRepository.findByIdAndActiveIsTrue(tableId).orElse(null);
+        if (table == null) {
+            return ResponseUtils.fail(404, "Bàn không tồn tại", null);
+
+        }
+
         int isOpcciped = orderTableRepository.checkTalbeOccupied(tableId, twentyFourHoursAgo);
         if (isOpcciped > 0) {
             return ResponseUtils.fail(201, "Bàn đã được đặt", null);
 
         }
-        return ResponseUtils.fail(200, "Bàn trống ", null);
+        return ResponseUtils.success(200, "Bàn trống ", null);
+    }
+
+    public ResponseDTO checkUserHasOrder() {
+        Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
+
+        User customer = systemService.getUserLogin();
+        System.out.println("CUS: " + customer.getId());
+        Order order = orderRepository.findOrderUser(customer.getId(), twentyFourHoursAgo).orNull();
+
+        if (order == null) {
+            return ResponseUtils.success(202, "Không có order", null);
+
+        }
+
+        OrderDTO orderDTO = convertOrderToDTO(order);
+
+        return ResponseUtils.success(200, "Khách hàng có order ", orderDTO);
     }
 
     public ResponseDTO create(OrderRequestDTO orderRequestDTO) {
@@ -151,10 +177,12 @@ public class OrderService {
         order.setCreateAt(new Date());
         order.setCreateBy(systemService.getUserLogin());
 
-        //TODO Nếu người dùng đang đăng nhập là nhân viên thì ko cần set customer Id
-        //TODO Nếu người dùng có tài khoản nhưng ko đem điện thoại thì có thể nhập số điện thoại trên điện thoại nhân viên rồi gán cho order
-        //TODO Nếu người tạo order là nhân viên thì trạng thái sẽ chuyển sang đang proccessing liền luôn
-        
+        // TODO Nếu người dùng đang đăng nhập là nhân viên thì ko cần set customer Id
+        // TODO Nếu người dùng có tài khoản nhưng ko đem điện thoại thì có thể nhập số
+        // điện thoại trên điện thoại nhân viên rồi gán cho order
+        // TODO Nếu người tạo order là nhân viên thì trạng thái sẽ chuyển sang đang
+        // proccessing liền luôn
+
         order.setCustomer(systemService.getUserLogin());
         order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.CONFIRMING).get());
         order.setTotal(total(orderRequestDTO));
@@ -197,6 +225,7 @@ public class OrderService {
         }
         systemService.writeSystemLog(orderSaved.getOrderId(), "", null);
         transactionManager.commit(transactionStatus);
+        // pushNotificationOrder(order.getCustomer(), orderSaved.getOrderId(), "Order của bạn đã được gửi cho nhân viên");
 
         return ResponseUtils.success(200, "Tạo order thành công", null);
 
@@ -267,6 +296,7 @@ public class OrderService {
             systemService.writeSystemLog(order.getOrderId(), "", null);
 
             transactionManager.commit(transactionStatus);
+            pushNotificationOrder(order.getCustomer(), order.getOrderId(), "Order của bạn đã được nhân viên tiếp nhận");
             return ResponseUtils.success(200, "Duyệt order thành công", null);
         } else {
             return ResponseUtils.fail(500, "Trạng thái order không hợp lệ", null);
@@ -861,15 +891,11 @@ public class OrderService {
     }
 
     public ResponseDTO test() {
-        SaleEvent saleEvent = saleProductRepository.findSaleByProductId(11).orNull();
-        // SaleEvent saleEvent =
-        // saleProductRepository.findSaleByProductVarientId(19).orNull();
+        User user = userRepository.findById(1).get();
+        pushNotificationService.pushNotification(user, "high", "Đơn hàng của bạn", "Đơn hàng của bạn đã hoàn thành",
+                ApplicationConst.CLIENT_HOST);
 
-        // SaleEvent saleEvent = saleProductRepository.findSaleByComboId(1).orNull();
-
-        // SaleEvent saleEvent = saleEventRepository.findById(9).get();
-        // System.out.println(saleEvent.getSaleProducts().size());
-        return ResponseUtils.success(200, "ID SẢN PHẢM: " + saleEvent.getId(), null);
+        return ResponseUtils.success(200, "OKE", null);
     }
 
     private Long total(Order order) {
@@ -1366,9 +1392,13 @@ public class OrderService {
 
     public Integer getOrderIdFromOrderCode(Integer orderCode) {
         String orderCodeStr = String.valueOf(orderCode);
-        String orderId = orderCodeStr.substring(6,orderCodeStr.length() );
+        String orderId = orderCodeStr.substring(6, orderCodeStr.length());
         int a = Integer.valueOf(orderId);
         return Integer.valueOf(orderId);
     }
 
+    private void pushNotificationOrder(User user, Integer orderId, String body) {
+        String urlToOrder = ApplicationConst.CLIENT_HOST + "?order=" + orderId;
+        pushNotificationService.pushNotification(user, PushNotificationService.HIGT, "Order của bạn", body, urlToOrder);
+    }
 }

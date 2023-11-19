@@ -31,6 +31,26 @@ public class PurchaseOrderController {
     private final OrderService orderService;
     private final WSPurcharseOrderController wsPurcharseOrderController;
 
+    @GetMapping("/api/u/order/check-table")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> checkTable(@RequestParam("table") Integer table) {
+        ResponseDTO responseDTO = orderService.checkTableOrdered(table);
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/api/purchase/order/create/check-user-order")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> check() {
+        ResponseDTO responseDTO = orderService.checkUserHasOrder();
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
+        }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
     @PostMapping("/api/purchase/order/create")
     @ResponseBody
     public ResponseEntity<ResponseDTO> create(@RequestBody @Valid OrderRequestDTO orderRequestDTO) {
