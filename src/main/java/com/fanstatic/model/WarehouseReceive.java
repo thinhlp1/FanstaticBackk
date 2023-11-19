@@ -44,7 +44,7 @@ public class WarehouseReceive {
 
     // bi-directional many-to-one association to WarehouseReceiveItem
     @OneToMany(mappedBy = "warehouseReceive")
-    private List<WarehouseReceiveItem> warehouseReceiveItems;
+    private List<WarehouseReceiveItem> warehouseReceiveItemList;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "update_at")

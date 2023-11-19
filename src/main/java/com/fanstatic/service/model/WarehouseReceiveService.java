@@ -9,11 +9,13 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.supplier.SupplierDTO;
-import com.fanstatic.dto.model.warehouseReceiver.WarehouseReceiveDTO;
-import com.fanstatic.dto.model.warehouseReceiver.WarehouseReceiveRequestDTO;
+import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveDTO;
+import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
+import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemRequestDTO;
 import com.fanstatic.model.File;
 import com.fanstatic.model.Supplier;
 import com.fanstatic.model.WarehouseReceive;
+import com.fanstatic.model.WarehouseReceiveItem;
 import com.fanstatic.repository.SupplierRepository;
 import com.fanstatic.repository.WarehouseReceiveRepository;
 import com.fanstatic.service.system.FileService;
@@ -39,6 +41,8 @@ public class WarehouseReceiveService {
     private final ModelMapper modelMapper;
 
     private final FileService fileService;
+
+    private final WarehouseReceiveItemService warehouseReceiveItemService;
 
     private final SystemService systemService;
 
@@ -86,6 +90,7 @@ public class WarehouseReceiveService {
          */
 //        extraPortion.setImageFile(fileImage);
 
+
         MultipartFile image = warehouseReceiveRequestDTO.getImageFile();
         if (image != null) {
             File file = fileService.upload(image, ImageConst.EXTRA_PORTION_FOLDER);
@@ -98,7 +103,31 @@ public class WarehouseReceiveService {
         warehouseReceive.setCreateBy(systemService.getUserLogin());
         //save and flush dung cho việc save vào database và lấy dữ liệu lên ngay lập tức để xử lý
         WarehouseReceive warehouseReceiveSaved = warehouseReceiveRepository.saveAndFlush(warehouseReceive);
+        /*
+        Giả sử như đã có listWarehouseReceiveItem rồi
+         */
+        WarehouseReceiveItemRequestDTO warehouseReceiveItemRequestDTO = new WarehouseReceiveItemRequestDTO();
+        if(warehouseReceiveSaved != null){
+            for(WarehouseReceiveItem warehouseReceiveItem : warehouseReceiveSaved.getWarehouseReceiveItemList()){
+                warehouseReceiveItem.setWarehouseReceive(warehouseReceiveSaved);
+                warehouseReceiveItemService.create(warehouseReceiveItem);
+            }
+        /*
+        modelMapper.map(warehouseReceiveRequestDTO, warehouseReceive);
+        warehouseReceive.setSupplier(supplier);
+        warehouseReceive.setActive(DataConst.ACTIVE_TRUE);
+        warehouseReceive.setUpdateAt(new Date());
+        warehouseReceive.setUpdateBy(systemService.getUserLogin());
+        WarehouseReceive warehouseReceiveSaved = warehouseReceiveRepository.save(warehouseReceive);
 
+        }
+
+        if (warehouseReceiveSaved != null) {
+            systemService.writeSystemLog(warehouseReceiveSaved.getId(), warehouseReceiveSaved.getDescription(), null);
+            //Mã 200 là thêm thành công (Khi success thì không truyền data nào để return cho json cả mà chỉ thông báo thành công)
+            return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
+        }
+         */
         if (warehouseReceiveSaved != null) {
             //Lưu thông tin vào lịch sử hệ thống
             systemService.writeSystemLog(warehouseReceiveSaved.getId(), warehouseReceiveSaved.getDescription(), null);

@@ -1,7 +1,7 @@
 package com.fanstatic.controller.manage;
 
 import com.fanstatic.dto.ResponseDTO;
-import com.fanstatic.dto.model.warehouseReceiver.WarehouseReceiveRequestDTO;
+import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
 import com.fanstatic.service.model.WarehouseReceiveService;
 import com.fanstatic.util.ResponseUtils;
 import jakarta.validation.Valid;
