@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -38,6 +39,9 @@ public class Flavor {
     @ManyToOne
     @JoinColumn(name = "flavor_category_id")
     private FlavorCategory flavorCategory;
+
+    @OneToMany(mappedBy = "flavor")
+    private List<WarehouseInventoryItem> warehouseInventoryItemList;
 
     //bi-directional many-to-one association to Unit
     @ManyToOne

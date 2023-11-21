@@ -76,7 +76,9 @@ public class ApplicationConfig {
                 "classpath:validate-message/warehouseDeliver",
                 "classpath:validate-message/warehouseDeliverReason",
                 "classpath:validate-message/warehouseDeliverSolution",
-                "classpath:validate-message/warehouseDeliverItem"
+                "classpath:validate-message/warehouseDeliverItem",
+                "classpath:validate-message/warehouseInventory",
+                "classpath:validate-message/warehouseInventoryItem"
         );
         ms.setDefaultEncoding("utf-8");
         return ms;
