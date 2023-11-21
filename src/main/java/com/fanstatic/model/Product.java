@@ -78,6 +78,8 @@ public class Product  {
 	@OneToMany(mappedBy="product")
 	private List<SaleProduct> saleProducts;
 
+	@OneToMany(mappedBy="product")
+	private List<ProductOption> productOptions;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="update_at")

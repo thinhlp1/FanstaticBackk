@@ -11,7 +11,5 @@ public class ExtraPortionOrderRequestDTO {
 
     private int extraPortionId;
 
-    private String note;
-
     private int quantity;
 }

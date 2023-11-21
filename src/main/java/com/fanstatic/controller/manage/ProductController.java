@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.model.product.ProductOptionRequestDTO;
 import com.fanstatic.dto.model.product.ProductRequestDTO;
 import com.fanstatic.dto.model.product.ProductVarientRequestDTO;
 import com.fanstatic.service.model.ProductService;
@@ -42,6 +44,24 @@ public class ProductController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
+    @PostMapping("/create/product-variant")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> createProductVariant(
+            @RequestBody ProductVarientRequestDTO productVarientRequestDTO) {
+
+        ResponseDTO reponseDTO = productVarientService.saveProductVarient(productVarientRequestDTO);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+     @PostMapping("/create/product-option")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> createProductOption(
+            @RequestBody ProductOptionRequestDTO productOptionRequestDTO) {
+
+        ResponseDTO reponseDTO = productService.saveProductOption(productOptionRequestDTO);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
     @PutMapping("/update/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> update(@RequestPart @Valid ProductRequestDTO data,
@@ -49,6 +69,8 @@ public class ProductController {
         ResponseDTO reponseDTO = productService.update(data);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
+
+    
 
     @PutMapping("/update/varient/{id}")
     @ResponseBody

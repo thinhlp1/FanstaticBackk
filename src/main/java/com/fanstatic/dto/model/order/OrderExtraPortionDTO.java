@@ -11,7 +11,5 @@ public class OrderExtraPortionDTO {
 
     private ExtraPortionDTO extraPortion;
 
-    private String note;
-
     private int quantity;
 }

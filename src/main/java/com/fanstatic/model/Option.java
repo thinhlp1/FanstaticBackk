@@ -33,28 +33,12 @@ public class Option {
 
 	private String name;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "update_at")
-	private Date updateAt;
+	private Long price;
 
-	@OneToOne
-	@JoinColumn(name = "update_by")
-	private User updateBy;
+	@ManyToOne
+	@JoinColumn(name = "option_group_id")
+	private OptionGroup optionGroup;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_at")
-	private Date createAt;
-
-	@OneToOne
-	@JoinColumn(name = "create_by")
-	private User createBy;
-
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "delete_at")
-	private Date deleteAt;
-
-	@OneToOne
-	@JoinColumn(name = "delete_by")
-	private User deleteBy;
+	private byte active;
 
 }

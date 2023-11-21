@@ -3,6 +3,7 @@ package com.fanstatic.service.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,22 +24,32 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.category.CategoryDTO;
+import com.fanstatic.dto.model.option.OptionGroupDTO;
+import com.fanstatic.dto.model.option.OptionGroupRequestDTO;
+import com.fanstatic.dto.model.option.OptionRequestDTO;
 import com.fanstatic.dto.model.permissioin.RoleDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
 import com.fanstatic.dto.model.product.ProductImageDTO;
+import com.fanstatic.dto.model.product.ProductOptionRequestDTO;
 import com.fanstatic.dto.model.product.ProductRequestDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.model.Category;
 import com.fanstatic.model.File;
+import com.fanstatic.model.Option;
+import com.fanstatic.model.OptionGroup;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductCategory;
 import com.fanstatic.model.ProductImage;
+import com.fanstatic.model.ProductOption;
 import com.fanstatic.model.ProductVarient;
 import com.fanstatic.model.SaleEvent;
 import com.fanstatic.repository.CategoryRepository;
+import com.fanstatic.repository.OptionGroupRepository;
+import com.fanstatic.repository.OptionRepository;
 import com.fanstatic.repository.ProductCategoryRepository;
 import com.fanstatic.repository.ProductImageRepository;
+import com.fanstatic.repository.ProductOptionRepository;
 import com.fanstatic.repository.ProductRepository;
 import com.fanstatic.repository.ProductVarientRepository;
 import com.fanstatic.repository.SaleProductRepository;
@@ -60,6 +71,9 @@ public class ProductService {
     private final ProductVarientRepository productVarientRepository;
     private final ProductImageRepository productImageRepository;
     private final SaleProductRepository saleProductRepository;
+    private final ProductOptionRepository productOptionRepository;
+    private final OptionRepository optionRepository;
+    private final OptionGroupRepository optionGroupRepository;
     private final FileService fileService;
 
     @Autowired
@@ -278,6 +292,173 @@ public class ProductService {
 
     }
 
+    // public ResponseDTO saveProductOption(ProductOptionRequestDTO
+    // productOptionRequestDTO) {
+    // TransactionStatus transactionStatus = transactionManager.getTransaction(new
+    // DefaultTransactionDefinition());
+    // // save product category
+    // try {
+    // List<OptionGroupRequestDTO> optionGroupRequestDTOs =
+    // productOptionRequestDTO.getOptionGroups();
+    // Product product =
+    // productRepository.findByIdAndActiveIsTrue(productOptionRequestDTO.getProductId())
+    // .orElse(null);
+
+    // if (product == null) {
+    // return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+    // }
+
+    // } catch (Exception e) {
+    // transactionManager.rollback(transactionStatus);
+    // return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
+    // }
+    // return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
+    // }
+
+    public ResponseDTO saveProductOption(ProductOptionRequestDTO productOptionRequestDTO) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+        try {
+            List<OptionGroupRequestDTO> optionGroupRequestDTOs = productOptionRequestDTO.getOptionGroups();
+            Product product = productRepository.findByIdAndActiveIsTrue(productOptionRequestDTO.getProductId())
+                    .orElse(null);
+
+            if (product == null) {
+                return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+            }
+
+            List<ProductOption> existingProductOptions = product.getProductOptions();
+
+            System.out.println("LENG: " + existingProductOptions.size());
+            List<OptionGroupRequestDTO> optionsSaved = productOptionRequestDTO.getOptionGroups().stream()
+                    .map(OptionGroupRequestDTO::new) // Tạo một bản sao của mỗi đối tượng
+                    .collect(Collectors.toList());
+
+            // Thêm mới các OptionGroup từ request
+            for (OptionGroupRequestDTO optionGroupRequestDTO : optionGroupRequestDTOs) {
+
+                if (optionGroupRequestDTO.getId() == null) {
+
+                    ProductOption newProductOption = new ProductOption();
+
+                    OptionGroup optionGroup = new OptionGroup();
+                    optionGroup.setMultichoice(
+                            optionGroupRequestDTO.isMultichoice() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                    optionGroup.setShare(
+                            optionGroupRequestDTO.isShared() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                    optionGroup.setName(optionGroupRequestDTO.getName());
+
+                    optionGroup = optionGroupRepository.saveAndFlush(optionGroup);
+
+                    newProductOption.setProduct(product);
+                    newProductOption.setOptionGroup(optionGroup);
+                    newProductOption.setActive(DataConst.ACTIVE_TRUE);
+
+                    productOptionRepository.save(newProductOption);
+                    System.out.println("SET NEW : " + 1);
+
+                    // Kiểm tra và thêm mới các Option
+                    for (OptionRequestDTO optionRequestDTO : optionGroupRequestDTO.getOptions()) {
+                        Option newOption = new Option();
+                        newOption.setName(optionRequestDTO.getName());
+                        newOption.setPrice(optionRequestDTO.getPrice());
+                        newOption.setOptionGroup(optionGroup);
+                        newOption.setActive(DataConst.ACTIVE_TRUE);
+                        optionRepository.save(newOption);
+                    }
+
+                    optionsSaved.remove(optionGroupRequestDTO);
+                }
+
+                // Nếu không tồn tại trong sản phẩm, thêm mới
+
+            }
+            System.out.println("LENG: " + existingProductOptions.size());
+
+            for (ProductOption existingProductOption : existingProductOptions) {
+                System.out.println("EXIT: " + existingProductOption.getId());
+                boolean existsInRequest = false;
+
+                for (OptionGroupRequestDTO optionGroupRequestDTO : optionsSaved) {
+                    if (existingProductOption.getOptionGroup().getId() == optionGroupRequestDTO.getId()) {
+                        existsInRequest = true;
+                        OptionGroup optionGroup = existingProductOption.getOptionGroup();
+                        optionGroup.setMultichoice(
+                                optionGroupRequestDTO.isMultichoice() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                        optionGroup.setShare(
+                                optionGroupRequestDTO.isShared() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                        optionGroup.setName(optionGroupRequestDTO.getName());
+                        optionGroup = optionGroupRepository.saveAndFlush(optionGroup);
+
+                        existingProductOption.setOptionGroup(optionGroup);
+                        productOptionRepository.save(existingProductOption);
+                        updateOptions(existingProductOption, optionGroupRequestDTO.getOptions());
+                        break;
+                    }
+                }
+
+                if (!existsInRequest) {
+                    // Nếu không tồn tại trong request, xóa bỏ
+                    System.out.println("SET FALSE: " + existingProductOption.getId());
+                    existingProductOption.setActive(DataConst.ACTIVE_FALSE);
+                    productOptionRepository.save(existingProductOption);
+                }
+            }
+
+            transactionManager.commit(transactionStatus);
+            return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
+        } catch (
+
+        Exception e) {
+            e.printStackTrace();
+            transactionManager.rollback(transactionStatus);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
+        }
+
+    }
+
+    private void updateOptions(ProductOption productOption, List<OptionRequestDTO> optionRequestDTOs) {
+        List<Option> existingOptions = productOption.getOptionGroup().getOptions();
+
+        List<OptionRequestDTO> optionsSaved = optionRequestDTOs.stream()
+                .map(OptionRequestDTO::new) // Tạo một bản sao của mỗi đối tượng OptionRequestDTO
+                .collect(Collectors.toList());
+
+        for (OptionRequestDTO optionRequestDTO : optionRequestDTOs) {
+            if (optionRequestDTO.getId() == null) {
+                Option newOption = new Option();
+                newOption.setName(optionRequestDTO.getName());
+                newOption.setPrice(optionRequestDTO.getPrice());
+                newOption.setOptionGroup(productOption.getOptionGroup());
+                newOption.setActive(DataConst.ACTIVE_TRUE);
+                optionRepository.save(newOption);
+                optionsSaved.remove(optionRequestDTO);
+
+            }
+        }
+        // check if option need to delete
+        for (Option existingOption : existingOptions) {
+            boolean isExits = false;
+
+            for (OptionRequestDTO optionRequestDTO : optionsSaved) {
+                if (existingOption.getId() == optionRequestDTO.getId()) {
+
+                    existingOption.setName(optionRequestDTO.getName());
+                    existingOption.setPrice(optionRequestDTO.getPrice());
+                    optionRepository.save(existingOption);
+                    isExits = true;
+                    break;
+                }
+            }
+
+            if (!isExits) {
+                existingOption.setActive(DataConst.ACTIVE_FALSE);
+                optionRepository.save(existingOption);
+            }
+        }
+
+    }
+
     public ResponseDTO updateDescriptionProduct(Integer productId, MultipartFile fileDescription) {
         Product product = productRepository.findByIdAndActiveIsTrue(productId).orElse(null);
         if (product == null) {
@@ -394,7 +575,16 @@ public class ProductService {
 
         }
 
+        List<ProductOption> productOptions = productOptionRepository.findByProduct(product);
+        List<OptionGroupDTO> optionGroupDTOs = new ArrayList<>();
+        for (ProductOption productOption : productOptions) {
+            OptionGroup optionGroup = productOption.getOptionGroup();
+            OptionGroupDTO optionGroupDTO = modelMapper.map(optionGroup, OptionGroupDTO.class);
+            optionGroupDTOs.add(optionGroupDTO);
+        }
+
         productDTO.setCategories(categoryDTOs);
+        productDTO.setOptionGroups(optionGroupDTOs);
         productDTO.setProductVarients(productVarientDTOs);
         productDTO.setImageUrl(getProductImage(product));
 

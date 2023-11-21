@@ -168,10 +168,10 @@ public class RolePermissionService {
                 continue;
             }
 
-             if (addedFeatureId.contains(managerFeature.getId())) {
-                    continue;
-                }
-                addedFeatureId.add(managerFeature.getId());
+            if (addedFeatureId.contains(managerFeature.getId())) {
+                continue;
+            }
+            addedFeatureId.add(managerFeature.getId());
 
             FeaturePermissionDTO featurePermissionDTO = new FeaturePermissionDTO();
             ManageFeatureDTO manageFeatureDTO = modelMapper.map(managerFeature, ManageFeatureDTO.class);
@@ -223,10 +223,14 @@ public class RolePermissionService {
         for (FeaturePermission featurePermission : featurePermissions) {
             ManagerFeature managerFeature = featurePermission.getManagerFeature();
 
-             if (addedFeatureId.contains(managerFeature.getId())) {
-                    continue;
-                }
-                addedFeatureId.add(managerFeature.getId());
+            if (managerFeature == null) {
+                continue;
+            }
+
+            if (addedFeatureId.contains(managerFeature.getId())) {
+                continue;
+            }
+            addedFeatureId.add(managerFeature.getId());
 
             FeaturePermissionDTO featurePermissionDTO = new FeaturePermissionDTO();
             ManageFeatureDTO manageFeatureDTO = modelMapper.map(managerFeature, ManageFeatureDTO.class);

@@ -30,8 +30,6 @@ public class OrderExtraPortion  {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	private String note;
-
 	// bi-directional many-to-one association to ExtraPortion
 	@ManyToOne
 	@JoinColumn(name = "extra_portion_id")

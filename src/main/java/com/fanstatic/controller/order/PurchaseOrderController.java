@@ -110,11 +110,25 @@ public class PurchaseOrderController {
 
     }
 
-    @PostMapping("/api/purchase/order/create/re-order/{id}")
+    @PostMapping("/api/purchase/order/create/re-order")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> reOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO,
+    public ResponseEntity<ResponseDTO> reOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO){
+        ResponseDTO responseDTO = orderService.reOrder(orderRequestDTO);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
+
+        }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
+    @PostMapping("/api/purchase/order/update")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO,
             @PathVariable Integer id) {
-        ResponseDTO responseDTO = orderService.reOrder(orderRequestDTO, id);
+        ResponseDTO responseDTO = orderService.reOrder(orderRequestDTO);
 
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
@@ -241,15 +255,4 @@ public class PurchaseOrderController {
 
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
-
-    // @MessageMapping("/order/delete")
-    // @SendTo("/topic/order/delete")
-    // public ResponseDTO greet3(LoginDTO loginDTO) throws InterruptedException {
-    // AccountDTO accountDTO = new AccountDTO();
-    // accountDTO.setNumberPhone("0334831013");
-    // accountDTO.setPassword("12082003az9");
-    // System.err.println("DELETE");
-
-    // return ResponseUtils.success(200, "XÓA ORDER", accountDTO);
-    // }
 }

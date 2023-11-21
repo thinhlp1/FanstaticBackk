@@ -27,7 +27,7 @@ public class PushNotificationService {
     @Autowired
     private final FCMService fcmService;
 
-    public static final String HIGT = "higt";
+    public static final String HIGT = "high";
 
     public ResponseDTO subscribe(SubscribteNotiRequestDTO subscribteNotiRequestDTO) {
         User user = systemService.getUserLogin();
