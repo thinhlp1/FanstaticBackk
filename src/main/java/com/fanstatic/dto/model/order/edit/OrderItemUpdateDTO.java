@@ -1,5 +1,7 @@
 package com.fanstatic.dto.model.order.edit;
 
+import java.util.List;
+
 import com.google.firebase.database.annotations.NotNull;
 
 import lombok.Data;
@@ -15,7 +17,10 @@ public class OrderItemUpdateDTO {
     private Integer id;
 
     private String note;
-    
+
     @NotNull
     private int quantity;
+
+    private List<Integer> optionsId;
+
 }

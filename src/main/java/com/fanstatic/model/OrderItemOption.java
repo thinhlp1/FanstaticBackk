@@ -36,7 +36,7 @@ public class OrderItemOption  {
 	private Option option;
 
 	// bi-directional many-to-one association to OrderItem
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "order_item_id")
 	private OrderItem orderItem;
 

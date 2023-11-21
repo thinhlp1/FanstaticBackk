@@ -2,6 +2,7 @@ package com.fanstatic.dto.model.comboproduct;
 
 import java.util.List;
 
+import com.fanstatic.dto.model.category.CategoryCompactDTO;
 import com.fanstatic.dto.model.product.ProductImageDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 
@@ -22,5 +23,7 @@ public class ComboProductDTO {
     private List<ProductImageDTO> imageUrl;
 
     private SaleEventDTO saleEvent;
+
+    private CategoryCompactDTO category;
 
 }

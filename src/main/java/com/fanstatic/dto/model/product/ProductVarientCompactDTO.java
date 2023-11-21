@@ -2,6 +2,7 @@ package com.fanstatic.dto.model.product;
 
 import java.util.List;
 
+import com.fanstatic.dto.model.category.CategoryCompactDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.dto.model.size.SizeDTO;
 
@@ -22,5 +23,7 @@ public class ProductVarientCompactDTO {
     private List<ProductImageDTO> imageUrl;
 
     private SaleEventDTO saleEvent;
+    
+    private List<CategoryCompactDTO> categories;
 
 }

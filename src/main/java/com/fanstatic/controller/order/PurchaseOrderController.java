@@ -125,8 +125,9 @@ public class PurchaseOrderController {
         ResponseDTO responseDTO = orderService.updateOrderItem(orderItemUpdateDTO);
 
         if (responseDTO.isSuccess()) {
-            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
-            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+            ResponseDTO responseDTO2 = orderService.detail(orderItemUpdateDTO.getOrderId());
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO2, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO2,
                     WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderItemUpdateDTO.getOrderId());
         }
 

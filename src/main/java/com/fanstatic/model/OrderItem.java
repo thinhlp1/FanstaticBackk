@@ -62,7 +62,7 @@ public class OrderItem {
 	private Status status;
 
 	// bi-directional many-to-one association to OrderItemOption
-	@OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "orderItem")
 	private List<OrderItemOption> orderItemOptions;
 
 	@Temporal(TemporalType.TIMESTAMP)

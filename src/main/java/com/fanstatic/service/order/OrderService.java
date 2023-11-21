@@ -4,7 +4,9 @@ import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,12 +25,15 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.bill.BillDTO;
+import com.fanstatic.dto.model.category.CategoryCompactDTO;
+import com.fanstatic.dto.model.category.CategoryDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
 import com.fanstatic.dto.model.option.OptionDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.OrderItemDTO;
+import com.fanstatic.dto.model.order.OrderItemSessionDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
@@ -47,6 +52,7 @@ import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
 import com.fanstatic.model.Bill;
 import com.fanstatic.model.CancelReason;
+import com.fanstatic.model.Category;
 import com.fanstatic.model.ComboProduct;
 import com.fanstatic.model.ExtraPortion;
 import com.fanstatic.model.File;
@@ -68,15 +74,18 @@ import com.fanstatic.model.User;
 import com.fanstatic.model.Voucher;
 import com.fanstatic.repository.BillRepository;
 import com.fanstatic.repository.CancelReasonRepository;
+import com.fanstatic.repository.CategoryRepository;
 import com.fanstatic.repository.ComboProductRepository;
 import com.fanstatic.repository.ExtraPortionRepository;
 import com.fanstatic.repository.OptionRepository;
 import com.fanstatic.repository.OrderExtraPortionRepository;
+import com.fanstatic.repository.OrderItemOptionRepository;
 import com.fanstatic.repository.OrderItemRepository;
 import com.fanstatic.repository.OrderRepository;
 import com.fanstatic.repository.OrderTableRepository;
 import com.fanstatic.repository.OrderTypeRepository;
 import com.fanstatic.repository.PaymentMethodRepository;
+import com.fanstatic.repository.ProductCategoryRepository;
 import com.fanstatic.repository.ProductRepository;
 import com.fanstatic.repository.ProductVarientRepository;
 import com.fanstatic.repository.SaleEventRepository;
@@ -123,6 +132,9 @@ public class OrderService {
     private final BillRepository billRepository;
     private final SaleProductRepository saleProductRepository;
     private final SaleEventRepository saleEventRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductCategoryRepository productCategoryRepository;
+    private final OrderItemOptionRepository orderItemOptionRepository;
 
     private final ProductRepository productRepository;
     private final ProductVarientRepository productVarientRepository;
@@ -488,6 +500,7 @@ public class OrderService {
 
         orderRepository.save(order);
         systemService.writeSystemLog(order.getOrderId(), "", null);
+        pushNotificationOrder(order.getCustomer(), order.getOrderId(), "Order của bạn đã được hủy");
 
         return ResponseUtils.success(200, "Hủy thành công", null);
     }
@@ -569,6 +582,7 @@ public class OrderService {
         order.setUpdateBy(systemService.getUserLogin());
 
         orderRepository.save(order);
+        pushNotificationOrder(order.getCustomer(), order.getOrderId(), "Đã gửi yêu cầu thành toán");
 
         return ResponseUtils.success(200, "Yêu cầu thanh toán thành công", null);
 
@@ -614,6 +628,7 @@ public class OrderService {
         if (billSaved != null) {
 
             OrderDTO orderDTO = convertOrderToDTO(order);
+
             return ResponseUtils.success(200, "Xác nhận thanh toán thành công", orderDTO);
         }
 
@@ -676,28 +691,65 @@ public class OrderService {
     }
 
     public ResponseDTO updateOrderItem(OrderItemUpdateDTO orderItemUpdateDTO) {
-        Order order = orderRepository.findById(orderItemUpdateDTO.getOrderId()).orElse(null);
-        if (order == null) {
-            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+        try {
+            Order order = orderRepository.findById(orderItemUpdateDTO.getOrderId()).orElse(null);
+            if (order == null) {
+                return ResponseUtils.fail(404, "Order không tồn tại", null);
+            }
+
+            OrderItem orderItem = orderItemRepository.findById(orderItemUpdateDTO.getId()).orElse(null);
+            if (orderItem == null) {
+                return ResponseUtils.fail(404, "Order item không tồn tại", null);
+            }
+
+            if (orderItemUpdateDTO.getQuantity() < MIN_QUANTITY || orderItemUpdateDTO.getQuantity() > MAX_PEOPLE) {
+                return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
+
+            }
+
+            orderItem.setQuantity(orderItemUpdateDTO.getQuantity());
+            orderItem.setNote(orderItemUpdateDTO.getNote());
+            orderItemRepository.save(orderItem);
+
+            List<Integer> optionsId = orderItemUpdateDTO.getOptionsId();
+            List<OrderItemOption> orderItemOptions = orderItem.getOrderItemOptions();
+
+            // List chứa những OrderItemOption có trong csdl mà không có trong optionsId
+            List<OrderItemOption> optionsInDbNotInList = orderItemOptions.stream()
+                    .filter(orderItemOption -> !optionsId.contains(orderItemOption.getOption().getId()))
+                    .collect(Collectors.toList());
+
+            // List chứa những OrderItemOption có trong optionsId mà không có trong csdl
+            List<Integer> optionIdsNotInDb = optionsId.stream()
+                    .filter(optionId -> orderItemOptions.stream()
+                            .noneMatch(orderItemOption -> orderItemOption.getOption().getId() == optionId))
+                    .collect(Collectors.toList());
+
+            List<OrderItemOption> orderItemOptions2 = new ArrayList<>();
+            for (Integer optionId : optionIdsNotInDb) {
+                Option option = optionRepository.findById(optionId).orElse(null);
+                if (option != null) {
+                    OrderItemOption orderItemOption = new OrderItemOption();
+                    orderItemOption.setOrderItem(orderItem);
+                    orderItemOption.setOption(option);
+                    orderItemOptions2.add(orderItemOption);
+                }
+
+            }
+
+            for (OrderItemOption orderItemOption : optionsInDbNotInList) {
+                orderItemOptionRepository.deleteById(orderItemOption.getId());
+            }
+
+            orderItemOptionRepository.saveAllAndFlush(orderItemOptions2);
+        } catch (Exception e) {
+
         }
+        transactionManager.commit(transactionStatus);
 
-        OrderItem orderItem = orderItemRepository.findById(orderItemUpdateDTO.getId()).orElse(null);
-        if (orderItem == null) {
-            return ResponseUtils.fail(404, "Order item không tồn tại", null);
-        }
-
-        if (orderItemUpdateDTO.getQuantity() < MIN_QUANTITY || orderItemUpdateDTO.getQuantity() > MAX_PEOPLE) {
-            return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
-
-        }
-
-        orderItem.setQuantity(orderItemUpdateDTO.getQuantity());
-        orderItem.setNote(orderItemUpdateDTO.getNote());
-        orderItemRepository.save(orderItem);
-
-        OrderDTO orderDTO = convertOrderToDTO(order);
-
-        return ResponseUtils.success(200, "Update thành công", orderDTO);
+        return ResponseUtils.success(200, "Update thành công", null);
     }
 
     public ResponseDTO checkVoucherApply(CheckVoucherRequestDTO checkVoucherRequestDTO) {
@@ -800,7 +852,6 @@ public class OrderService {
         orderDTO.setOrderItems(getOrderItems(order.getOrderItems()));
         orderDTO.setTables(getTables(order.getOrderTables()));
         orderDTO.setBill(modelMapper.map(order.getBill(), BillDTO.class));
-
         orderDTO.setCreateAt(order.getCreateAt());
         orderDTO.setDeleteAt(order.getDeleteAt());
         orderDTO.setUpdateAt(order.getUpdateAt());
@@ -919,10 +970,12 @@ public class OrderService {
             orderItem.setCreateAt(new Date());
             orderItem.setCreateBy(systemService.getUserLogin());
             orderItem.setStatus(statusRepository.findById("ITEM_PROCESSING").get());
-            orderItem.setOrderItemOptions(orderItemOptions);
             orderItem.setOrder(order);
             // orderItemRepository.save(orderItem);
             orderItems.add(orderItem);
+
+            orderItemOptionRepository.saveAll(orderItemOptions);
+            orderItem.setOrderItemOptions(orderItemOptions);
 
         }
         try {
@@ -1236,22 +1289,45 @@ public class OrderService {
 
             OrderItemDTO newOrderItemDTO = modelMapper.map(orderItem, OrderItemDTO.class);
             if (productVarient != null) {
+                Product product2 = productVarient.getProduct();
                 SaleEvent saleEvent = saleProductRepository.findSaleByProductVarientId(productVarient.getId()).orNull();
                 if (saleEvent != null) {
+
                     newOrderItemDTO.getProductVarient().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+
                 }
+                List<ProductCategory> productCategories = productCategoryRepository.findByProduct(product2);
+
+                List<CategoryCompactDTO> categoryDTOs = new ArrayList<>();
+                for (ProductCategory productCategory : productCategories) {
+                    Category category = productCategory.getCategory();
+                    CategoryCompactDTO categoryDTO = modelMapper.map(category, CategoryCompactDTO.class);
+                    categoryDTOs.add(categoryDTO);
+                }
+                newOrderItemDTO.getProductVarient().setCategories(categoryDTOs);
 
             } else if (product != null) {
                 SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
                 if (saleEvent != null) {
 
                     newOrderItemDTO.getProduct().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+
                 }
+                List<ProductCategory> productCategories = productCategoryRepository.findByProduct(product);
+
+                List<CategoryCompactDTO> categoryDTOs = new ArrayList<>();
+                for (ProductCategory productCategory : productCategories) {
+                    Category category = productCategory.getCategory();
+                    CategoryCompactDTO categoryDTO = modelMapper.map(category, CategoryCompactDTO.class);
+                    categoryDTOs.add(categoryDTO);
+                }
+                newOrderItemDTO.getProduct().setCategories(categoryDTOs);
 
             } else if (comboProduct != null) {
                 SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orNull();
                 if (saleEvent != null) {
                     newOrderItemDTO.getComboProduct().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+
                 }
 
             }
