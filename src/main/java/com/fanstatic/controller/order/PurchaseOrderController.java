@@ -17,6 +17,7 @@ import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
 import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
 import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
+import com.fanstatic.service.model.UserService;
 import com.fanstatic.service.order.OrderService;
 import com.fanstatic.util.ResponseUtils;
 
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class PurchaseOrderController {
 
     private final OrderService orderService;
+    private final UserService userService;
     private final WSPurcharseOrderController wsPurcharseOrderController;
 
     @GetMapping("/api/u/order/check-table")
@@ -47,6 +49,15 @@ public class PurchaseOrderController {
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
         }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PostMapping("/api/purchase/order/create/check-user-exits")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> checkUserExit(@RequestBody String numberPhone) {
+        System.out.println(numberPhone);
+        ResponseDTO responseDTO = userService.checkCustomerExits(numberPhone);
 
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
@@ -78,14 +89,44 @@ public class PurchaseOrderController {
 
     }
 
-    @GetMapping("/api/purchase/order/update/{id}")
+    @PutMapping("/api/purchase/order/create/customer/update-people/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> update(@PathVariable Integer id) {
-        ResponseDTO responseDTO = orderService.detail(id);
+    public ResponseEntity<ResponseDTO> cupdatePeople(@PathVariable Integer id, @RequestBody Integer people) {
+        ResponseDTO responseDTO = orderService.updatePeople(people, id);
 
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+        }
+        return ResponseUtils.returnReponsetoClient(responseDTO);
 
+    }
+
+    @PutMapping("/api/purchase/order/update/update-people/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updatePeople(@PathVariable Integer id, @RequestBody Integer people) {
+        ResponseDTO responseDTO = orderService.updatePeople(people, id);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+        }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
+    @PutMapping("/api/purchase/order/update/order-item")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateOrderItem(@PathVariable Integer id, @RequestBody Integer people) {
+        ResponseDTO responseDTO = orderService.updatePeople(people, id);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
         }
 
         return ResponseUtils.returnReponsetoClient(responseDTO);
@@ -112,7 +153,7 @@ public class PurchaseOrderController {
 
     @PostMapping("/api/purchase/order/create/re-order")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> reOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO){
+    public ResponseEntity<ResponseDTO> reOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO) {
         ResponseDTO responseDTO = orderService.reOrder(orderRequestDTO);
 
         if (responseDTO.isSuccess()) {

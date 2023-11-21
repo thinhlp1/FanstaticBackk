@@ -10,6 +10,7 @@ import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.payment.PaymentMethodDTO;
+import com.fanstatic.dto.model.status.StatusDTO;
 import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
@@ -35,7 +36,7 @@ public class OrderDTO extends ResponseDataDTO {
 
     private long total;
 
-    private String status;
+    private StatusDTO status;
 
     private VoucherDTO voucher;
 

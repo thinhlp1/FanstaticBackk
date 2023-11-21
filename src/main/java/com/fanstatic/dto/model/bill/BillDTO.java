@@ -2,6 +2,7 @@ package com.fanstatic.dto.model.bill;
 
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.payment.PaymentMethodDTO;
+import com.fanstatic.dto.model.status.StatusDTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ public class BillDTO extends ResponseDataDTO {
 
     private Long receiveMoney;
 
-    private String status;
+    private StatusDTO status;
 
     private PaymentMethodDTO paymentMethod;
 

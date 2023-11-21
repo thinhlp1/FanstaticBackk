@@ -79,6 +79,8 @@ public class SystemService {
         return null;
     }
 
+
+
     public boolean checkUserResource(int userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {

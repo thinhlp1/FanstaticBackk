@@ -36,12 +36,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             // Sử dụng phương thức Arrays.asList để chuyển mảng thành danh sách và sử dụng
             // contains để kiểm tra
             if (path.equals("handle-checkout") || path.equals("cancel-checkout")) {
-                String remoteHost = request.getRemoteHost();
-                System.out.println("Remote Host: " + remoteHost);
 
-                // Lấy IP của nguồn gửi request
-                String remoteAddr = request.getRemoteAddr();
-                System.out.println("Remote IP Address: " + remoteAddr);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -75,11 +70,8 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                     String permissionId = urlPaths[4].toUpperCase();
                     int roleId = account.getRole().getId();
 
-                    System.out.println(permissionId);
-                    System.out.println(managerFeatureId);
                     boolean isAuthentization = rolePermissionService.checkUserRolePermission(roleId, managerFeatureId,
                             permissionId);
-                    System.out.println(isAuthentization);
                     if (isAuthentization) {
                         filterChain.doFilter(request, response);
                         return;

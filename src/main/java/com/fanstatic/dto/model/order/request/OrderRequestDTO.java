@@ -13,17 +13,19 @@ public class OrderRequestDTO {
 
     private int id;
 
+    private Integer customerId;
+
     @NotNull
-    private int orderType;
+    private Integer orderType;
 
     @NotNull
     private String note;
 
     @NotNull
-    private int tableId;
+    private Integer tableId;
 
     @NotNull
-    private int people;
+    private Integer people;
 
     private List<ExtraPortionOrderRequestDTO> extraPortions;
 

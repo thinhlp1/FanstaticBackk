@@ -27,7 +27,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                         "OR o.status.id = 'CONFIRMING') " +
                         "AND o.customer.id = :customerId " +
                         "AND o.createAt >= :time")
-        Optional<Order> findOrderUser(@Param("customerId") Integer customerId,@Param("time") Date time);
+        Optional<List<Order>> findOrderUser(@Param("customerId") Integer customerId,@Param("time") Date time);
 
         List<Order> findByRootOrder(Integer rootOrder);
 

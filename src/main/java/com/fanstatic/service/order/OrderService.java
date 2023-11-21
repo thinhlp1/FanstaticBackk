@@ -18,6 +18,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.fanstatic.config.constants.ApplicationConst;
+import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
@@ -39,6 +40,7 @@ import com.fanstatic.dto.model.order.request.OrderRequestDTO;
 import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
 import com.fanstatic.dto.model.payment.PaymentMethodDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
+import com.fanstatic.dto.model.status.StatusDTO;
 import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
@@ -82,6 +84,7 @@ import com.fanstatic.repository.StatusRepository;
 import com.fanstatic.repository.TableRepository;
 import com.fanstatic.repository.UserRepository;
 import com.fanstatic.repository.VoucherRepository;
+import com.fanstatic.service.model.RolePermissionService;
 import com.fanstatic.service.model.TableService;
 import com.fanstatic.service.payos.PayOSService;
 import com.fanstatic.service.system.FileService;
@@ -100,6 +103,7 @@ public class OrderService {
     private final FileService fileService;
     private final PayOSService payOSService;
     private final PushNotificationService pushNotificationService;
+    private final RolePermissionService rolePermissionService;
 
     private final TableService tableService;
     private final ExtraPortionRepository extraPortionRepository;
@@ -145,17 +149,24 @@ public class OrderService {
         Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
 
         User customer = systemService.getUserLogin();
-        System.out.println("CUS: " + customer.getId());
-        Order order = orderRepository.findOrderUser(customer.getId(), twentyFourHoursAgo).orNull();
+        List<Order> orders = orderRepository.findOrderUser(customer.getId(), twentyFourHoursAgo).orNull();
 
-        if (order == null) {
+        if (orders == null) {
             return ResponseUtils.success(202, "Không có order", null);
 
         }
+        List<ResponseDataDTO> orderDTOs = new ArrayList<>();
+        for (Order order : orders) {
+            OrderDTO orderDTO = convertOrderToDTO(order);
+            orderDTOs.add(orderDTO);
 
-        OrderDTO orderDTO = convertOrderToDTO(order);
+        }
 
-        return ResponseUtils.success(200, "Khách hàng có order ", orderDTO);
+        ResponseListDataDTO ordersDTO = new ResponseListDataDTO();
+        ordersDTO.setDatas(orderDTOs);
+        ordersDTO.setNameList("Danh sách order của khách hàng");
+
+        return ResponseUtils.success(200, "Khách hàng có order ", ordersDTO);
     }
 
     public ResponseDTO create(OrderRequestDTO orderRequestDTO) {
@@ -183,10 +194,24 @@ public class OrderService {
         // TODO Nếu người dùng có tài khoản nhưng ko đem điện thoại thì có thể nhập số
         // điện thoại trên điện thoại nhân viên rồi gán cho order
         // TODO Nếu người tạo order là nhân viên thì trạng thái sẽ chuyển sang đang
-        // proccessing liền luôn
 
-        order.setCustomer(systemService.getUserLogin());
-        order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.CONFIRMING).get());
+        if (isStaffCreateOrderAndConfirm()) {
+            order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.PROCESSING).get());
+            if (orderRequestDTO.getCustomerId() != null) {
+                User user = userRepository.findByIdAndActiveIsTrue(orderRequestDTO.getCustomerId()).orElse(null);
+                if (user == null) {
+                    return ResponseUtils.fail(500, "Customer không tồn tại", null);
+                }
+                order.setCustomer(user);
+                order.setEmployeeConfirmed(systemService.getUserLogin());
+            }
+
+        } else {
+            order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.CONFIRMING).get());
+            order.setCustomer(systemService.getUserLogin());
+
+        }
+
         order.setTotal(total(orderRequestDTO));
         order.setOrderType(orderType);
 
@@ -223,12 +248,11 @@ public class OrderService {
 
         } else {
             transactionManager.rollback(transactionStatus);
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
         // systemService.writeSystemLog(orderSaved.getOrderId(), "", null);
         transactionManager.commit(transactionStatus);
-        // pushNotificationOrder(order.getCustomer(), orderSaved.getOrderId(), "Order
-        // của bạn đã được gửi cho nhân viên");
+        pushNotificationOrder(order.getCustomer(), orderSaved.getOrderId(), "Order của bạn đã được gửi cho nhân viên");
 
         return ResponseUtils.success(200, "Tạo order thành công", null);
 
@@ -371,10 +395,12 @@ public class OrderService {
                 }
             }
 
-            // ResponseDTO orderTableSaved = createOrderTable(List.of(orderRequestDTO.getTableId()), orderSaved);
+            // ResponseDTO orderTableSaved =
+            // createOrderTable(List.of(orderRequestDTO.getTableId()), orderSaved);
             // if (!orderTableSaved.isSuccess()) {
-            //     transactionManager.rollback(transactionStatus);
-            //     return ResponseUtils.fail(orderTableSaved.getStatusCode(), orderTableSaved.getMessage(), null);
+            // transactionManager.rollback(transactionStatus);
+            // return ResponseUtils.fail(orderTableSaved.getStatusCode(),
+            // orderTableSaved.getMessage(), null);
 
             // }
 
@@ -390,7 +416,7 @@ public class OrderService {
 
         } else {
             transactionManager.rollback(transactionStatus);
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
 
         // systemService.writeSystemLog(orderSaved.getOrderId(), "", null);
@@ -740,7 +766,7 @@ public class OrderService {
         orderDTO.setCreateAt(order.getCreateAt());
         orderDTO.setDeleteAt(order.getDeleteAt());
         orderDTO.setUpdateAt(order.getUpdateAt());
-        orderDTO.setStatus(order.getStatus().getStatus());
+        orderDTO.setStatus(modelMapper.map(order.getStatus(), StatusDTO.class));
 
         if (order.getEmployeeConfirmed() != null) {
             orderDTO.setEmploeeConfirmed(modelMapper.map(order.getEmployeeConfirmed(), UserCompactDTO.class));
@@ -760,10 +786,9 @@ public class OrderService {
 
         Bill bill = billRepository.findBillCheckouted(order.getOrderId()).orNull();
         if (bill != null) {
-            String status = bill.getStatus().getStatus();
             bill.setStatus(null);
             orderDTO.setBill(modelMapper.map(bill, BillDTO.class));
-            orderDTO.getBill().setStatus(status);
+            orderDTO.getBill().setStatus(modelMapper.map(bill.getStatus(), StatusDTO.class));
         }
 
         return orderDTO;
@@ -791,11 +816,11 @@ public class OrderService {
         try {
             List<OrderExtraPortion> listSaved = orderExtraPortionRepository.saveAll(orderExtraPortions);
             if (listSaved != null) {
-                return ResponseUtils.success(200, "Tạo thành công!", null);
+                return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
             }
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         } catch (Exception e) {
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
     }
 
@@ -865,12 +890,12 @@ public class OrderService {
         try {
             List<OrderItem> listSaved = orderItemRepository.saveAll(orderItems);
             if (listSaved != null) {
-                return ResponseUtils.success(200, "Tạo thành công!", null);
+                return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
             }
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
     }
 
@@ -897,12 +922,31 @@ public class OrderService {
         try {
             List<OrderTable> listSaved = orderTableRepository.saveAll(orderTables);
             if (listSaved != null) {
-                return ResponseUtils.success(200, "Tạo thành công!", null);
+                return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
             }
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         } catch (Exception e) {
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
+
+    }
+
+    public ResponseDTO updatePeople(Integer people, Integer orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+        int minPeople = 0;
+        int maxPeople = 99;
+        if (people < minPeople || people > maxPeople) {
+            return ResponseUtils.fail(404, "Số lượng người không hợp lệ", null);
+        }
+
+        order.setPeople(orderId);
+        order.setUpdateAt(new Date());
+        order.setUpdateBy(systemService.getUserLogin());
+        orderRepository.save(order);
+        return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 
     }
 
@@ -1266,11 +1310,11 @@ public class OrderService {
     // List<OrderItem> listSaved = orderItemRepository.saveAll(syncOrderItems);
 
     // if (listSaved != null) {
-    // return ResponseUtils.success(200, "Tạo thành công!", null);
+    // return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
     // }
-    // return ResponseUtils.fail(500, "Tạo order không thành công", null);
+    // return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
     // } catch (Exception e) {
-    // return ResponseUtils.fail(500, "Tạo order không thành công", null);
+    // return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
     // }
     // }
 
@@ -1311,11 +1355,11 @@ public class OrderService {
             List<OrderItem> listSaved = orderItemRepository.saveAll(syncOrderItems);
             // listSaved = orderItemRepository.saveAll(rootChanges);
             if (listSaved != null) {
-                return ResponseUtils.success(200, "Tạo thành công!", null);
+                return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
             }
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         } catch (Exception e) {
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
     }
 
@@ -1346,11 +1390,11 @@ public class OrderService {
             List<OrderExtraPortion> listSaved = orderExtraPortionRepository.saveAll(syncOrderExtraPortions);
 
             if (listSaved != null) {
-                return ResponseUtils.success(200, "Tạo thành công!", null);
+                return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
             }
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         } catch (Exception e) {
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
     }
 
@@ -1367,11 +1411,11 @@ public class OrderService {
             List<OrderTable> listSaved = orderTableRepository.saveAll(syncOrderTables);
 
             if (listSaved != null) {
-                return ResponseUtils.success(200, "Tạo thành công!", null);
+                return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
             }
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         } catch (Exception e) {
-            return ResponseUtils.fail(500, "Tạo order không thành công", null);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
     }
 
@@ -1421,7 +1465,7 @@ public class OrderService {
     }
 
     private void pushNotificationOrder(User user, Integer orderId, String body) {
-        String urlToOrder = ApplicationConst.CLIENT_HOST + "?order=" + orderId;
+        String urlToOrder = ApplicationConst.CLIENT_HOST + "/myorder/" + orderId;
         pushNotificationService.pushNotification(user, PushNotificationService.HIGT, "Order của bạn", body, urlToOrder);
     }
 
@@ -1483,5 +1527,12 @@ public class OrderService {
             return false;
         }
         return false;
+    }
+
+    private boolean isStaffCreateOrderAndConfirm() {
+        User user = systemService.getUserLogin();
+        boolean hasPermission = rolePermissionService.checkUserRolePermission(user.getRole().getId(), "PURCHASE_ORDER",
+                "CONFIRM");
+        return hasPermission;
     }
 }
