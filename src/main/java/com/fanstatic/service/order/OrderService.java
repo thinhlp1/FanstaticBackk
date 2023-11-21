@@ -32,6 +32,7 @@ import com.fanstatic.dto.model.order.OrderItemDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
+import com.fanstatic.dto.model.order.edit.OrderItemUpdateDTO;
 import com.fanstatic.dto.model.order.checkout.ApplyVoucherDTO;
 import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
@@ -128,6 +129,11 @@ public class OrderService {
 
     private final PlatformTransactionManager transactionManager;
 
+    private final int MIN_PEOPLE = 1;
+    private final int MAX_PEOPLE = 20;
+    private final int MIN_QUANTITY = 1;
+    private final int MAX_QUANTITY = 99;
+
     public ResponseDTO checkTableOrdered(int tableId) {
         Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
 
@@ -157,8 +163,27 @@ public class OrderService {
         }
         List<ResponseDataDTO> orderDTOs = new ArrayList<>();
         for (Order order : orders) {
-            OrderDTO orderDTO = convertOrderToDTO(order);
-            orderDTOs.add(orderDTO);
+            // if
+            // ((!order.getStatus().getId().equals(ApplicationConst.OrderStatus.CONFIRMING)
+            // && !order.getStatus().getId().equals(ApplicationConst.OrderStatus.CANCEL)
+            // )
+            // && order.getRootOrder() != null) {
+            // continue;
+            // }
+
+            if (order.getRootOrder() != null) {
+                if ((order.getStatus().getId().equals(ApplicationConst.OrderStatus.CONFIRMING)
+                        || order.getStatus().getId().equals(ApplicationConst.OrderStatus.CANCEL))) {
+
+                    OrderDTO orderDTO = convertOrderToDTO(order);
+                    orderDTOs.add(orderDTO);
+                }
+
+            } else {
+
+                OrderDTO orderDTO = convertOrderToDTO(order);
+                orderDTOs.add(orderDTO);
+            }
 
         }
 
@@ -329,18 +354,6 @@ public class OrderService {
             return ResponseUtils.fail(500, "Trạng thái order không hợp lệ", null);
 
         }
-
-    }
-
-    public ResponseDTO update(OrderRequestDTO orderRequestDTO) {
-        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
-
-        Order rootOrder = orderRepository.findById(orderRequestDTO.getId()).orElse(null);
-        if (rootOrder == null) {
-            return ResponseUtils.fail(404, "Order không tồn tại", null);
-        }
-
-        return ResponseUtils.success(200, "Tạo order thành công", null);
 
     }
 
@@ -662,6 +675,31 @@ public class OrderService {
         return ResponseUtils.success(200, "Thanh toán order đã bị hủy", orderDTO);
     }
 
+    public ResponseDTO updateOrderItem(OrderItemUpdateDTO orderItemUpdateDTO) {
+        Order order = orderRepository.findById(orderItemUpdateDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        OrderItem orderItem = orderItemRepository.findById(orderItemUpdateDTO.getId()).orElse(null);
+        if (orderItem == null) {
+            return ResponseUtils.fail(404, "Order item không tồn tại", null);
+        }
+
+        if (orderItemUpdateDTO.getQuantity() < MIN_QUANTITY || orderItemUpdateDTO.getQuantity() > MAX_PEOPLE) {
+            return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
+
+        }
+
+        orderItem.setQuantity(orderItemUpdateDTO.getQuantity());
+        orderItem.setNote(orderItemUpdateDTO.getNote());
+        orderItemRepository.save(orderItem);
+
+        OrderDTO orderDTO = convertOrderToDTO(order);
+
+        return ResponseUtils.success(200, "Update thành công", orderDTO);
+    }
+
     public ResponseDTO checkVoucherApply(CheckVoucherRequestDTO checkVoucherRequestDTO) {
 
         Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(checkVoucherRequestDTO.getVoucherId()).orElse(null);
@@ -936,9 +974,8 @@ public class OrderService {
         if (order == null) {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
         }
-        int minPeople = 0;
-        int maxPeople = 99;
-        if (people < minPeople || people > maxPeople) {
+
+        if (people < MIN_PEOPLE || people > MAX_PEOPLE) {
             return ResponseUtils.fail(404, "Số lượng người không hợp lệ", null);
         }
 

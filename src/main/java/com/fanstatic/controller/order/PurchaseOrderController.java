@@ -14,6 +14,7 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
+import com.fanstatic.dto.model.order.edit.OrderItemUpdateDTO;
 import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
 import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
@@ -120,13 +121,13 @@ public class PurchaseOrderController {
 
     @PutMapping("/api/purchase/order/update/order-item")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> updateOrderItem(@PathVariable Integer id, @RequestBody Integer people) {
-        ResponseDTO responseDTO = orderService.updatePeople(people, id);
+    public ResponseEntity<ResponseDTO> updateOrderItem(@RequestBody @Valid OrderItemUpdateDTO orderItemUpdateDTO) {
+        ResponseDTO responseDTO = orderService.updateOrderItem(orderItemUpdateDTO);
 
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
-                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderItemUpdateDTO.getOrderId());
         }
 
         return ResponseUtils.returnReponsetoClient(responseDTO);
