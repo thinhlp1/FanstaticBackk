@@ -2,6 +2,7 @@ package com.fanstatic.controller.manage;
 
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
+import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDeleteDTO;
 import com.fanstatic.service.model.WarehouseReceiveService;
 import com.fanstatic.util.ResponseUtils;
 import jakarta.validation.Valid;
@@ -42,8 +43,8 @@ public class WarehouseReceiveController {
 //
     @DeleteMapping("/delete/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id) {
-        ResponseDTO responseDTO = warehouseReceiveService.delete(id);
+    public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id, @RequestBody WarehouseReceiveRequestDeleteDTO warehouseReceiveRequestDeleteDTO) {
+        ResponseDTO responseDTO = warehouseReceiveService.delete(id, warehouseReceiveRequestDeleteDTO);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

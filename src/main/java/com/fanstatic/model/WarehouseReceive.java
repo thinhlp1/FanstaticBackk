@@ -33,6 +33,9 @@ public class WarehouseReceive {
 
     private String description;
 
+    @Column(name = "cancel_reason")
+    private String cancelReason;
+
     // bi-directional many-to-one association to File
     @ManyToOne
     @JoinColumn(name = "image_id")

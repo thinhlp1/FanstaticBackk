@@ -12,6 +12,7 @@ import com.fanstatic.dto.model.flavor.FlavorDTO;
 import com.fanstatic.dto.model.supplier.SupplierDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
+import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDeleteDTO;
 import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemDTO;
 import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemRequestDTO;
 import com.fanstatic.model.File;
@@ -78,6 +79,7 @@ public class WarehouseReceiveService {
             // save image to Fisebase and file table
         }
         warehouseReceive.setSupplier(supplier);
+        warehouseReceive.setCancelReason("");
         warehouseReceive.setActive(DataConst.ACTIVE_TRUE);
         warehouseReceive.setCreateAt(new Date());
         warehouseReceive.setCreateBy(systemService.getUserLogin());
@@ -169,7 +171,8 @@ public class WarehouseReceiveService {
 //        return ResponseUtils.fail(200, "UploadImage", null);
 //    }
 
-    public ResponseDTO delete(int id) {
+    public ResponseDTO delete(int id, WarehouseReceiveRequestDeleteDTO warehouseReceiveRequestDeleteDTO) {
+
         WarehouseReceive warehouseReceive = warehouseReceiveRepository.findByIdAndActiveIsTrue(id).orElse(null);
 
         if (warehouseReceive == null) {
@@ -181,6 +184,7 @@ public class WarehouseReceiveService {
          */
         warehouseReceive.setActive(DataConst.ACTIVE_FALSE);
         warehouseReceive.setDeleteAt(new Date());
+        warehouseReceive.setCancelReason(warehouseReceiveRequestDeleteDTO.getCancelReason());
         warehouseReceive.setDeleteBy(systemService.getUserLogin());
         WarehouseReceive warehouseReceiveSaved = warehouseReceiveRepository.save(warehouseReceive);
 
