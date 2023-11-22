@@ -177,12 +177,14 @@ public class ExtraPortionService {
         // check image
         if (imageFile != null) {
             if (extraPortion.getImageFile() != null) {
+
                 fileService.deleteFireStore(extraPortion.getImageFile().getName());
                 fileService.updateFile(imageFile, ImageConst.EXTRA_PORTION_FOLDER, extraPortion.getImageFile());
             } else {
                 File file = fileService.upload(imageFile, ImageConst.EXTRA_PORTION_FOLDER);
                 extraPortion.setImageFile(file);
             }
+            System.out.println(extraPortion.getImageFile());
             ExtraPortion extraPortionSaved = extraPortionRepository.save(extraPortion);
             if (extraPortionSaved != null) {
                 systemService.writeSystemLog(extraPortionSaved.getExtraPortionId(), extraPortionSaved.getName(), null);

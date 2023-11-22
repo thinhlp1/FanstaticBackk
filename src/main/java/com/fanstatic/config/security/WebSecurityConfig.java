@@ -43,7 +43,7 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // .requestMatchers("/customer/**").hasRole("CUSTOMER")
                         // .requestMatchers("/manager/**").hasRole("MANAGER")
                         // .requestMatchers("/employee/**").hasRole("EMPLOYEE")
@@ -60,8 +60,8 @@ public class WebSecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:5500"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PUT","OPTIONS","PATCH", "DELETE"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PUT", "OPTIONS", "PATCH", "DELETE"));
         configuration.setAllowCredentials(true);
         configuration.addAllowedHeader("*"); // Thêm dòng này
         configuration.addExposedHeader("Authorization"); // Thêm dòng này
@@ -69,5 +69,4 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", configuration); // Thay đổi đường dẫn tương ứng với API đăng nhập
         return source;
     }
-
 }
