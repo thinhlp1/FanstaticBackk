@@ -41,20 +41,20 @@ public class OrderItem {
 	private Integer quantityCompleted;
 
 	// bi-directional many-to-one association to Order
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne()
 	@JoinColumn(name = "order_id")
 	private Order order;
 
 	// bi-directional many-to-one association to Product
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne()
 	private Product product;
 
 	// bi-directional many-to-one association to ProductVarient
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne()
 	@JoinColumn(name = "product_variant_id")
 	private ProductVarient productVarient;
 
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne()
 	@JoinColumn(name = "combo_id")
 	private ComboProduct comboProduct;
 	// bi-directional many-to-one association to Status

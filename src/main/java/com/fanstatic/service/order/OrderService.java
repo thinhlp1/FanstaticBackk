@@ -37,6 +37,9 @@ import com.fanstatic.dto.model.order.OrderItemSessionDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
+import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
+import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
+import com.fanstatic.dto.model.order.edit.OrderItemRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemUpdateDTO;
 import com.fanstatic.dto.model.order.checkout.ApplyVoucherDTO;
 import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
@@ -102,6 +105,8 @@ import com.fanstatic.service.system.PushNotificationService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -140,6 +145,9 @@ public class OrderService {
     private final ProductVarientRepository productVarientRepository;
 
     private final PlatformTransactionManager transactionManager;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private final int MIN_PEOPLE = 1;
     private final int MAX_PEOPLE = 20;
@@ -316,7 +324,7 @@ public class OrderService {
             String newNote = rootOrder.getNote();
             newNote = newNote + " - " + rNote;
 
-            Long total = order.getTotal() + rootOrder.getTotal();
+            Long total = total(rootOrder) + total(order);
 
             rootOrder.setNote(newNote);
             rootOrder.setTotal(total);
@@ -546,6 +554,12 @@ public class OrderService {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
 
         }
+
+        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
+        }
+
         if (!order.getStatus().getId().equals(ApplicationConst.OrderStatus.PROCESSING)) {
             return ResponseUtils.fail(500, "Order không thể thanh toán", null);
 
@@ -699,13 +713,18 @@ public class OrderService {
                 return ResponseUtils.fail(404, "Order không tồn tại", null);
             }
 
-            OrderItem orderItem = orderItemRepository.findById(orderItemUpdateDTO.getId()).orElse(null);
+            OrderItem orderItem = orderItemRepository.findByIdAndOrder(orderItemUpdateDTO.getId(), order).orElse(null);
             if (orderItem == null) {
                 return ResponseUtils.fail(404, "Order item không tồn tại", null);
             }
 
             if (orderItemUpdateDTO.getQuantity() < MIN_QUANTITY || orderItemUpdateDTO.getQuantity() > MAX_PEOPLE) {
                 return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
+
+            }
+
+            if (!isOrderUpdated(order)) {
+                return ResponseUtils.fail(500, "Order không thể update", null);
 
             }
 
@@ -752,6 +771,184 @@ public class OrderService {
         return ResponseUtils.success(200, "Update thành công", null);
     }
 
+    public ResponseDTO updateOrderExtraPortion(OrderExtraPortionUpdateDTO orderExtraPortionUpdateDTO) {
+
+        Order order = orderRepository.findById(orderExtraPortionUpdateDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        OrderExtraPortion orderExtraPortion = orderExtraPortionRepository
+                .findByIdAndOrder(orderExtraPortionUpdateDTO.getId(), order)
+                .orElse(null);
+        if (orderExtraPortion == null) {
+            return ResponseUtils.fail(404, "Order extra không tồn tại", null);
+        }
+
+        if (orderExtraPortionUpdateDTO.getQuantity() < MIN_QUANTITY
+                || orderExtraPortionUpdateDTO.getQuantity() > MAX_PEOPLE) {
+            return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
+
+        }
+
+        if (!isOrderUpdated(order)) {
+            return ResponseUtils.fail(500, "Order không thể update", null);
+
+        }
+
+        orderExtraPortion.setQuantity(orderExtraPortionUpdateDTO.getQuantity());
+        orderExtraPortionRepository.save(orderExtraPortion);
+
+        return ResponseUtils.success(200, "Update thành công", convertOrderToDTO(order));
+    }
+
+    public ResponseDTO removeOrderItem(OrderItemRemoveDTO orderItemRemoveDTO) {
+
+        Order order = orderRepository.findById(orderItemRemoveDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        OrderItem orderItem = orderItemRepository
+                .findByIdAndOrder(orderItemRemoveDTO.getId(), order)
+                .orElse(null);
+        if (orderItem == null) {
+            return ResponseUtils.fail(404, "Order extra không tồn tại", null);
+        }
+
+        if (!isOrderUpdated(order)) {
+            return ResponseUtils.fail(500, "Order không thể update", null);
+
+        }
+
+        orderItemRepository.delete(orderItem);
+
+        return ResponseUtils.success(200, "Remove thành công", convertOrderToDTO(order));
+    }
+
+    public ResponseDTO removeOrderExtraPortion(OrderExtraPortionRemoveDTO orderExtraPortionRemoveDTO) {
+
+        Order order = orderRepository.findById(orderExtraPortionRemoveDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        OrderExtraPortion orderExtraPortion = orderExtraPortionRepository
+                .findByIdAndOrder(orderExtraPortionRemoveDTO.getId(), order)
+                .orElse(null);
+        if (orderExtraPortion == null) {
+            return ResponseUtils.fail(404, "Order extra không tồn tại", null);
+        }
+
+        if (!isOrderUpdated(order)) {
+            return ResponseUtils.fail(500, "Order không thể update", null);
+
+        }
+
+        orderExtraPortionRepository.delete(orderExtraPortion);
+
+        return ResponseUtils.success(200, "Remove thành công", convertOrderToDTO(order));
+    }
+
+    public ResponseDTO addNewOrderItem(OrderItemRequestDTO orderItemRequestDTO) {
+
+        Order order = orderRepository.findById(orderItemRequestDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        if (!isOrderUpdated(order)) {
+            return ResponseUtils.fail(500, "Order không thể update", null);
+
+        }
+
+        if (orderItemRequestDTO.getQuantity() < MIN_QUANTITY
+                || orderItemRequestDTO.getQuantity() > MAX_PEOPLE) {
+            return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
+
+        }
+
+        List<OrderItem> orderItems = order.getOrderItems();
+        for (OrderItem orderItem : orderItems) {
+            // Kiểm tra nếu product, product variant hoặc combo giống nhau
+            if (isSameProductOrVariantOrCombo(orderItem, orderItemRequestDTO)) {
+                // Cộng số lượng từ orderItem vào orderItem
+
+                orderItem.setQuantity(orderItem.getQuantity() +
+                        orderItemRequestDTO.getQuantity());
+                orderItemRepository.save(orderItem);
+                order = orderRepository.findById(orderItemRequestDTO.getOrderId()).orElse(null);
+
+                return ResponseUtils.success(200, "Thêm mới thành công",
+                        convertOrderToDTO(order));
+
+            }
+
+        }
+
+        List<OrderItemRequestDTO> orderItemRequestDTOs = new ArrayList<>();
+        orderItemRequestDTOs.add(orderItemRequestDTO);
+        ResponseDTO isSaved = createOrderItem(orderItemRequestDTOs, order);
+        if (isSaved.isSuccess()) {
+            order = orderRepository.findById(orderItemRequestDTO.getOrderId()).orElse(null);
+            return ResponseUtils.success(200, "Thêm mới thành công",
+                    convertOrderToDTO(order));
+
+        }
+        return ResponseUtils.success(200, "Thêm mới thất bại", null);
+
+    }
+
+    public ResponseDTO addNewOrderExtraPortion(ExtraPortionOrderRequestDTO extraPortionOrderRequestDTO) {
+        Order order = orderRepository.findById(extraPortionOrderRequestDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        ExtraPortion extraPortion = extraPortionRepository
+                .findByExtraPortionIdAndActiveIsTrue(extraPortionOrderRequestDTO.getExtraPortionId()).orElse(null);
+        if (extraPortion == null) {
+            return ResponseUtils.fail(404, "Order extra không tồn tại", null);
+        }
+        if (!isOrderUpdated(order)) {
+            return ResponseUtils.fail(500, "Order không thể update", null);
+
+        }
+
+        if (extraPortionOrderRequestDTO.getQuantity() < MIN_QUANTITY
+                || extraPortionOrderRequestDTO.getQuantity() > MAX_PEOPLE) {
+            return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
+
+        }
+
+        for (OrderExtraPortion rootExtraPortion : order.getOrderExtraPortions()) {
+            if (rootExtraPortion.getExtraPortion().getExtraPortionId() == extraPortionOrderRequestDTO
+                    .getExtraPortionId()) {
+                rootExtraPortion
+                        .setQuantity(rootExtraPortion.getQuantity() + extraPortionOrderRequestDTO.getQuantity());
+                order = orderRepository.findById(extraPortionOrderRequestDTO.getOrderId()).orElse(null);
+                return ResponseUtils.success(200, "Thêm mới thành công",
+                        convertOrderToDTO(order));
+
+            }
+
+        }
+
+        OrderExtraPortion orderExtraPortion = modelMapper.map(extraPortionOrderRequestDTO, OrderExtraPortion.class);
+
+        orderExtraPortion.setCreateAt(new Date());
+        orderExtraPortion.setCreateBy(systemService.getUserLogin());
+        orderExtraPortion.setExtraPortion(extraPortion);
+        orderExtraPortion.setOrder(order);
+        order = orderRepository.findById(extraPortionOrderRequestDTO.getOrderId()).orElse(null);
+
+        orderExtraPortionRepository.save(orderExtraPortion);
+        order = orderRepository.findById(extraPortionOrderRequestDTO.getOrderId()).orElse(null);
+
+        return ResponseUtils.success(200, "Thêm mới thành công",
+                convertOrderToDTO(order));
+    }
+
     public ResponseDTO checkVoucherApply(CheckVoucherRequestDTO checkVoucherRequestDTO) {
 
         Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(checkVoucherRequestDTO.getVoucherId()).orElse(null);
@@ -768,7 +965,7 @@ public class OrderService {
         Date startAt = voucher.getStartAt();
         Date endAt = voucher.getEndAt();
 
-        Long total = order.getTotal();
+        Long total = total(order);
 
         if (currentDate.after(startAt) && currentDate.before(endAt)) {
             // Hôm nay nằm giữa startAt và endAt
@@ -1023,9 +1220,15 @@ public class OrderService {
     }
 
     public ResponseDTO updatePeople(Integer people, Integer orderId) {
+
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
         }
 
         if (people < MIN_PEOPLE || people > MAX_PEOPLE) {
@@ -1433,7 +1636,6 @@ public class OrderService {
 
     private ResponseDTO syncOrderItem(List<OrderItem> orderItems, Order rootOrder) {
         List<OrderItem> syncOrderItems = new ArrayList<>();
-        List<OrderItem> rootChanges = new ArrayList<>();
 
         List<OrderItem> rootOrderItems = rootOrder.getOrderItems();
 
@@ -1614,6 +1816,38 @@ public class OrderService {
         return false;
     }
 
+    private boolean isSameProductOrVariantOrCombo(OrderItem orderItem, OrderItemRequestDTO orderItemRequestDTO) {
+        // Kiểm tra theo product
+        if ((orderItem.getProduct() != null && orderItemRequestDTO.getProductId() != null)) {
+
+            if (orderItem.getProduct().getId() == (orderItemRequestDTO.getProductId())) {
+
+                return checkIsSameOrderItem(orderItemRequestDTO, orderItem);
+
+            }
+        }
+
+        // Kiểm tra theo product variant
+        if ((orderItem.getProductVarient() != null && orderItemRequestDTO.getProductVariantId() != null)) {
+
+            if (orderItem.getProductVarient().getId() == (orderItemRequestDTO.getProductVariantId())) {
+                return true;
+
+            }
+        }
+
+        // Kiểm tra theo combo
+        if ((orderItem.getComboProduct() != null && orderItemRequestDTO.getComboId() != null)) {
+
+            if (orderItem.getComboProduct().getId() == (orderItemRequestDTO.getComboId())) {
+                return true;
+
+            }
+        }
+
+        return false;
+    }
+
     private boolean checkIsSameOrderItem(OrderItem orderItem, OrderItem rOrderItem) {
         List<OrderItemOption> rOrderItemOptions = rOrderItem.getOrderItemOptions();
         List<OrderItemOption> orderItemOptions = orderItem.getOrderItemOptions();
@@ -1642,10 +1876,43 @@ public class OrderService {
         return false;
     }
 
+    private boolean checkIsSameOrderItem(OrderItemRequestDTO orderItemRequestDTO, OrderItem rOrderItem) {
+        List<OrderItemOption> rOrderItemOptions = rOrderItem.getOrderItemOptions();
+        List<Integer> orderItemOptionIds = orderItemRequestDTO.getOptionsId();
+        if (rOrderItemOptions != null && orderItemOptionIds != null) {
+            List<Integer> roorOrderItemOptionIds = rOrderItemOptions.stream()
+                    .map(orderItemOption -> orderItemOption.getOption().getId())
+                    .collect(Collectors.toList());
+
+            boolean areOptionsSame = roorOrderItemOptionIds.containsAll(orderItemOptionIds)
+                    && orderItemOptionIds.containsAll(roorOrderItemOptionIds);
+
+            if (areOptionsSame) {
+                String orderItemNote = orderItemRequestDTO.getNote();
+                String rootOrderItemNote = rOrderItem.getNote();
+                if (rootOrderItemNote != null && rootOrderItemNote != null) {
+                    return rootOrderItemNote.equalsIgnoreCase(orderItemNote);
+                }
+            }
+
+            return false;
+        }
+        return false;
+    }
+
     private boolean isStaffCreateOrderAndConfirm() {
         User user = systemService.getUserLogin();
         boolean hasPermission = rolePermissionService.checkUserRolePermission(user.getRole().getId(), "PURCHASE_ORDER",
                 "CONFIRM");
         return hasPermission;
+    }
+
+    private boolean isOrderUpdated(Order order) {
+        if (!order.getStatus().getId().equals(ApplicationConst.OrderStatus.CANCEL)
+                && !order.getStatus().getId().equals(ApplicationConst.OrderStatus.COMPLETE)
+                && !order.getStatus().getId().equals(ApplicationConst.OrderStatus.AWAIT_CHECKOUT)) {
+            return true;
+        }
+        return false;
     }
 }

@@ -11,11 +11,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.fanstatic.config.constants.WebsocketConst;
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
+import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
+import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
+import com.fanstatic.dto.model.order.edit.OrderItemRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemUpdateDTO;
 import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
+import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
+import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
 import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
 import com.fanstatic.service.model.UserService;
@@ -24,6 +30,7 @@ import com.fanstatic.util.ResponseUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -129,6 +136,91 @@ public class PurchaseOrderController {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO2, WebsocketConst.TOPIC_ORDER_UPDATE);
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO2,
                     WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderItemUpdateDTO.getOrderId());
+        }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
+    @PutMapping("/api/purchase/order/update/order-extra-portion")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateOrderExtraPortion(
+            @RequestBody @Valid OrderExtraPortionUpdateDTO orderExtraPortionUpdateDTO) {
+        ResponseDTO responseDTO = orderService.updateOrderExtraPortion(orderExtraPortionUpdateDTO);
+
+        if (responseDTO.isSuccess()) {
+
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderExtraPortionUpdateDTO.getOrderId());
+        }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
+    @PutMapping("/api/purchase/order/update/remove-order-item")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> removeOrderItem(
+            @RequestBody @Valid OrderItemRemoveDTO orderItemRemoveDTO) {
+        ResponseDTO responseDTO = orderService.removeOrderItem(orderItemRemoveDTO);
+
+        if (responseDTO.isSuccess()) {
+
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderItemRemoveDTO.getOrderId());
+        }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
+    @PutMapping("/api/purchase/order/update/remove-order-extra-portion")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> removeOrderExtraPortion(
+            @RequestBody @Valid OrderExtraPortionRemoveDTO orderExtraPortionRemoveDTO) {
+        ResponseDTO responseDTO = orderService.removeOrderExtraPortion(orderExtraPortionRemoveDTO);
+
+        if (responseDTO.isSuccess()) {
+
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderExtraPortionRemoveDTO.getOrderId());
+        }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
+    @PutMapping("/api/purchase/order/update/add-order-item")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> addOrderItem(
+            @RequestBody @Valid OrderItemRequestDTO orderItemRequestDTO) {
+        ResponseDTO responseDTO = orderService.addNewOrderItem(orderItemRequestDTO);
+
+        if (responseDTO.isSuccess()) {
+
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderItemRequestDTO.getOrderId());
+        }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
+    @PutMapping("/api/purchase/order/update/add-order-extra-portion")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> addOrderExtraPortion(
+            @RequestBody @Valid ExtraPortionOrderRequestDTO extraPortionOrderRequestDTO) {
+        ResponseDTO responseDTO = orderService.addNewOrderExtraPortion(extraPortionOrderRequestDTO);
+
+        if (responseDTO.isSuccess()) {
+
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + extraPortionOrderRequestDTO.getOrderId());
         }
 
         return ResponseUtils.returnReponsetoClient(responseDTO);

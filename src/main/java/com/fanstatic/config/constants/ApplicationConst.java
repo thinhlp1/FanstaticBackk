@@ -3,11 +3,12 @@ package com.fanstatic.config.constants;
 public class ApplicationConst {
     public static final String CLIENT_HOST = "https://fantastic-ui-chi.vercel.app";
     public static final String CLIENT_HOST_ICON = "https://fantastic-ui-chi.vercel.app/icon/favicon.svg";
-    
 
     public static final int CUSTOMER_ROLE_ID = 3;
     public static final int ADNIN_ROLE_ID = 1;
     public static final int CASHIER_ROLE_ID = 2;
+    public static final int MANAGER_ROLE_ID = 4;
+    public static final int WAITER_ROLE_ID = 5;
 
     public static class OrderStatus {
         public static final String CONFIRMING = "CONFIRMING";
@@ -25,7 +26,7 @@ public class ApplicationConst {
         public static final String PAID = "PAID";
         public static final String AWAIT_PAYMENT = "AWAIT_PAYMENT";
         public static final String CANCELLED = "CANCELLED";
-        
+
     }
 
 }

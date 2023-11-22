@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class OrderItemRequestDTO {
+
+    private int orderId;
+
     private int id;
 
     private Integer productId;

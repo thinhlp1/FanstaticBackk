@@ -24,6 +24,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,10 +49,44 @@ public class RolePermissionService {
         if (role == null) {
             return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
         }
-        rolePermissionRepository.deleteByRoleId(setRolePermissionDTO.getRoleId());
+
+        List<Integer> featurePermissionIdsToAdd = setRolePermissionDTO.getFeaturePermissionsId();
+        RolePermissionDTO rolePermissionDTO = (RolePermissionDTO) (getRolePermisson(setRolePermissionDTO.getRoleId())
+                .getData());
+
+        List<Integer> featurePermissionIdsInRole = rolePermissionDTO.getFeaturePermissions().stream()
+                .map(FeaturePermissionDTO::getPermissions)
+                .flatMap(List::stream)
+                .map(PermissionDTO::getFeaturePermissionId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Integer> featurePermissionIdsToAddToDb = featurePermissionIdsToAdd.stream()
+                .filter(id -> !featurePermissionIdsInRole.contains(id))
+                .collect(Collectors.toList());
+
+        // Tạo danh sách cần xóa khỏi csdl
+        List<Integer> featurePermissionIdsToDeleteFromDb = featurePermissionIdsInRole.stream()
+                .filter(id -> !featurePermissionIdsToAdd.contains(id))
+                .collect(Collectors.toList());
+
+        // xoa quyen
+
+        try {
+
+            for (Integer featurePermissionId : featurePermissionIdsToDeleteFromDb) {
+                rolePermissionRepository.deleteByFeaturePermissionId(featurePermissionId,
+                        setRolePermissionDTO.getRoleId());
+            }
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+
+            e.printStackTrace();
+            return ResponseUtils.fail(500, "Gán quyền thất bại", null);
+        }
 
         // kiem tra va gan quyen
-        for (Integer featurePermissionId : setRolePermissionDTO.getFeaturePermissionsId()) {
+        for (Integer featurePermissionId : featurePermissionIdsToAddToDb) {
 
             RolePermission rolePermission = new RolePermission();
 
@@ -96,7 +131,7 @@ public class RolePermissionService {
             List<RolePermission> rolePermissions = role.getRolePermissions();
 
             // khoi tao reponse data
-            RolePermissonDTO rolePermissonDTO = new RolePermissonDTO();
+            RolePermissionDTO rolePermissonDTO = new RolePermissionDTO();
             RoleDTO roleDTO = modelMapper.map(role, RoleDTO.class);
             rolePermissonDTO.setRole(roleDTO);
             List<FeaturePermissionDTO> featurePermissionDTOs = new ArrayList<>();
@@ -152,7 +187,7 @@ public class RolePermissionService {
         List<RolePermission> rolePermissions = role.getRolePermissions();
 
         // khoi tao reponse data
-        RolePermissonDTO rolePermissonDTO = new RolePermissonDTO();
+        RolePermissionDTO rolePermissonDTO = new RolePermissionDTO();
         RoleDTO roleDTO = modelMapper.map(role, RoleDTO.class);
         rolePermissonDTO.setRole(roleDTO);
         List<FeaturePermissionDTO> featurePermissionDTOs = new ArrayList<>();
@@ -210,6 +245,7 @@ public class RolePermissionService {
 
     }
 
+   
     public ResponseDTO getFeaturePermission() {
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
 

@@ -2,7 +2,6 @@ package com.fanstatic.repository;
 
 import com.fanstatic.model.RolePermission;
 
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +21,7 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
         @Query("DELETE FROM RolePermission rp WHERE rp.role.id = :roleId")
         void deleteByRoleId(@Param("roleId") int roleId);
 
+        @Modifying
+        @Query("DELETE FROM RolePermission rp WHERE rp.featurePermission.id = :id AND rp.role.id = :roleId")
+        void deleteByFeaturePermissionId(@Param("id") int id, @Param("roleId") int roleId);
 }

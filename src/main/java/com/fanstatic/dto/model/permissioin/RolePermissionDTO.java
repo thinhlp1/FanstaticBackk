@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class RolePermissonDTO extends ResponseDataDTO {
+public class RolePermissionDTO extends ResponseDataDTO {
     
     private RoleDTO role;
 

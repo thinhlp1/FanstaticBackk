@@ -9,6 +9,8 @@ public class ExtraPortionOrderRequestDTO {
     
     private int id;
 
+    private int orderId;
+
     private int extraPortionId;
 
     private int quantity;
