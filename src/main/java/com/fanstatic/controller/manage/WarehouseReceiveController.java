@@ -1,7 +1,11 @@
 package com.fanstatic.controller.manage;
 
 import com.fanstatic.dto.ResponseDTO;
+<<<<<<< HEAD
 import com.fanstatic.dto.model.warehouseReceiver.WarehouseReceiveRequestDTO;
+=======
+import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
+>>>>>>> parent of 901909f ([API] DONE API warehouse deliver)
 import com.fanstatic.service.model.WarehouseReceiveService;
 import com.fanstatic.util.ResponseUtils;
 import jakarta.validation.Valid;

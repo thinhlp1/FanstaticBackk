@@ -9,8 +9,15 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.supplier.SupplierDTO;
+<<<<<<< HEAD
 import com.fanstatic.dto.model.warehouseReceiver.WarehouseReceiveDTO;
 import com.fanstatic.dto.model.warehouseReceiver.WarehouseReceiveRequestDTO;
+=======
+import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveDTO;
+import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
+import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemDTO;
+import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemRequestDTO;
+>>>>>>> parent of 901909f ([API] DONE API warehouse deliver)
 import com.fanstatic.model.File;
 import com.fanstatic.model.Supplier;
 import com.fanstatic.model.WarehouseReceive;
@@ -121,6 +128,7 @@ public class WarehouseReceiveService {
             return ResponseUtils.fail(401, "Phiếu nhập hàng không tồn tại", null);
         }
 
+<<<<<<< HEAD
         //Tạo 1 list để lưu trữ lỗi, khi thông báo lỗi thì truyền nó lên -> mục đích để thông báo lỗi 1 lượt
         List<FieldError> errors = new ArrayList<>();
 
@@ -176,6 +184,8 @@ public class WarehouseReceiveService {
         return ResponseUtils.fail(200, "UploadImage", null);
     }
 
+=======
+>>>>>>> parent of 901909f ([API] DONE API warehouse deliver)
     public ResponseDTO delete(int id) {
         WarehouseReceive warehouseReceive = warehouseReceiveRepository.findByIdAndActiveIsTrue(id).orElse(null);
 

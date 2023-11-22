@@ -71,7 +71,12 @@ public class ApplicationConfig {
                 "classpath:validate-message/extraPortion",
                 "classpath:validate-message/flavor",
                 "classpath:validate-message/flavorcategory",
+<<<<<<< HEAD
                 "classpath:validate-message/warehouseReceive"
+=======
+                "classpath:validate-message/warehouseReceive",
+                "classpath:validate-message/warehouseReceiveItem"
+>>>>>>> parent of 901909f ([API] DONE API warehouse deliver)
         );
         ms.setDefaultEncoding("utf-8");
         return ms;
