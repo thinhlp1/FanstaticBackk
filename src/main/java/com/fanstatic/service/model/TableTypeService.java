@@ -129,12 +129,12 @@ public class TableTypeService {
         // check image
         if (image != null) {
             if (tableType.getImage() != null) {
-                fileService.updateFile(image, ImageConst.CATEGORY_FOLDER, tableType.getImage());
-
                 fileService.deleteFireStore(tableType.getImage().getName());
 
+                fileService.updateFile(image, ImageConst.TALBE_FOLDER, tableType.getImage());
+
             } else {
-                File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+                File file = fileService.upload(image, ImageConst.TALBE_FOLDER);
                 tableType.setImage(file);
 
             }

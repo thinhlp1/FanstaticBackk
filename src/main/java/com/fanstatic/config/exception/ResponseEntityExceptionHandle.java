@@ -17,24 +17,6 @@ import org.springframework.validation.FieldError;
 @ControllerAdvice
 public class ResponseEntityExceptionHandle extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(ValidationException.class)
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(ValidationException ex) {
-
-        ErrorValidateDTO errorValidateDTO = new ErrorValidateDTO();
-        ResponseDTO reponseDTO = new ResponseDTO();
-
-        Map<String, String> errors = ex.getErrors()
-                .stream()
-                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-
-        errorValidateDTO.setErrors(errors);
-        reponseDTO.setData(errorValidateDTO);
-        reponseDTO.setMessage("Thông tin không hợp lệ");
-        reponseDTO.setTypeReponse("BAD_REQUEST");
-        reponseDTO.setStatusCode(400);
-
-        return ResponseEntity.status(400).body(reponseDTO);
-    }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
