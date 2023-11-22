@@ -2,7 +2,7 @@ package com.fanstatic.dto.model.order;
 
 import java.util.List;
 
-import com.fanstatic.dto.model.comboproduct.ComboProductDTO;
+import com.fanstatic.dto.model.combo.ComboProductDTO;
 import com.fanstatic.dto.model.option.OptionDTO;
 import com.fanstatic.dto.model.product.ProductCompactDTO;
 import com.fanstatic.dto.model.product.ProductDTO;

@@ -1,4 +1,4 @@
-package com.fanstatic.dto.model.comboproduct;
+package com.fanstatic.dto.model.combo;
 
 import java.util.List;
 
