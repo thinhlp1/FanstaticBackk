@@ -279,6 +279,8 @@ public class PurchaseOrderController {
     public ResponseEntity<ResponseDTO> confirm(@PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.confirm(id);
         if (responseDTO.isSuccess()) {
+
+            
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
                     WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);

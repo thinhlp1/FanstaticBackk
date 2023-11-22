@@ -30,6 +30,7 @@ import com.fanstatic.dto.model.category.CategoryDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
 import com.fanstatic.dto.model.option.OptionDTO;
+import com.fanstatic.dto.model.order.CreateOrderResponseDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.OrderItemDTO;
@@ -241,7 +242,7 @@ public class OrderService {
         // TODO Nếu người tạo order là nhân viên thì trạng thái sẽ chuyển sang đang
 
         if (isStaffCreateOrderAndConfirm()) {
-            order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.PROCESSING).get());
+
             if (orderRequestDTO.getCustomerId() != null) {
                 User user = userRepository.findByIdAndActiveIsTrue(orderRequestDTO.getCustomerId()).orElse(null);
                 if (user == null) {
@@ -252,11 +253,10 @@ public class OrderService {
             }
 
         } else {
-            order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.CONFIRMING).get());
             order.setCustomer(systemService.getUserLogin());
 
         }
-
+        order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.CONFIRMING).get());
         order.setTotal(total(orderRequestDTO));
         order.setOrderType(orderType);
 
@@ -295,9 +295,18 @@ public class OrderService {
             transactionManager.rollback(transactionStatus);
             return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
-        // systemService.writeSystemLog(orderSaved.getOrderId(), "", null);
+
         transactionManager.commit(transactionStatus);
-        pushNotificationOrder(order.getCustomer(), orderSaved.getOrderId(), "Order của bạn đã được gửi cho nhân viên");
+
+        systemService.writeSystemLog(orderSaved.getOrderId(), "", null);
+
+        if (isStaffCreateOrderAndConfirm()) {
+            confirm(orderSaved.getOrderId());
+        } else {
+            pushNotificationOrder(order.getCustomer().getId(), orderSaved.getOrderId(),
+                    "Order của bạn đã được gửi cho nhân viên");
+
+        }
 
         return ResponseUtils.success(200, "Tạo order thành công", null);
 
@@ -365,10 +374,19 @@ public class OrderService {
             order.setEmployeeConfirmed(systemService.getUserLogin());
 
             orderRepository.save(order);
+
+            for (OrderItem orderItem : order.getOrderItems()) {
+                orderItem.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.ITEM_PROCESSING).get());
+                orderItemRepository.save(orderItem);
+            }
+
             systemService.writeSystemLog(order.getOrderId(), "", null);
 
             transactionManager.commit(transactionStatus);
-            pushNotificationOrder(order.getCustomer(), order.getOrderId(), "Order của bạn đã được nhân viên tiếp nhận");
+
+            pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(),
+                    "Order của bạn đã được nhân viên tiếp nhận");
+
             return ResponseUtils.success(200, "Duyệt order thành công", null);
         } else {
             return ResponseUtils.fail(500, "Trạng thái order không hợp lệ", null);
@@ -508,7 +526,7 @@ public class OrderService {
 
         orderRepository.save(order);
         systemService.writeSystemLog(order.getOrderId(), "", null);
-        pushNotificationOrder(order.getCustomer(), order.getOrderId(), "Order của bạn đã được hủy");
+        pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Order của bạn đã được hủy");
 
         return ResponseUtils.success(200, "Hủy thành công", null);
     }
@@ -596,7 +614,7 @@ public class OrderService {
         order.setUpdateBy(systemService.getUserLogin());
 
         orderRepository.save(order);
-        pushNotificationOrder(order.getCustomer(), order.getOrderId(), "Đã gửi yêu cầu thành toán");
+        pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Đã gửi yêu cầu thành toán");
 
         return ResponseUtils.success(200, "Yêu cầu thanh toán thành công", null);
 
@@ -1045,8 +1063,18 @@ public class OrderService {
 
         orderDTO.setCustomer(modelMapper.map(order.getCustomer(),
                 CustomerDTO.class));
-        orderDTO.setExtraPortions(getOrderExtraPortions(order.getOrderExtraPortions()));
-        orderDTO.setOrderItems(getOrderItems(order.getOrderItems()));
+
+        if (order.getOrderExtraPortions() != null) {
+            orderDTO.setExtraPortions(getOrderExtraPortions(order.getOrderExtraPortions()));
+
+        }
+        // if ()
+
+        if (order.getOrderItems() != null) {
+            orderDTO.setOrderItems(getOrderItems(order.getOrderItems()));
+
+        }
+
         orderDTO.setTables(getTables(order.getOrderTables()));
         orderDTO.setBill(modelMapper.map(order.getBill(), BillDTO.class));
         orderDTO.setCreateAt(order.getCreateAt());
@@ -1166,7 +1194,7 @@ public class OrderService {
             }
             orderItem.setCreateAt(new Date());
             orderItem.setCreateBy(systemService.getUserLogin());
-            orderItem.setStatus(statusRepository.findById("ITEM_PROCESSING").get());
+            // orderItem.setStatus(statusRepository.findById("ITEM_PROCESSING").get());
             orderItem.setOrder(order);
             // orderItemRepository.save(orderItem);
             orderItems.add(orderItem);
@@ -1244,9 +1272,8 @@ public class OrderService {
     }
 
     public ResponseDTO test() {
-        User user = userRepository.findById(1).get();
-        pushNotificationService.pushNotification(user, "high", "Đơn hàng của bạn", "Đơn hàng của bạn đã hoàn thành",
-                ApplicationConst.CLIENT_HOST);
+        User user = userRepository.findById(33).get();
+        pushNotificationOrder(user.getId(), 150, "dfdsf");
 
         return ResponseUtils.success(200, "OKE", null);
     }
@@ -1779,9 +1806,10 @@ public class OrderService {
         return Integer.valueOf(orderId);
     }
 
-    private void pushNotificationOrder(User user, Integer orderId, String body) {
+    private void pushNotificationOrder(Integer userId, Integer orderId, String body) {
         String urlToOrder = ApplicationConst.CLIENT_HOST + "/myorder/" + orderId;
-        pushNotificationService.pushNotification(user, PushNotificationService.HIGT, "Order của bạn", body, urlToOrder);
+        pushNotificationService.pushNotification(userId, PushNotificationService.HIGT, "Order của bạn", body,
+                urlToOrder);
     }
 
     private boolean isSameProductOrVariantOrCombo(OrderItem orderItem, OrderItem rootOrderItem) {
@@ -1900,7 +1928,7 @@ public class OrderService {
         return false;
     }
 
-    private boolean isStaffCreateOrderAndConfirm() {
+    public boolean isStaffCreateOrderAndConfirm() {
         User user = systemService.getUserLogin();
         boolean hasPermission = rolePermissionService.checkUserRolePermission(user.getRole().getId(), "PURCHASE_ORDER",
                 "CONFIRM");

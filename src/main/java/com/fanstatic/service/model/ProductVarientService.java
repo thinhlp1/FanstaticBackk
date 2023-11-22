@@ -12,6 +12,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.model.product.ProductChangeStockDTO;
 import com.fanstatic.dto.model.product.ProductVarientRequestDTO;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductVarient;
@@ -81,7 +82,8 @@ public class ProductVarientService {
     }
 
     public ResponseDTO saveProductVarient(ProductVarientRequestDTO productVarientRequestDTO) {
-        Product product = productRepository.findByIdAndActiveIsTrue(productVarientRequestDTO.getProductId()).orElse(null);
+        Product product = productRepository.findByIdAndActiveIsTrue(productVarientRequestDTO.getProductId())
+                .orElse(null);
 
         if (product == null) {
             return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
@@ -239,4 +241,5 @@ public class ProductVarientService {
         return ResponseUtils.success(200, MessageConst.DELETE_SUCCESS, null);
     }
 
+  
 }

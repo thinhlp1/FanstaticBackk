@@ -48,8 +48,10 @@ public class ProductVarient {
 	@ManyToOne
 	private Size size;
 
-	private byte active;
+	private Byte active;
 
+	@Column(name = "out_of_stock")
+	private Byte outOfStock;
 
 	@OneToMany(mappedBy = "productVariant")
 	private List<ProductImage> productImages;

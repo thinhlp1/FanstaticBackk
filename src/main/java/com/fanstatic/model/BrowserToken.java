@@ -33,16 +33,18 @@ public class BrowserToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    // @ManyToOne
+    // @JoinColumn(name = "user_id")
+    // private User user;
+    @Column(name = "user_id")
+    private Integer userId;
 
     private String token;
 
     private String browser;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "subscribe_at")
-    private Date subscribeAt;
+    // @Temporal(TemporalType.TIMESTAMP)
+    // @Column(name = "subscribe_at")
+    // private Date subscribeAt;
 
 }

@@ -47,6 +47,9 @@ public class WebsocketConst {
      */
     public static final String TOPIC_ORDER_CANCEL_CHECKOUT = TOPIC + "/purchase/order/cancel-checkout";
 
-    public static final String TOPIC_CURRENT_ORDER = TOPIC + "/purchase/order/current-order";
+    // public static final String TOPIC_CURRENT_ORDER = TOPIC +
+    // "/purchase/order/current-order";
+
+    public static final String TOPIC_PRODUCT_CHANGE_STOCK = TOPIC + "/product/change-stock";
 
 }

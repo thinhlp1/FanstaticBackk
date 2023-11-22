@@ -56,7 +56,7 @@ public class SystemService {
         systemlog.setUser(user);
         systemlog.setActionAt(new Date());
 
-        systemlogRepository.saveAndFlush(systemlog);
+        systemlogRepository.save(systemlog);
 
     }
 

@@ -32,40 +32,47 @@ public class PushNotificationService {
     public ResponseDTO subscribe(SubscribteNotiRequestDTO subscribteNotiRequestDTO) {
         User user = systemService.getUserLogin();
 
-        BrowserToken existingToken = browserTokenRepository.findByUserAndToken(user,
+        BrowserToken existingToken = browserTokenRepository.findByUserIdAndToken(user.getId(),
                 subscribteNotiRequestDTO.getToken()).orElse(null);
 
         if (existingToken == null) {
             BrowserToken newToken = new BrowserToken();
-            newToken.setUser(user);
+            // newToken.setUser(user);
+            newToken.setUserId(user.getId());
             newToken.setToken(subscribteNotiRequestDTO.getToken());
             newToken.setBrowser(subscribteNotiRequestDTO.getBrowser());
-            newToken.setSubscribeAt(new Date());
+            // newToken.setSubscribeAt(new Date());
             browserTokenRepository.save(newToken);
         }
         return ResponseUtils.success(200, "Nhận thông báo thành công", null);
     }
 
-    public ResponseDTO pushNotification(User user, String priority, String title, String body, String returnUrl) {
+    public ResponseDTO pushNotification(Integer userId, String priority, String title, String body, String returnUrl) {
 
-        List<BrowserToken> browserTokens = browserTokenRepository.findByUser(user);
+        try {
+            List<BrowserToken> browserTokens = browserTokenRepository.findByUserId(userId).orElse(null);
 
-        if (browserTokens != null) {
-            for (BrowserToken browserToken : browserTokens) {
-                String isSend = fcmService.sendMessage(browserToken.getToken(), priority, title, body,
-                        ApplicationConst.CLIENT_HOST_ICON, returnUrl);
-                        System.out.println(title);
-                        System.out.println(browserToken.getToken());
-                if (isSend == null) {
-                    System.out.println("KO THÀNH CÔNG");
-                }else{
-                    System.out.println("THÀNH CÔNG");
+            if (browserTokens != null) {
+                for (BrowserToken browserToken : browserTokens) {
+                    String isSend = fcmService.sendMessage(browserToken.getToken(), priority, title, body,
+                            ApplicationConst.CLIENT_HOST_ICON, returnUrl);
+                    System.out.println(title);
+                    System.out.println(browserToken.getToken());
+                    if (isSend == null) {
+                        System.out.println("KO THÀNH CÔNG");
+                    } else {
+                        System.out.println("THÀNH CÔNG");
+                    }
+
                 }
-
             }
-        }
+            return ResponseUtils.success(200, "Nhận thông báo thành công", null);
 
-        return ResponseUtils.success(200, "Nhận thông báo thành công", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+                 return ResponseUtils.fail(200, "Thông báo thất bại", null);
+
+        }
 
     }
 

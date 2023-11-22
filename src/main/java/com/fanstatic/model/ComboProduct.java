@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
@@ -11,8 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
 
 /**
  * 
@@ -28,8 +25,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ComboProduct  {
-	
+public class ComboProduct {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
@@ -47,6 +44,9 @@ public class ComboProduct  {
 	private String name;
 
 	private Long price;
+
+	@Column(name = "out_of_stock")
+	private byte outOfStock;
 
 	// bi-directional many-to-one association to Category
 	@ManyToOne

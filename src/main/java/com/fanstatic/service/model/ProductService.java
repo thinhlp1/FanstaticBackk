@@ -28,6 +28,7 @@ import com.fanstatic.dto.model.option.OptionGroupDTO;
 import com.fanstatic.dto.model.option.OptionGroupRequestDTO;
 import com.fanstatic.dto.model.option.OptionRequestDTO;
 import com.fanstatic.dto.model.permissioin.RoleDTO;
+import com.fanstatic.dto.model.product.ProductChangeStockDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
 import com.fanstatic.dto.model.product.ProductImageDTO;
 import com.fanstatic.dto.model.product.ProductOptionRequestDTO;
@@ -546,6 +547,8 @@ public class ProductService {
         productDTO.setName(product.getName());
         productDTO.setPrice(product.getPrice());
         productDTO.setActive(product.getActive());
+        productDTO.setOutOfStock(product.getOutOfStock());
+
 
         SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
         if (saleEvent != null) {
@@ -664,4 +667,43 @@ public class ProductService {
         reponseListDataDTO.setNameList("Danh sách sản phẩm");
         return ResponseUtils.success(200, "Danh sách sản phẩm", reponseListDataDTO);
     }
+
+    public ResponseDTO changeIsOutOfStock(ProductChangeStockDTO productChangeStockDTO) {
+        if (productChangeStockDTO.getProductId() != null) {
+            Product product = productRepository.findByIdAndActiveIsTrue(productChangeStockDTO.getProductId())
+                    .orElse(null);
+            if (product == null) {
+                return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+
+            }
+
+            product.setOutOfStock((byte) (productChangeStockDTO.isOutOfStack() == true ? 1 : 0));
+            productRepository.save(product);
+            return ResponseUtils.success(200, "Cập nhật thành công", detail(product.getId()).getData());
+
+        }
+        return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+
+    }
+
+    public ResponseDTO changeProductVarientIsOutOfStock(ProductChangeStockDTO productChangeStockDTO) {
+        if (productChangeStockDTO.getProductVariantId() != null) {
+            ProductVarient productVarient = productVarientRepository
+                    .findByIdAndActiveIsTrue(productChangeStockDTO.getProductVariantId())
+                    .orElse(null);
+            if (productVarient == null) {
+                return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+
+            }
+
+            productVarient.setOutOfStock((byte) (productChangeStockDTO.isOutOfStack() ? 1 : 0));
+            productVarientRepository.save(productVarient);
+
+            return ResponseUtils.success(200, "Cập nhật thành công", detail(productVarient.getId()).getData());
+
+        }
+        return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+
+    }
+
 }
