@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 public class Systemlog {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	@ManyToOne

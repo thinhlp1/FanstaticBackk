@@ -127,10 +127,10 @@ public class SaleEventService {
                 saleevents = saleEventRepository.findAll();
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                saleevents = saleEventRepository.findAllByActiveIsTrue().orElse(saleevents);
-                break;
-            case RequestParamConst.ACTIVE_TRUE:
                 saleevents = saleEventRepository.findAllByActiveIsFalse().orElse(saleevents);
+                break;
+            case RequestParamConst.ACTIVE_TRUE:   
+                 saleevents = saleEventRepository.findAllByActiveIsTrue().orElse(saleevents);
                 break;
             default:
                 saleevents = saleEventRepository.findAll();

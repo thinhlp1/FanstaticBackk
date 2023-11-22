@@ -9,7 +9,7 @@ import com.fanstatic.model.ComboProduct;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductVarient;
 import com.fanstatic.model.SaleEvent;
-
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,18 +19,12 @@ import lombok.Builder;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SaleProductDTO extends ResponseDataDTO {
-     private int id;
+public class GetAllProductDTO extends ResponseDataDTO {
 
-    // private ProductForSaleDTO product;
+    private List<ProductForSaleDTO> products;
 
-    // private ProductVarientDTO productVarient;
+     private List<ComboProductDTO> comboProducts;
 
-    //  private SaleEventDTO saleEvent;
-
-    // private ComboProductDTO comboProduct;
-
-    private ObjectSaleDTO objectSale;
-
-    private byte active;
+       private List<ProductVarientDTO> productVarients;
 }
+

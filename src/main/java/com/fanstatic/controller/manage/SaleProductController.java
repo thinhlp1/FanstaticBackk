@@ -22,12 +22,12 @@ public class SaleProductController {
         ResponseDTO reponseDTO = saleProductService.show(active);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
-    // @PostMapping("/create")
-    // @ResponseBody
-    // public ResponseEntity<ResponseDTO> create(@RequestBody @Valid SaleProductRequestDTO saleProductRequestDTO) {
-    //     ResponseDTO reponseDTO = saleProductService.create(saleProductRequestDTO);
-    //     return ResponseUtils.returnReponsetoClient(reponseDTO);
-    // }
+    @PostMapping("/create")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> create(@RequestBody @Valid SaleProductRequestDTO saleProductRequestDTO) {
+        ResponseDTO reponseDTO = saleProductService.create(saleProductRequestDTO);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
 
     // @PutMapping("/update/{id}")
     // @ResponseBody
@@ -52,10 +52,10 @@ public class SaleProductController {
   
   
 
-    //  @GetMapping("/show/detail/{id}")
-    // @ResponseBody
-    // public ResponseEntity<ResponseDTO> detail(@PathVariable("id") int id) {
-    //     ResponseDTO reponseDTO = saleProductService.detail(id);
-    //     return ResponseUtils.returnReponsetoClient(reponseDTO);
-    // }
+     @GetMapping("/show/getall")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getAll() {
+        ResponseDTO reponseDTO = saleProductService.getAllProductAndProductVariantAndComProduct();
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
 }

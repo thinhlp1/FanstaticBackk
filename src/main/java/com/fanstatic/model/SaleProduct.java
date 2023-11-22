@@ -30,7 +30,7 @@ public class SaleProduct  {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private Integer id;
 
 	// bi-directional many-to-one association to Product
 	@ManyToOne
@@ -44,7 +44,7 @@ public class SaleProduct  {
 
 	@ManyToOne
 	@JoinColumn(name = "combo_product_id")
-	private ComboProduct comProduct;
+	private ComboProduct comboProduct;
 
 	// bi-directional many-to-one association to SaleEvent
 	@ManyToOne
