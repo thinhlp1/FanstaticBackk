@@ -1,18 +1,10 @@
 package com.fanstatic.service.order;
 
-import java.math.BigInteger;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.tomcat.util.http.ResponseUtil;
-import org.aspectj.weaver.ast.Or;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -26,18 +18,15 @@ import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.bill.BillDTO;
 import com.fanstatic.dto.model.category.CategoryCompactDTO;
-import com.fanstatic.dto.model.category.CategoryDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
-import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
 import com.fanstatic.dto.model.option.OptionDTO;
-import com.fanstatic.dto.model.order.CreateOrderResponseDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.OrderItemDTO;
-import com.fanstatic.dto.model.order.OrderItemSessionDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
+import com.fanstatic.dto.model.order.edit.CompleteOrderItemDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemRemoveDTO;
@@ -235,11 +224,6 @@ public class OrderService {
 
         order.setCreateAt(new Date());
         order.setCreateBy(systemService.getUserLogin());
-
-        // TODO Nếu người dùng đang đăng nhập là nhân viên thì ko cần set customer Id
-        // TODO Nếu người dùng có tài khoản nhưng ko đem điện thoại thì có thể nhập số
-        // điện thoại trên điện thoại nhân viên rồi gán cho order
-        // TODO Nếu người tạo order là nhân viên thì trạng thái sẽ chuyển sang đang
 
         if (isStaffCreateOrderAndConfirm()) {
 
@@ -818,6 +802,30 @@ public class OrderService {
         orderExtraPortionRepository.save(orderExtraPortion);
 
         return ResponseUtils.success(200, "Update thành công", convertOrderToDTO(order));
+    }
+
+    public ResponseDTO completeOrderItem(CompleteOrderItemDTO completeOrderItemDTO) {
+        Order order = orderRepository.findById(completeOrderItemDTO.getOrderId()).orElse(null);
+
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        if (!isOrderUpdated(order)) {
+            return ResponseUtils.fail(500, "Order không thể update", null);
+
+        }
+        OrderItem orderItem = orderItemRepository.findByIdAndOrder(completeOrderItemDTO.getId(), order).orElse(null);
+        if (orderItem == null) {
+            return ResponseUtils.fail(404, "Order item không tồn tại", null);
+        }
+
+        orderItem.setQuantityCompleted(completeOrderItemDTO.getQuantityCompleted());
+
+        orderItemRepository.save(orderItem);
+
+        return ResponseUtils.success(200, "Update thành công", convertOrderToDTO(order));
+
     }
 
     public ResponseDTO removeOrderItem(OrderItemRemoveDTO orderItemRemoveDTO) {

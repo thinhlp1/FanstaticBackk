@@ -15,6 +15,7 @@ import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
+import com.fanstatic.dto.model.order.edit.CompleteOrderItemDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemRemoveDTO;
@@ -227,6 +228,23 @@ public class PurchaseOrderController {
 
     }
 
+    @PutMapping("/api/purchase/order/update/complete-order-item")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> completeOrderItem(
+            @RequestBody @Valid CompleteOrderItemDTO completeOrderItemDTO) {
+        ResponseDTO responseDTO = orderService.completeOrderItem(completeOrderItemDTO);
+
+        if (responseDTO.isSuccess()) {
+
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + completeOrderItemDTO.getOrderId());
+        }
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
     @GetMapping("/api/purchase/order/show/current-order")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showCurrentOrder() {
@@ -280,7 +298,6 @@ public class PurchaseOrderController {
         ResponseDTO responseDTO = orderService.confirm(id);
         if (responseDTO.isSuccess()) {
 
-            
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
                     WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);

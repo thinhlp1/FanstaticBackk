@@ -24,6 +24,8 @@ public class ProductDTO extends ResponseDataDTO {
 
     private byte outOfStock;
 
+    private int soldQuantity;
+
     private List<CategoryDTO> categories;
 
     private List<ProductVarientDTO> productVarients;

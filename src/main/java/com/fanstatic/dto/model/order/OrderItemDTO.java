@@ -28,10 +28,12 @@ public class OrderItemDTO {
 
     private int quantity;
 
+    private int quantityCompleted;
+
     private boolean priority;
 
     private Long total;
 
     private List<OptionDTO> options;
-    
+
 }

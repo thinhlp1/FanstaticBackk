@@ -48,6 +48,7 @@ import com.fanstatic.model.SaleEvent;
 import com.fanstatic.repository.CategoryRepository;
 import com.fanstatic.repository.OptionGroupRepository;
 import com.fanstatic.repository.OptionRepository;
+import com.fanstatic.repository.OrderItemRepository;
 import com.fanstatic.repository.ProductCategoryRepository;
 import com.fanstatic.repository.ProductImageRepository;
 import com.fanstatic.repository.ProductOptionRepository;
@@ -68,6 +69,7 @@ public class ProductService {
     private final SystemService systemService;
 
     private final CategoryRepository categoryRepository;
+    private final OrderItemRepository orderItemRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductVarientRepository productVarientRepository;
     private final ProductImageRepository productImageRepository;
@@ -548,7 +550,7 @@ public class ProductService {
         productDTO.setPrice(product.getPrice());
         productDTO.setActive(product.getActive());
         productDTO.setOutOfStock(product.getOutOfStock());
-
+        productDTO.setSoldQuantity(productRepository.countSoldQuantityByProductId(product.getId()));
 
         SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
         if (saleEvent != null) {
