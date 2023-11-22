@@ -76,6 +76,9 @@ public class ApplicationConfig {
 =======
                 "classpath:validate-message/warehouseReceive",
                 "classpath:validate-message/warehouseReceiveItem"
+<<<<<<< HEAD
+>>>>>>> parent of 901909f ([API] DONE API warehouse deliver)
+=======
 >>>>>>> parent of 901909f ([API] DONE API warehouse deliver)
         );
         ms.setDefaultEncoding("utf-8");

@@ -129,6 +129,7 @@ public class WarehouseReceiveService {
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         //Tạo 1 list để lưu trữ lỗi, khi thông báo lỗi thì truyền nó lên -> mục đích để thông báo lỗi 1 lượt
         List<FieldError> errors = new ArrayList<>();
 
@@ -184,6 +185,8 @@ public class WarehouseReceiveService {
         return ResponseUtils.fail(200, "UploadImage", null);
     }
 
+=======
+>>>>>>> parent of 901909f ([API] DONE API warehouse deliver)
 =======
 >>>>>>> parent of 901909f ([API] DONE API warehouse deliver)
     public ResponseDTO delete(int id) {
