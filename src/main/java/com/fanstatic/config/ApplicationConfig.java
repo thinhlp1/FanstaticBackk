@@ -71,12 +71,7 @@ public class ApplicationConfig {
                 "classpath:validate-message/extraPortion",
                 "classpath:validate-message/flavor",
                 "classpath:validate-message/flavorcategory",
-                "classpath:validate-message/warehouseReceive",
-                "classpath:validate-message/warehouseReceiveItem",
-                "classpath:validate-message/warehouseDeliver",
-                "classpath:validate-message/warehouseDeliverReason",
-                "classpath:validate-message/warehouseDeliverSolution",
-                "classpath:validate-message/warehouseDeliverItem"
+                "classpath:validate-message/warehouseReceive"
         );
         ms.setDefaultEncoding("utf-8");
         return ms;

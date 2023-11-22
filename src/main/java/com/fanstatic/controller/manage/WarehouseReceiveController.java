@@ -1,8 +1,7 @@
 package com.fanstatic.controller.manage;
 
 import com.fanstatic.dto.ResponseDTO;
-import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
-import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDeleteDTO;
+import com.fanstatic.dto.model.warehouseReceiver.WarehouseReceiveRequestDTO;
 import com.fanstatic.service.model.WarehouseReceiveService;
 import com.fanstatic.util.ResponseUtils;
 import jakarta.validation.Valid;
@@ -26,25 +25,25 @@ public class WarehouseReceiveController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    //    @PutMapping("/update/{id}")
-//    @ResponseBody
-//    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid WarehouseReceiveRequestDTO data, @PathVariable("id") int id) {
-//        ResponseDTO responseDTO = warehouseReceiveService.update(data);
-//        return ResponseUtils.returnReponsetoClient(responseDTO);
-//    }
-//
-//    @PutMapping("/update/image/{id}")
-//    @ResponseBody
-//    public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile imageFile,
-//                                                   @PathVariable("id") Integer id) {
-//        ResponseDTO responseDTO = warehouseReceiveService.updateImage(id, imageFile);
-//        return ResponseUtils.returnReponsetoClient(responseDTO);
-//    }
-//
+    @PutMapping("/update/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid WarehouseReceiveRequestDTO data, @PathVariable("id") int id) {
+        ResponseDTO responseDTO = warehouseReceiveService.update(data);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/update/image/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile imageFile,
+                                                   @PathVariable("id") Integer id) {
+        ResponseDTO responseDTO = warehouseReceiveService.updateImage(id, imageFile);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
     @DeleteMapping("/delete/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id, @RequestBody WarehouseReceiveRequestDeleteDTO warehouseReceiveRequestDeleteDTO) {
-        ResponseDTO responseDTO = warehouseReceiveService.delete(id, warehouseReceiveRequestDeleteDTO);
+    public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id) {
+        ResponseDTO responseDTO = warehouseReceiveService.delete(id);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

@@ -1,12 +1,9 @@
-package com.fanstatic.dto.model.warehouseReceive;
+package com.fanstatic.dto.model.warehouseReceiver;
 
-import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemRequestDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,6 +18,4 @@ public class WarehouseReceiveRequestDTO {
     private String description;
 
     private boolean active;
-
-    List<WarehouseReceiveItemRequestDTO> warehouseReceiveItemRequestDTOList;
 }
