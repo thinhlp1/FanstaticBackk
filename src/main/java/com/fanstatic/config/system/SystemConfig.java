@@ -3,21 +3,20 @@ package com.fanstatic.config.system;
 import java.util.Date;
 import java.util.List;
 
+import com.fanstatic.dto.ResponseDataDTO;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-public class SystemConfig {
-    private List<OrderConfig> allowOrder;
-    private List<ContactConfig> contact;
+@NoArgsConstructor
+@AllArgsConstructor
+public class SystemConfig extends ResponseDataDTO{
+    private OrderConfig allowOrder;
+    private ContactConfig contact;
     private List<PointProgramConfig> pointProgram;
-    private List<IpConfig> ipConfig;
+    private IpConfig ipConfig;
 
-    public SystemConfig() {
 
-    }
-
-    public SystemConfig(String jsonString) {
-
-    }
 }

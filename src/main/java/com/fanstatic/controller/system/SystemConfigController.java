@@ -1,5 +1,6 @@
 package com.fanstatic.controller.system;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,8 +8,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fanstatic.config.system.ContactConfig;
+import com.fanstatic.config.system.IpConfig;
+import com.fanstatic.config.system.PointProgramConfig;
 import com.fanstatic.config.system.SystemConfig;
+import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.service.system.SystemConfigService;
+import com.fanstatic.util.ResponseUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,15 +22,58 @@ import lombok.RequiredArgsConstructor;
 public class SystemConfigController {
     private final SystemConfigService systemConfigService;
 
-    @GetMapping("/api/u/systemconfig/contact")
+    @GetMapping("/api/u/systemconfig/get-config")
     @ResponseBody
-    public SystemConfig getContactConfig() {
-        return systemConfigService.getConfig();
+    public ResponseEntity<ResponseDTO> getConfig() {
+        return ResponseUtils.returnReponsetoClient(systemConfigService.getConfig());
     }
 
-    @PostMapping("/api/u/systemconfig/contact")
+    @PostMapping("/api/u/systemconfig/update-config")
     @ResponseBody
-    public void updateContact(@RequestBody SystemConfig config) {
-         systemConfigService.updateConfig(config);;
+    public ResponseEntity<ResponseDTO> updateConfig(@RequestBody SystemConfig config) {
+
+        return ResponseUtils.returnReponsetoClient(systemConfigService.updateConfig(config));
+
+    }
+
+    @GetMapping("/api/u/systemconfig/get-ip-config")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getIpConfig() {
+        return ResponseUtils.returnReponsetoClient(systemConfigService.getConfig());
+
+    }
+
+    @PostMapping("/api/u/systemconfig/update-ip-config")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateIpConfig(@RequestBody IpConfig config) {
+        return ResponseUtils.returnReponsetoClient(systemConfigService.updateIpConfig(config));
+    }
+
+    @GetMapping("/api/u/systemconfig/get-contact-config")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getContactConfig() {
+        return ResponseUtils.returnReponsetoClient(systemConfigService.getContactConfig());
+
+    }
+
+    @PostMapping("/api/u/systemconfig/update-contact-config")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateConfig(@RequestBody ContactConfig config) {
+
+        return ResponseUtils.returnReponsetoClient(systemConfigService.updateContactConfig(config));
+
+    }
+
+    @GetMapping("/api/u/systemconfig/get-point-program-config")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getPointProgram() {
+        return ResponseUtils.returnReponsetoClient(systemConfigService.getPointProgramConfig());
+    }
+
+    @PostMapping("/api/u/systemconfig/update-point-program-config")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updatePointProgramConfig(@RequestBody PointProgramConfig config) {
+        return ResponseUtils.returnReponsetoClient(systemConfigService.updatePointProgram(config));
+        
     }
 }
