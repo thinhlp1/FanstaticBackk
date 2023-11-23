@@ -1353,7 +1353,7 @@ public class OrderService {
                             .orElse(null);
                     if (productVariant != null) {
 
-                        saleEvent = saleProductRepository.findSaleByProductVarientId(productVariant.getId()).orNull();
+                        saleEvent = saleProductRepository.findSaleByProductVarientId(productVariant.getId()).orElse(null);
                         if (saleEvent != null) {
                             itemPrice = (long) (productVariant.getPrice()
                                     - (productVariant.getPrice() * ((double) saleEvent.getPercent() / 100)));
@@ -1363,7 +1363,7 @@ public class OrderService {
                         }
                     }
                 } else {
-                    saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
+                    saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orElse(null);
 
                     if (saleEvent != null) {
                         itemPrice = (long) (product.getPrice()
@@ -1386,7 +1386,7 @@ public class OrderService {
             if (comboProduct != null) {
                 long itemPrice = 0;
 
-                saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orNull();
+                saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orElse(null);
 
                 if (saleEvent != null) {
                     itemPrice = (long) (comboProduct.getPrice()
@@ -1414,7 +1414,7 @@ public class OrderService {
             ProductVarient productVariant = orderItem.getProductVarient();
             if (productVariant != null) {
 
-                saleEvent = saleProductRepository.findSaleByProductVarientId(productVariant.getId()).orNull();
+                saleEvent = saleProductRepository.findSaleByProductVarientId(productVariant.getId()).orElse(null);
                 if (saleEvent != null) {
                     itemPrice = (long) (productVariant.getPrice()
                             - (productVariant.getPrice() * ((double) saleEvent.getPercent() / 100)));
@@ -1424,7 +1424,7 @@ public class OrderService {
                 }
 
             } else {
-                saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
+                saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orElse(null);
 
                 if (saleEvent != null) {
                     itemPrice = (long) (product.getPrice()
@@ -1440,7 +1440,7 @@ public class OrderService {
         if (comboProduct != null) {
             long itemPrice = 0;
 
-            saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orNull();
+            saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orElse(null);
 
             if (saleEvent != null) {
                 itemPrice = (long) (comboProduct.getPrice()
@@ -1528,7 +1528,7 @@ public class OrderService {
             OrderItemDTO newOrderItemDTO = modelMapper.map(orderItem, OrderItemDTO.class);
             if (productVarient != null) {
                 Product product2 = productVarient.getProduct();
-                SaleEvent saleEvent = saleProductRepository.findSaleByProductVarientId(productVarient.getId()).orNull();
+                SaleEvent saleEvent = saleProductRepository.findSaleByProductVarientId(productVarient.getId()).orElse(null);
                 if (saleEvent != null) {
 
                     newOrderItemDTO.getProductVarient().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
@@ -1545,7 +1545,7 @@ public class OrderService {
                 newOrderItemDTO.getProductVarient().setCategories(categoryDTOs);
 
             } else if (product != null) {
-                SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
+                SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orElse(null);
                 if (saleEvent != null) {
 
                     newOrderItemDTO.getProduct().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
@@ -1562,7 +1562,7 @@ public class OrderService {
                 newOrderItemDTO.getProduct().setCategories(categoryDTOs);
 
             } else if (comboProduct != null) {
-                SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orNull();
+                SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orElse(null);
                 if (saleEvent != null) {
                     newOrderItemDTO.getComboProduct().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
 

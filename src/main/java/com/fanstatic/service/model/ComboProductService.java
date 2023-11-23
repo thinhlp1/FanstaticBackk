@@ -470,7 +470,7 @@ public class ComboProductService {
         comboProductDTO.setOutOfStock(comboProduct.getOutOfStock());
         comboProductDTO.setSoldQuantity(comboProductRepository.countSoldQuantityByProductId(comboProduct.getId()));
 
-        SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orNull();
+        SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orElse(null);
         if (saleEvent != null) {
             comboProductDTO.setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
         }

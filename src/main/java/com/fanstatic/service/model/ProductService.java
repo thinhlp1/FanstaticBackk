@@ -552,7 +552,7 @@ public class ProductService {
         productDTO.setOutOfStock(product.getOutOfStock());
         productDTO.setSoldQuantity(productRepository.countSoldQuantityByProductId(product.getId()));
 
-        SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orNull();
+        SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orElse(null);
         if (saleEvent != null) {
             productDTO.setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
         }
@@ -571,7 +571,7 @@ public class ProductService {
         for (ProductVarient productVarient : productVarients) {
             ProductVarientDTO productVarientDTO = modelMapper.map(productVarient, ProductVarientDTO.class);
             SaleEvent saleEventVarient = saleProductRepository.findSaleByProductVarientId(productVarient.getId())
-                    .orNull();
+                    .orElse(null);
             if (saleEventVarient != null) {
                 productVarientDTO.setSaleEvent(modelMapper.map(saleEventVarient, SaleEventDTO.class));
             }

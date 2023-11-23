@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -20,8 +21,8 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "flavor")
-public class Flavor {
+@Table(name = "flavor_category")
+public class FlavorCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,14 +34,10 @@ public class Flavor {
 
     private String name;
 
+    //bi-directional many-to-one association to WarehouseReceiveItem
+    @OneToMany(mappedBy = "flavorCategory")
+    private List<Flavor> flavor;
 
-    //bi-directional many-to-one association to Category
-    @ManyToOne
-    private FlavorCategory flavorCategory;
-
-    //bi-directional many-to-one association to Unit
-    @ManyToOne
-    private Unit unit;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "update_at")

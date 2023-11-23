@@ -1,13 +1,5 @@
 package com.fanstatic.service.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.FieldError;
-
 import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.constants.RequestParamConst;
@@ -21,8 +13,14 @@ import com.fanstatic.model.Unit;
 import com.fanstatic.repository.UnitRepository;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
-
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.FieldError;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -158,10 +156,10 @@ public class UnitService {
             case RequestParamConst.ACTIVE_ALL:
                 units = unitRepository.findAll();
                 break;
-            case RequestParamConst.ACTIVE_FALSE:
+            case RequestParamConst.ACTIVE_TRUE:
                 units = unitRepository.findAllByActiveIsTrue().orElse(units);
                 break;
-            case RequestParamConst.ACTIVE_TRUE:
+            case RequestParamConst.ACTIVE_FALSE:
                 units = unitRepository.findAllByActiveIsFalse().orElse(units);
                 break;
             default:

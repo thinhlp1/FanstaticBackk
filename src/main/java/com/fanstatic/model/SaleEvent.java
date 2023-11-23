@@ -35,6 +35,10 @@ public class SaleEvent  {
 
 	private String description;
 
+	private String code;
+	
+	private String name;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "end_at")
 	private Date endAt;

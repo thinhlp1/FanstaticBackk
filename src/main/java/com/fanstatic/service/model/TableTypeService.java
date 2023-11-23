@@ -44,11 +44,12 @@ public class TableTypeService {
         }
 
         if (tableTypeRepository.findByNameAndActiveIsTrue(tableTypeRequestDTO.getName()).isPresent()) {
-            errors.add(new FieldError("tableTypeRequestDTO", "name", "TableType đã tồn tại"));
+            errors.add(new FieldError("tableTypeRequestDTO", "name", "Teen bàn đã tồn tại"));
         }
 
         // Nếu có lỗi, ném ra một lượt với danh sách lỗi
         if (!errors.isEmpty()) {
+            System.out.println(errors);
             throw new ValidationException(errors);
         }
 

@@ -16,9 +16,10 @@ import lombok.NoArgsConstructor;
  * 
  */
 
-@Table(name = "sale_product")
+
 @Entity
 @Data
+@Table(name = "sale_product")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,6 +33,7 @@ public class SaleProduct {
 	@ManyToOne
 	private Product product;
 
+	private byte active;
 	// bi-directional many-to-one association to ProductVarient
 	@ManyToOne
 	@JoinColumn(name = "product_variant_id")
@@ -39,7 +41,7 @@ public class SaleProduct {
 
 	@ManyToOne
 	@JoinColumn(name = "combo_product_id")
-	private ComboProduct comboProduct;
+	private ComboProduct comProduct;
 
 	// bi-directional many-to-one association to SaleEvent
 	@ManyToOne

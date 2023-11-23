@@ -19,10 +19,11 @@ import lombok.NoArgsConstructor;
  * 
  */
 
-@Table(name = "combo_product")
+
 @Entity
 @Data
 @Builder
+@Table(name = "combo_product")
 @AllArgsConstructor
 @NoArgsConstructor
 public class ComboProduct {

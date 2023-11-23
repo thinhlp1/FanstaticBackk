@@ -23,69 +23,66 @@ import java.util.List;
 @NoArgsConstructor
 public class Category implements Serializable {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-	private byte active;
+    private byte active;
 
-	private String code;
+    private String code;
 
-	private int level;
+    private int level;
 
-	private String name;
+    private String name;
 
-	@ManyToOne
-	@JoinColumn(name = "image_id")
-	private File image;
+    @ManyToOne
+    @JoinColumn(name = "image_id")
+    private File image;
 
-	// bi-directional many-to-one association to Category
-	@ManyToOne
-	@JoinColumn(name = "parent_id")
-	private Category parentCategory;
+    // bi-directional many-to-one association to Category
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Category parentCategory;
 
-	// bi-directional many-to-one association to Category
-	@OneToMany(mappedBy = "parentCategory")
-	private List<Category> categories;
+    // bi-directional many-to-one association to Category
+    @OneToMany(mappedBy = "parentCategory")
+    private List<Category> categories;
 
-	// bi-directional many-to-one association to ComboProduct
-	@OneToMany(mappedBy = "category")
-	private List<ComboProduct> comboProducts;
+    // bi-directional many-to-one association to ComboProduct
+    @OneToMany(mappedBy = "category")
+    private List<ComboProduct> comboProducts;
 
-	// bi-directional many-to-one association to ExtraPortion
-	@OneToMany(mappedBy = "category")
-	private List<ExtraPortion> extraPortions;
-
-	// bi-directional many-to-one association to Flavor
-	@OneToMany(mappedBy = "category")
-	private List<Flavor> flavors;
-
-	// bi-directional many-to-one association to Product
-	@OneToMany(mappedBy = "category")
-	private List<ProductCategory> productCategories;
+    // bi-directional many-to-one association to ExtraPortion
+    @OneToMany(mappedBy = "category")
+    private List<ExtraPortion> extraPortions;
 
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "update_at")
-	private Date updateAt;
+    // bi-directional many-to-one association to Product
+    @OneToMany(mappedBy = "category")
+    private List<ProductCategory> productCategories;
 
-	@OneToOne
-	@JoinColumn(name = "update_by")
-	private User updateBy;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_at")
-	private Date createAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "update_at")
+    private Date updateAt;
 
-	@OneToOne
-	@JoinColumn(name = "create_by")
-	private User createBy;
+    @OneToOne
+    @JoinColumn(name = "update_by")
+    private User updateBy;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "delete_at")
-	private Date deleteAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "create_at")
+    private Date createAt;
 
-	@OneToOne
-	@JoinColumn(name = "delete_by")
-	private User deleteBy;
+    @OneToOne
+    @JoinColumn(name = "create_by")
+    private User createBy;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "delete_at")
+    private Date deleteAt;
+
+    @OneToOne
+    @JoinColumn(name = "delete_by")
+    private User deleteBy;
 }

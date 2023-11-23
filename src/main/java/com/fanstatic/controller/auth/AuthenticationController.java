@@ -17,7 +17,6 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @Controller
-@CrossOrigin("http://localhost:3000/")
 @RequestMapping("/auth")
 @AllArgsConstructor
 public class AuthenticationController {
