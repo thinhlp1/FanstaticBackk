@@ -24,4 +24,6 @@ public class ProductVarientDTO extends ResponseDataDTO {
     
     private SaleEventDTO saleEvent;
 
+    private boolean defaultSize;
+
 }

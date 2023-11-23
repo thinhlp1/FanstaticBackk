@@ -14,16 +14,16 @@ import org.springframework.data.repository.query.Param;
 
 public interface SaleProductRepository extends JpaRepository<SaleProduct, Integer> {
     @Query("SELECT se FROM SaleEvent se JOIN SaleProduct sp ON se.id = sp.saleEvent.id " +
-            "WHERE sp.product.id = :productId AND se.startAt <= CURRENT_TIMESTAMP AND se.endAt >= CURRENT_TIMESTAMP")
+            "WHERE se.active = 1 AND sp.product.id = :productId AND se.startAt <= CURRENT_TIMESTAMP AND se.endAt >= CURRENT_TIMESTAMP")
     Optional<SaleEvent> findSaleByProductId(@Param("productId") Integer productId);
 
     @Query("SELECT se FROM SaleEvent se JOIN SaleProduct sp ON se.id = sp.saleEvent.id " +
-            "WHERE sp.productVarient.id = :productId AND se.startAt <= CURRENT_TIMESTAMP AND se.endAt >= CURRENT_TIMESTAMP")
-    Optional<SaleEvent> findSaleByProductVarientId(@Param("productId") Integer productVarientId);
+            "WHERE  se.active = 1 AND sp.productVarient.id = :productVarientId AND se.startAt <= CURRENT_TIMESTAMP AND se.endAt >= CURRENT_TIMESTAMP")
+    Optional<SaleEvent> findSaleByProductVarientId(@Param("productVarientId") Integer productVarientId);
 
     @Query("SELECT se FROM SaleEvent se JOIN SaleProduct sp ON se.id = sp.saleEvent.id " +
-            "WHERE sp.comboProduct.id = :productId AND se.startAt <= CURRENT_TIMESTAMP AND se.endAt >= CURRENT_TIMESTAMP")
-    Optional<SaleEvent> findSaleByComboId(@Param("productId") Integer comboId);
+            "WHERE se.active = 1 AND sp.comboProduct.id = :comboId AND se.startAt <= CURRENT_TIMESTAMP AND se.endAt >= CURRENT_TIMESTAMP")
+    Optional<SaleEvent> findSaleByComboId(@Param("comboId") Integer comboId);
       public Optional<List<SaleProduct>> findAllByActiveIsTrue();
 
     public Optional<List<SaleProduct>> findAllByActiveIsFalse();

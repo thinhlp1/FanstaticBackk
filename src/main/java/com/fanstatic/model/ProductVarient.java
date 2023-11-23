@@ -50,6 +50,9 @@ public class ProductVarient {
 
 	private Byte active;
 
+	@Column(name = "default_size")
+	private Byte defaulSize;
+
 	@Column(name = "out_of_stock")
 	private Byte outOfStock;
 

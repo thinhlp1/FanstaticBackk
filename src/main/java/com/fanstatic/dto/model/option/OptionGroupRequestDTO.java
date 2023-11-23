@@ -26,5 +26,7 @@ public class OptionGroupRequestDTO {
 
     private boolean multichoice;
 
+    private boolean required;
+
     private List<OptionRequestDTO> options;
 }

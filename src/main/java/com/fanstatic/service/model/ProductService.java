@@ -351,6 +351,8 @@ public class ProductService {
                             optionGroupRequestDTO.isMultichoice() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
                     optionGroup.setShare(
                             optionGroupRequestDTO.isShared() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                    optionGroup.setRequire(
+                            optionGroupRequestDTO.isRequired() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
                     optionGroup.setName(optionGroupRequestDTO.getName());
 
                     optionGroup = optionGroupRepository.saveAndFlush(optionGroup);
@@ -392,6 +394,8 @@ public class ProductService {
                                 optionGroupRequestDTO.isMultichoice() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
                         optionGroup.setShare(
                                 optionGroupRequestDTO.isShared() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                        optionGroup.setRequire(
+                                optionGroupRequestDTO.isRequired() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
                         optionGroup.setName(optionGroupRequestDTO.getName());
                         optionGroup = optionGroupRepository.saveAndFlush(optionGroup);
 
