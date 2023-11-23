@@ -12,8 +12,8 @@ public class PayOSController {
     @Autowired
     private PayOSService payOS;
 
-    @PostMapping("/payos/checkout")
+    @PostMapping("auth/payos/checkout")
     public String checkout() {
-        return payOS.getCheckoutUrl(12, 1000L, "test");
+        return payOS.getCheckoutUrl(10000635, Long.valueOf(800000), "test");
     }
 }

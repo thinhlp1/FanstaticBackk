@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script>
+        var stompClient = Stomp.over(new SockJS('/purchage/order'));
+        
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            
+            // Đăng ký để lắng nghe sự kiện tạo đơn đặt hàng
+            stompClient.subscribe('/topic/order/create', function (response) {
+                console.log(response);
+                console.log("ABC");
+                // var message = JSON.parse(response.body);
+                // console.log('Create Order:', message);
+            });
+            
+            // Đăng ký để lắng nghe sự kiện cập nhật đơn đặt hàng
+            stompClient.subscribe('/topic/order/update', function (response) {
+                // var message = JSON.parse(response.body);
+                // console.log('Update Order:', message);
+            });
+            
+            // Đăng ký để lắng nghe sự kiện xóa đơn đặt hàng
+            stompClient.subscribe('/topic/order/delete', function (response) {
+                // var message = JSON.parse(response.body);
+                // console.log('Delete Order:', message);
+            });
+        });
+        
+        function createOrder() {
+            stompClient.send("/ws/order/create", {}, JSON.stringify({}));
+        }
+
+        function updateOrder() {
+            stompClient.send("/ws/order/update", {}, JSON.stringify({}));
+        }
+
+        function deleteOrder() {
+            stompClient.send("/ws/order/delete", {}, JSON.stringify({}));
+        }
+    </script>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+    <button onclick="createOrder()">Create Order</button>
+    <button onclick="updateOrder()">Update Order</button>
+    <button onclick="deleteOrder()">Delete Order</button>
+</body>
+</html>

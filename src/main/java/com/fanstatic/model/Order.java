@@ -1,10 +1,11 @@
 package com.fanstatic.model;
 
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
  * 
  */
 @Entity
+@Table(name = "`order`")
 @Data
 @Builder
 @AllArgsConstructor
@@ -28,8 +30,9 @@ public class Order {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int orderId;
 
-	@Column(name = "cancel_reason")
-	private String cancelReason;
+	@ManyToOne
+	@JoinColumn(name = "cancel_reason")
+	private CancelReason cancelReason;
 
 	@ManyToOne
 	@JoinColumn(name = "customer_id")
@@ -41,22 +44,35 @@ public class Order {
 
 	private String note;
 
-	@Column(name = "order_type")
-	private String orderType;
+	@ManyToOne
+	@JoinColumn(name = "order_type")
+	private OrderType orderType;
 
-	private BigInteger total;
+	private Long total;
+
+	private Integer people;
+
+	// @ManyToOne
+	// @JoinColumn(name = "root_order")
+	// private Order rootOrder;
+
+	@Column(name = "root_order")
+	private Integer rootOrder;
 
 	// bi-directional many-to-one association to Status
 	@ManyToOne
 	@JoinColumn(name = "status_id")
 	private Status status;
 
+	@OneToMany(mappedBy = "order",fetch = FetchType.LAZY)
+	private List<Bill> bill;
+
 	// bi-directional many-to-one association to OrderExtraPortion
 	@OneToMany(mappedBy = "order")
 	private List<OrderExtraPortion> orderExtraPortions;
 
 	// bi-directional many-to-one association to OrderItem
-	@OneToMany(mappedBy = "order")
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
 	private List<OrderItem> orderItems;
 
 	// bi-directional many-to-one association to OrderSurcharge
@@ -71,6 +87,10 @@ public class Order {
 	@ManyToOne
 	@JoinColumn(name = "voucher_id")
 	private Voucher voucher;
+
+	@ManyToOne
+	@JoinColumn(name = "payment_method_id")
+	private PaymentMethod paymentMethod;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")

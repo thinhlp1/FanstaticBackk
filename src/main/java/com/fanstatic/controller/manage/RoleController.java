@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.model.permissioin.SetRolePermissionDTO;
 import com.fanstatic.dto.model.role.RoleRequestDTO;
 import com.fanstatic.service.model.RolePermissionService;
 import com.fanstatic.service.model.RoleService;
@@ -81,6 +82,13 @@ public class RoleController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> getFeaturePermission() {
         ResponseDTO reponseDTO = rolePermissionService.getFeaturePermission();
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @PostMapping("/create/set-role-permission")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> setRolePermission(@RequestBody @Valid SetRolePermissionDTO setRolePermissionDTO) {
+        ResponseDTO reponseDTO = rolePermissionService.setRolePermission(setRolePermissionDTO);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 }

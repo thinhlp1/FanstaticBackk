@@ -37,6 +37,8 @@ public class ProductRequestDTO extends ResponseDataDTO {
 
 	private List<MultipartFile> imageFiles;
 
+	private String mainImageName;
+
 	private MultipartFile descriptionFile;
 
 }

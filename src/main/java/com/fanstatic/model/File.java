@@ -45,8 +45,6 @@ public class File implements Serializable {
     @Column(name = "file_type")
     private String fileType;
 
-    @OneToMany(mappedBy = "imageFile")
-    private List<ExtraPortion> extraPortions;
 
     public File(byte active, String extension, String link, String name, long size, String fileType) {
         this.active = active;

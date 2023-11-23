@@ -92,7 +92,9 @@ public class PayOSService {
         JSONObject jsonObject = new JSONObject(response.getBody());
         String codeId = jsonObject.getString("code");
         if (codeId.equals("00")) {
-            String reponseCheckoutUrl =  jsonObject.getJSONObject("data").getString("checkoutUrl").toString();
+            String reponseCheckoutUrl = jsonObject.getJSONObject("data").getString("checkoutUrl").toString();
+            System.out.println("URL: " + reponseCheckoutUrl);
+
             return reponseCheckoutUrl;
         }
         return null;

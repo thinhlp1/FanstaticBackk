@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import java.util.Date;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
@@ -9,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
 
 /**
  * 
@@ -26,8 +23,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SaleProduct  {
-	
+public class SaleProduct {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;

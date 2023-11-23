@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket Demo</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+  </head>
+
+  <body>
+    <h1>WebSocket Demo</h1>
+
+    <button onclick="sendOrder()">Gửi Đơn Hàng</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script>
+      var stompClient = null;
+
+      function connect() {
+        var socket = new SockJS("/u/purchase/order"); // Thay đổi địa chỉ WebSocket endpoint theo cấu hình của bạn
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+          stompClient.subscribe(
+            "/topic/purchase/order/update",
+            function (response) {
+              var orderData = JSON.parse(response.body);
+              console.log("Received update order: ", orderData);
+              // Xử lý thông điệp về đơn hàng ở đây
+            }
+          );
+
+          stompClient.subscribe(
+            "/topic/purchase/order/detail/32",
+            function (response) {
+              var orderData = JSON.parse(response.body);
+              console.log("Received details order: ", orderData);
+              // Xử lý thông điệp về đơn hàng ở đây
+            }
+          );
+        });
+      }
+
+      function disconnect() {
+        if (stompClient !== null) {
+          stompClient.disconnect();
+        }
+        console.log("Disconnected");
+      }
+
+      function sendOrder() {
+        var orderData = {
+          orderType: 1,
+          note: "mặn",
+          tableId: 16,
+          people: 5,
+          orderItems: [
+            {
+              productId: 11,
+              productVariantId: 8,
+              note: "ngọt",
+              quantity: 2,
+              priority: true,
+              optionsId: [1],
+            },
+            {
+              productId: 11,
+              productVariantId: 9,
+              note: "ngọt",
+              quantity: 3,
+              priority: true,
+              optionsId: [1, 3],
+            },
+          ],
+          extraPortions: [
+            {
+              extraPortionId: 1,
+              quantity: 2,
+              note: "nhiều nhiều",
+            },
+          ],
+        };
+
+        // stompClient.send("/app/purchase/order/create", {}, JSON.stringify(orderData));
+        fetch("/api/purchase/order/confirm/32", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("API Response: ", data);
+            // Xử lý kết quả từ REST API tại đây
+          })
+          .catch((error) => {
+            console.error("API Error: ", error);
+          });
+      }
+
+      connect();
+    </script>
+  </body>
+</html>

@@ -34,9 +34,10 @@ public class ExtraPortion {
 
     private String code;
 
+	private Long price;
+    
     private String name;
 
-    private int price;
 
     private String type;
 
