@@ -65,8 +65,12 @@ public class AuthenticationService {
             Account account = accountRepository.findByNumberPhoneAndActiveIsTrue(loginDTO.getNumberPhone())
                     .orElseThrow();
             String jwtToken = jwtUtil.generateToken(account);
+            User user = account.getUser();
             authenReponse.setToken(jwtToken);
             cookieUtils.set("token", jwtToken, 24);
+            cookieUtils.set("name", user.getName(), 24);
+            cookieUtils.set("email", user.getEmail(), 24);
+
             systemService.writeLoginLog(jwtToken, account.getUser());
             // return authenReponse;
             return ResponseUtils.success(200, "Đăng nhập thành công", authenReponse);
