@@ -4,6 +4,7 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDeleteDTO;
 import com.fanstatic.service.model.WarehouseReceiveService;
+import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,18 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class WarehouseReceiveController {
     private final WarehouseReceiveService warehouseReceiveService;
+
+    private final SystemService systemService;
+    /*
+        systemService
+        userService -> user = systemService.getUserLogin
+     */
+
+    @GetMapping("/getUser")
+    public ResponseEntity<ResponseDTO> getUser() {
+        ResponseDTO responseDTO = warehouseReceiveService.getUser(systemService.getUserLogin().getId());
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
 
     @PostMapping("/create")
     @ResponseBody

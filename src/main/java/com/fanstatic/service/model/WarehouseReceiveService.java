@@ -10,16 +10,15 @@ import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.flavor.FlavorDTO;
 import com.fanstatic.dto.model.supplier.SupplierDTO;
+import com.fanstatic.dto.model.user.UserDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDeleteDTO;
 import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemDTO;
 import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemRequestDTO;
-import com.fanstatic.model.File;
-import com.fanstatic.model.Supplier;
-import com.fanstatic.model.WarehouseReceive;
-import com.fanstatic.model.WarehouseReceiveItem;
+import com.fanstatic.model.*;
 import com.fanstatic.repository.SupplierRepository;
+import com.fanstatic.repository.UserRepository;
 import com.fanstatic.repository.WarehouseReceiveRepository;
 import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
@@ -48,6 +47,7 @@ public class WarehouseReceiveService {
     private final WarehouseReceiveItemService warehouseReceiveItemService;
 
     private final SystemService systemService;
+    private final UserRepository userRepository;
 
     public ResponseDTO create(WarehouseReceiveRequestDTO warehouseReceiveRequestDTO) {
         Supplier supplier = supplierRepository.findByIdAndActiveIsTrue(warehouseReceiveRequestDTO.getSupplierId()).orElse(null);
@@ -294,5 +294,17 @@ public class WarehouseReceiveService {
             warehouseReceiveDTO.setSupplierDTO(supplierDTO);
         }
         return ResponseUtils.success(200, "Chi tiết phiếu nhập hàng", warehouseReceiveDTO);
+    }
+
+    public ResponseDTO getUser(Integer id) {
+        User user = userRepository.findById(id).orElse(null);
+
+        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+        if (user.getImage() != null) {
+            String imageUrl = user.getImage().getLink();
+            userDTO.setImageUrl(imageUrl);
+        }
+
+        return ResponseUtils.success(200, "Chi tiết người dùng", userDTO);
     }
 }
