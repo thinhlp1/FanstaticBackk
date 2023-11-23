@@ -58,4 +58,12 @@ public class SaleProductController {
         ResponseDTO reponseDTO = saleProductService.getAllProductAndProductVariantAndComProduct();
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
+
+    
+     @GetMapping("/show/getbyid/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getBySaleEventId(@PathVariable("id") int id) {
+        ResponseDTO reponseDTO = saleProductService.getProductBySaleEventId(id);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
 }

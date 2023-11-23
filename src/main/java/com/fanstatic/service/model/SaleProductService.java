@@ -18,6 +18,7 @@ import com.fanstatic.dto.model.product.ProductForSaleDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
 import com.fanstatic.dto.model.saleEventProduct.GetAllProductDTO;
 import com.fanstatic.dto.model.saleEventProduct.ObjectSaleDTO;
+import com.fanstatic.dto.model.saleEventProduct.SaleProductByIdDTO;
 import com.fanstatic.dto.model.saleEventProduct.SaleProductDTO;
 import com.fanstatic.dto.model.saleEventProduct.SaleProductRequestDTO;
 import com.fanstatic.dto.model.supplier.SupplierDTO;
@@ -46,12 +47,11 @@ public class SaleProductService {
     private final ProductRepository productRepository;
     private final ProductVarientRepository productVarientRepository;
     private final ComboProductRepository comboProductRepository;
-     private final SaleEventRepository saleEventRepository;
+    private final SaleEventRepository saleEventRepository;
 
     public ResponseDTO create(SaleProductRequestDTO saleProductRequestDTO) {
 
-        
-          SaleEvent saleEvent = saleEventRepository.findById(saleProductRequestDTO.getSaleEvent()).orElse(null);
+        SaleEvent saleEvent = saleEventRepository.findById(saleProductRequestDTO.getSaleEvent()).orElse(null);
         if (saleProductRequestDTO.getProduct().size() > 0) {
             for (int i = 0; i < saleProductRequestDTO.getProduct().size(); i++) {
                 Product product = productRepository.findById(saleProductRequestDTO.getProduct().get(i)).orElse(null);
@@ -65,9 +65,10 @@ public class SaleProductService {
 
         if (saleProductRequestDTO.getComboProduct().size() > 0) {
             for (int i = 0; i < saleProductRequestDTO.getComboProduct().size(); i++) {
-                ComboProduct comboProduct = comboProductRepository.findById(saleProductRequestDTO.getComboProduct().get(i)).orElse(null);
+                ComboProduct comboProduct = comboProductRepository
+                        .findById(saleProductRequestDTO.getComboProduct().get(i)).orElse(null);
                 SaleProduct saleProduct = new SaleProduct();
-              
+
                 saleProduct.setSaleEvent(saleEvent);
                 saleProduct.setComboProduct(comboProduct);
                 SaleProduct saleProductSaved = saleProductRepository.saveAndFlush(saleProduct);
@@ -77,7 +78,8 @@ public class SaleProductService {
         }
         if (saleProductRequestDTO.getProductVarient().size() > 0) {
             for (int i = 0; i < saleProductRequestDTO.getProductVarient().size(); i++) {
-               ProductVarient productVarient = productVarientRepository.findById(saleProductRequestDTO.getProductVarient().get(i)).orElse(null);
+                ProductVarient productVarient = productVarientRepository
+                        .findById(saleProductRequestDTO.getProductVarient().get(i)).orElse(null);
                 SaleProduct saleProduct = new SaleProduct();
                 saleProduct.setSaleEvent(saleEvent);
                 saleProduct.setProductVarient(productVarient);
@@ -245,6 +247,67 @@ public class SaleProductService {
 
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
         reponseListDataDTO.setDatas(listAllProduct);
+        return ResponseUtils.success(200, "Danh sách sản phẩm", reponseListDataDTO);
+    }
+
+    public ResponseDTO getProductBySaleEventId(int id) {
+        List<SaleProduct> saleProducts = new ArrayList<>();
+        saleProducts = saleProductRepository.findAll();
+        List<ResponseDataDTO> saleProductDTOS = new ArrayList<>();
+         List<SaleProduct> listSaleProductBySaleEventId = new ArrayList<>();
+        List<ProductForSaleDTO> listProduct = new ArrayList<>();
+        List<ProductVarientDTO> listProductVariant = new ArrayList<>();
+        List<ComboProductDTO> listComboProduct = new ArrayList<>();
+        
+
+        SaleProductByIdDTO saleProductDTO = new SaleProductByIdDTO();
+        for (SaleProduct saleProduct : saleProducts) {
+            if(saleProduct.getSaleEvent().getId() == id) {
+               listSaleProductBySaleEventId.add(saleProduct);
+            }
+        }
+
+        System.out.println("Độ dài của saleeventid " + listSaleProductBySaleEventId.size());
+        if (listSaleProductBySaleEventId.size() > 0) {
+            for(SaleProduct saleProduct : listSaleProductBySaleEventId) {
+            if (saleProduct.getComboProduct() != null) {
+                  if (saleProduct.getComboProduct().getId() != null) {
+                    ComboProductDTO comboProductDTO = new ComboProductDTO();
+                    modelMapper.map(saleProduct.getComboProduct(), comboProductDTO);
+                    listComboProduct.add(comboProductDTO);
+            }
+            }
+            if (saleProduct.getProductVarient() != null) {
+                  if (saleProduct.getProductVarient().getId() != null) {
+                ProductVarientDTO productVarientDTO = new ProductVarientDTO();
+                 modelMapper.map(saleProduct.getProductVarient(), productVarientDTO);
+                listProductVariant.add(productVarientDTO);
+            }
+            }
+              if (saleProduct.getProduct() != null) {
+                  if (saleProduct.getProduct().getId() != null) {
+                ProductForSaleDTO productForSaleDTO = new ProductForSaleDTO();
+                 modelMapper.map(saleProduct.getProduct(), productForSaleDTO);
+                listProduct.add(productForSaleDTO);
+            }
+            }
+            
+            }
+        }
+
+        if (listComboProduct.size() > 0) {
+                   saleProductDTO.setComboProducts(listComboProduct);
+        }
+         if (listProductVariant.size() > 0) {
+                saleProductDTO.setProductVarients(listProductVariant);
+        }
+           if (listProduct.size() > 0) {
+                 saleProductDTO.setProducts(listProduct);
+        }
+        saleProductDTO.setSaleEventId(id);
+        saleProductDTOS.add(saleProductDTO); 
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+        reponseListDataDTO.setDatas(saleProductDTOS);
         return ResponseUtils.success(200, "Danh sách sản phẩm", reponseListDataDTO);
     }
 }
