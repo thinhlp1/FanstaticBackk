@@ -46,6 +46,7 @@ import com.fanstatic.model.ProductOption;
 import com.fanstatic.model.ProductVarient;
 import com.fanstatic.model.SaleEvent;
 import com.fanstatic.repository.CategoryRepository;
+import com.fanstatic.repository.HotProductRepository;
 import com.fanstatic.repository.OptionGroupRepository;
 import com.fanstatic.repository.OptionRepository;
 import com.fanstatic.repository.OrderItemRepository;
@@ -77,6 +78,7 @@ public class ProductService {
     private final ProductOptionRepository productOptionRepository;
     private final OptionRepository optionRepository;
     private final OptionGroupRepository optionGroupRepository;
+    private final HotProductRepository hotProductRepository;
     private final FileService fileService;
 
     @Autowired
@@ -548,13 +550,20 @@ public class ProductService {
         productDTO.setId(product.getId());
         productDTO.setName(product.getName());
         productDTO.setPrice(product.getPrice());
-        productDTO.setActive(product.getActive());
-        productDTO.setOutOfStock(product.getOutOfStock());
+        productDTO.setActive(product.getActive() == 0 ? false : true);
+        productDTO.setOutOfStock(product.getOutOfStock() == 0 ? false : true);
         productDTO.setSoldQuantity(productRepository.countSoldQuantityByProductId(product.getId()));
 
         SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orElse(null);
         if (saleEvent != null) {
             productDTO.setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+        }
+
+        if (hotProductRepository.findByProduct(product).isPresent()) {
+            productDTO.setHotProduct(true);
+        } else {
+            productDTO.setHotProduct(false);
+
         }
 
         List<ProductCategory> productCategories = productCategoryRepository.findByProduct(product);

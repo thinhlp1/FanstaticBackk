@@ -20,11 +20,13 @@ public class ProductDTO extends ResponseDataDTO {
 
     private Long price;
 
-    private byte active;
+    private boolean active;
 
-    private byte outOfStock;
+    private boolean outOfStock;
 
     private int soldQuantity;
+
+    private boolean hotProduct;
 
     private List<CategoryDTO> categories;
 

@@ -10,8 +10,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.model.hotproduct.HotProductDTO;
 import com.fanstatic.dto.model.hotproduct.HotProductRequestDTO;
+import com.fanstatic.dto.model.product.ProductDTO;
 import com.fanstatic.model.ComboProduct;
 import com.fanstatic.model.HotProduct;
 import com.fanstatic.model.Product;
@@ -49,7 +54,12 @@ public class HotProductSerivce {
                     transactionManager.rollback(transactionStatus);
                     return ResponseUtils.fail(404, "Sản phẩm không tồn tại", null);
                 }
-                hotProduct.setProduct(product);
+
+                if (!hotProductRepository.findByProduct(product).isPresent()) {
+                    hotProduct.setProduct(product);
+
+                }
+
             } else if (hotProductRequestDTO.getComboProductId() != null) {
                 ComboProduct comboProduct = comboProductRepository
                         .findByIdAndActiveIsTrue(hotProductRequestDTO.getComboProductId())
@@ -58,7 +68,10 @@ public class HotProductSerivce {
                     transactionManager.rollback(transactionStatus);
                     return ResponseUtils.fail(404, "Sản phẩm không tồn tại", null);
                 }
-                hotProduct.setComboProduct(comboProduct);
+                if (!hotProductRepository.findByComboProduct(comboProduct).isPresent()) {
+                    hotProduct.setComboProduct(comboProduct);
+
+                }
             }
 
             hotProducts.add(hotProduct);
@@ -80,15 +93,38 @@ public class HotProductSerivce {
 
     }
 
-    public ResponseDTO removeHotProduct(HotProductRequestDTO hotProductRequestDTO){
-        
-        HotProduct hotProduct = hotProductRepository.findById(hotProductRequestDTO.getId()).orElse(null);
-        if (hotProduct == null){
-            return ResponseUtils.fail(404, "Sản phẩm không tồn tại", null);
-        }
+    public ResponseDTO removeHotProduct(List<Integer> hotProductRequestDTO) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
-        hotProductRepository.delete(hotProduct);
+        for (Integer id : hotProductRequestDTO) {
+            HotProduct hotProduct = hotProductRepository.findById(id).orElse(null);
+            if (hotProduct == null) {
+                transactionManager.rollback(transactionStatus);
+
+                return ResponseUtils.fail(404, "Sản phẩm không tồn tại", null);
+            }
+
+            hotProductRepository.delete(hotProduct);
+        }
+        transactionManager.commit(transactionStatus);
+
         return ResponseUtils.success(200, "Xóa thành công", null);
 
     }
+
+    public ResponseDTO show() {
+        List<HotProduct> hotProducts = hotProductRepository.findAll();
+
+        List<ResponseDataDTO> productDTOS = new ArrayList<>();
+
+        for (HotProduct hotProduct : hotProducts) {
+            HotProductDTO hotProductDTO = modelMapper.map(hotProduct, HotProductDTO.class);
+            productDTOS.add(hotProductDTO);
+        }
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+        reponseListDataDTO.setDatas(productDTOS);
+        reponseListDataDTO.setNameList("Danh sách hot product");
+        return ResponseUtils.success(200, "Danh sách hot product", reponseListDataDTO);
+    }
+
 }

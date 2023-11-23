@@ -41,7 +41,7 @@ public class SaleProduct {
 
 	@ManyToOne
 	@JoinColumn(name = "combo_product_id")
-	private ComboProduct comProduct;
+	private ComboProduct comboProduct;
 
 	// bi-directional many-to-one association to SaleEvent
 	@ManyToOne
