@@ -63,7 +63,7 @@ public class ProductVarientService {
                 productVarient.setCreateBy(systemService.getUserLogin());
                 productVarient.setSize(size);
                 productVarient.setProduct(product);
-                productVarient.setDefaulSize(
+                productVarient.setDefaultSize(
                         productVarientDTO.isDefaultSize() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
 
                 ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
@@ -114,7 +114,7 @@ public class ProductVarientService {
             productVarient.setSize(size);
             productVarient.setProduct(product);
             productVarient
-                    .setDefaulSize(productVarientRequestDTO.isDefaultSize() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                    .setDefaultSize(productVarientRequestDTO.isDefaultSize() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
 
             ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
             if (productVarientSaved == null) {
@@ -156,7 +156,7 @@ public class ProductVarientService {
             productVarient.setUpdateBy(systemService.getUserLogin());
             productVarient.setSize(size);
               productVarient
-                    .setDefaulSize(productVarientDTO.isDefaultSize() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                    .setDefaultSize(productVarientDTO.isDefaultSize() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
 
             ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
             if (productVarientSaved == null) {

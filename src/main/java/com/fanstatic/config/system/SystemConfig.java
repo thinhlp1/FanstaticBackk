@@ -7,18 +7,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 public class SystemConfig {
     private List<OrderConfig> allowOrder;
     private List<ContactConfig> contact;
     private List<PointProgramConfig> pointProgram;
     private List<IpConfig> ipConfig;
 
-  
-   
+    public SystemConfig() {
 
-  
+    }
 
-  
+    public SystemConfig(String jsonString) {
 
+    }
 }
