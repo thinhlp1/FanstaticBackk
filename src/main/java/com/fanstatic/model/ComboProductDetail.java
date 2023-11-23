@@ -38,6 +38,16 @@ public class ComboProductDetail {
 	@ManyToOne
 	private Product product;
 
+	@ManyToOne
+	@JoinColumn(name = "product_varient_id")
+	private ProductVarient productVarient;
+
+	@ManyToOne
+	@JoinColumn(name = "extra_portion_id")
+	private ExtraPortion extraPortion;
+
+	private Integer quantity;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")
 	private Date updateAt;

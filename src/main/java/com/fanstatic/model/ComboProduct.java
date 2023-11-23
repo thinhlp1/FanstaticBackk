@@ -43,6 +43,8 @@ public class ComboProduct {
 
 	private String name;
 
+	private String code;
+
 	private Long price;
 
 	@Column(name = "out_of_stock")

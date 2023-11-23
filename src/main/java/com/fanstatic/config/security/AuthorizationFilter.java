@@ -64,6 +64,8 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             if (authentication != null && authentication.isAuthenticated()) {
                 Account account = (Account) authentication.getPrincipal();
 
+                // api for user, dont need authrization
+
                 // kiem tra url api xem co hop le hay khong
                 if (urlPaths[1].equals("api") || urlPaths[1].equals("ws")) {
                     String managerFeatureId = (urlPaths[2] + "_" + urlPaths[3]).toUpperCase();
