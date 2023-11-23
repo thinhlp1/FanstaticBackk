@@ -40,4 +40,5 @@ public class ProductDTO extends ResponseDataDTO {
 
     private List<OptionGroupDTO> optionGroups;
 
+   private Long varientPrice;
 }

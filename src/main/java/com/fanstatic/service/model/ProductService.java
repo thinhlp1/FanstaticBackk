@@ -589,6 +589,11 @@ public class ProductService {
                 productVarientDTO.setSaleEvent(modelMapper.map(saleEventVarient, SaleEventDTO.class));
             }
             productVarientDTO.setImageUrl(getProductVarientImage(productVarient));
+
+            if (productVarient.getDefaultSize() == 1){
+                productDTO.setVarientPrice(productVarientDTO.getPrice());
+            }
+
             productVarientDTOs.add(productVarientDTO);
 
         }
