@@ -18,5 +18,8 @@ public class UserCompactDTO extends ResponseDataDTO {
 
 	private String employeeCode;
 
-	
+	private String name;
+
+	private RoleDTO role;
+
 }

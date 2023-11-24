@@ -7,5 +7,6 @@ public class ImageConst {
     public static final String EXTRA_PORTION_FOLDER = "default/extraportion";
     public static final String TALBE_FOLDER = "default/table";
     public static final String TALBE_LAYOUT_FOLDER = "default/table/layout";
+    public static final String USER_FOLDER = "default/user";
 
 }

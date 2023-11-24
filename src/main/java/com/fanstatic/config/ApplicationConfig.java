@@ -79,7 +79,7 @@ public class ApplicationConfig {
                 "classpath:validate-message/warehouseDeliverItem",
                 "classpath:validate-message/warehouseInventory",
                 "classpath:validate-message/warehouseInventoryItem"
-        );
+                "classpath:validate-message/warehouseReceiveItem"
         ms.setDefaultEncoding("utf-8");
         return ms;
     }

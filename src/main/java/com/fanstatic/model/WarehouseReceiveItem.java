@@ -25,14 +25,15 @@ import java.util.Date;
 public class WarehouseReceiveItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "expired_at")
     private Date expiredAt;
 
-    private long price;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date price;
 
     private int quantity;
 
@@ -71,8 +72,8 @@ public class WarehouseReceiveItem {
     @JoinColumn(name = "delete_by")
     private User deleteBy;
 
-//    @ManyToOne
-//    @JoinColumn(name = "flavor_category_id")
-//    private FlavorCategory flavorCategory;
+    @ManyToOne
+    @JoinColumn(name = "flavor_category_id")
+    private FlavorCategory flavorCategory;
 
 }

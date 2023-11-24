@@ -49,17 +49,16 @@ public class CategoryService {
             throw new ValidationException(errors);
         }
 
+        Category category = modelMapper.map(categoryRequestDTO, Category.class);
+
         // check image
         MultipartFile image = categoryRequestDTO.getImageFile();
         if (image != null) {
-            String fileName = image.getOriginalFilename();
-            String contentType = image.getContentType();
-            long fileSize = image.getSize();
-            System.out.println(fileName);
+            File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+            category.setImage(file);
             // save image to Fisebase and file table
         }
 
-        Category category = modelMapper.map(categoryRequestDTO, Category.class);
         category.setActive(DataConst.ACTIVE_TRUE);
         category.setCreateAt(new Date());
         category.setCreateBy(systemService.getUserLogin());
