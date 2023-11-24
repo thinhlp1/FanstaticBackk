@@ -11,9 +11,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface ComboProductRepository extends JpaRepository<ComboProduct, Integer> {
 
-    public Optional<List<ComboProduct>> findAllByActiveIsTrue();
+    public Optional<List<ComboProduct>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<ComboProduct>> findAllByActiveIsFalse();
+    public Optional<List<ComboProduct>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<ComboProduct> findByIdAndActiveIsFalse(int id);
 
@@ -30,6 +30,8 @@ public interface ComboProductRepository extends JpaRepository<ComboProduct, Inte
     public Optional<ComboProduct> findByNameAndActiveIsTrueAndIdNot(String code, Integer id);
 
     public Optional<ComboProduct> findByCodeAndActiveIsTrueAndIdNot(String code, Integer id);
+
+    public List<ComboProduct> findAllByOrderByCreateAtDesc();
 
     @Query("SELECT COALESCE(SUM(oi.quantity), 0) " +
             "FROM OrderItem oi " +

@@ -189,16 +189,16 @@ public class TableService {
         int active = RequestParamConst.ACTIVE_TRUE;
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                tables = tableRepository.findAll();
+                tables = tableRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                tables = tableRepository.findAllByActiveIsTrue().orElse(tables);
+                tables = tableRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(tables);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                tables = tableRepository.findAllByActiveIsFalse().orElse(tables);
+                tables = tableRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(tables);
                 break;
             default:
-                tables = tableRepository.findAll();
+                tables = tableRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> tableDTOS = new ArrayList<>();

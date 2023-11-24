@@ -7,13 +7,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.fanstatic.model.Product;
 import com.fanstatic.model.User;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    public Optional<List<User>> findAllByActiveIsTrue();
+    public Optional<List<User>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<User>> findAllByActiveIsFalse();
+    public Optional<List<User>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<User> findByIdAndActiveIsTrue(Integer id);
 
@@ -33,4 +34,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.employeeCode LIKE %:employeeCode%")
     public Optional<Integer> countByEmployeeCodeLike(@Param("employeeCode") String employeeCode);
+
+    public List<User> findAllByOrderByCreateAtDesc();
+
 }

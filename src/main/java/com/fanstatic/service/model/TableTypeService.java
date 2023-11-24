@@ -182,16 +182,16 @@ public class TableTypeService {
         int active = RequestParamConst.ACTIVE_TRUE;
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                tableTypes = tableTypeRepository.findAll();
+                tableTypes = tableTypeRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                tableTypes = tableTypeRepository.findAllByActiveIsTrue().orElse(tableTypes);
+                tableTypes = tableTypeRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(tableTypes);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                tableTypes = tableTypeRepository.findAllByActiveIsFalse().orElse(tableTypes);
+                tableTypes = tableTypeRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(tableTypes);
                 break;
             default:
-                tableTypes = tableTypeRepository.findAll();
+                tableTypes = tableTypeRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> tableTypeDTOS = new ArrayList<>();

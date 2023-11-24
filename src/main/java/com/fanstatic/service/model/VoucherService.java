@@ -41,16 +41,16 @@ public class VoucherService {
         //Dựa vào biến active mà sẽ cho hiển thị list voucher mong muốn
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                vouchers = voucherRepository.findAll();
+                vouchers = voucherRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                vouchers = voucherRepository.findAllByActiveIsFalse().orElse(vouchers);
+                vouchers = voucherRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(vouchers);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                vouchers = voucherRepository.findAllByActiveIsTrue().orElse(vouchers);
+                vouchers = voucherRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(vouchers);
                 break;
             default:
-                vouchers = voucherRepository.findAll();
+                vouchers = voucherRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
 //        Bắt đầu từ đoạn này chủ yếu để cấu hình cho json trả về theo dạng nào

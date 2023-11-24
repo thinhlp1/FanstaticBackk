@@ -154,16 +154,16 @@ public class UnitService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                units = unitRepository.findAll();
+                units = unitRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                units = unitRepository.findAllByActiveIsTrue().orElse(units);
+                units = unitRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(units);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                units = unitRepository.findAllByActiveIsFalse().orElse(units);
+                units = unitRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(units);
                 break;
             default:
-                units = unitRepository.findAll();
+                units = unitRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> unitDTOS = new ArrayList<>();

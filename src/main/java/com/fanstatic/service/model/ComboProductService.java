@@ -507,16 +507,16 @@ public class ComboProductService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                comboProducts = comboProductRepository.findAll();
+                comboProducts = comboProductRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                comboProducts = comboProductRepository.findAllByActiveIsTrue().orElse(comboProducts);
+                comboProducts = comboProductRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(comboProducts);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                comboProducts = comboProductRepository.findAllByActiveIsFalse().orElse(comboProducts);
+                comboProducts = comboProductRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(comboProducts);
                 break;
             default:
-                comboProducts = comboProductRepository.findAll();
+                comboProducts = comboProductRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> comboProductDTOs = new ArrayList<>();

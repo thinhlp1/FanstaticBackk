@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface CustomerRepository extends JpaRepository<User, Integer> {
 
-    public Optional<List<User>> findAllByActiveIsTrue();
+    public Optional<List<User>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<User>> findAllByActiveIsFalse();
+    public Optional<List<User>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<User> findByIdAndActiveIsTrue(Integer id);
 
@@ -26,6 +26,7 @@ public interface CustomerRepository extends JpaRepository<User, Integer> {
 
     public Optional<User> findByEmailAndActiveIsTrueAndIdNot(String email, Integer id);
 
+    public List<User> findAllByOrderByCreateAtDesc();
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.employeeCode LIKE %:employeeCode%")
     public Optional<Integer> countByEmployeeCodeLike(@Param("employeeCode") String employeeCode);

@@ -198,16 +198,16 @@ public class RoleService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                roles = roleRepository.findAll();
+                roles = roleRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                roles = roleRepository.findAllByActiveIsTrue().orElse(roles);
+                roles = roleRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(roles);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                roles = roleRepository.findAllByActiveIsFalse().orElse(roles);
+                roles = roleRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(roles);
                 break;
             default:
-                roles = roleRepository.findAll();
+                roles = roleRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> roleDTOS = new ArrayList<>();

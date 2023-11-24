@@ -6,11 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-
 public interface WarehouseInventoryRepository extends JpaRepository<WarehouseInventory, Integer> {
-    public Optional<List<WarehouseInventory>> findAllByActiveIsTrue();
+    public Optional<List<WarehouseInventory>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<WarehouseInventory>> findAllByActiveIsFalse();
+    public Optional<List<WarehouseInventory>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<WarehouseInventory> findByIdAndActiveIsTrue(int id);
 
@@ -19,4 +18,7 @@ public interface WarehouseInventoryRepository extends JpaRepository<WarehouseInv
     public Optional<WarehouseInventory> findByDescriptionAndActiveIsTrue(String description);
 
     public Optional<WarehouseInventory> findByDescriptionAndActiveIsFalse(String description);
+
+    public List<WarehouseInventory> findAllByOrderByCreateAtDesc();
+
 }

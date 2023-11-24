@@ -227,16 +227,16 @@ public class FlavorService {
         //Dựa vào biến active mà sẽ cho hiển thị list voucher mong muốn
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                flavors = flavorRepository.findAll();
+                flavors = flavorRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                flavors = flavorRepository.findAllByActiveIsFalse().orElse(flavors);
+                flavors = flavorRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(flavors);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                flavors = flavorRepository.findAllByActiveIsTrue().orElse(flavors);
+                flavors = flavorRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(flavors);
                 break;
             default:
-                flavors = flavorRepository.findAll();
+                flavors = flavorRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
 

@@ -249,7 +249,7 @@ public class RolePermissionService {
     public ResponseDTO getFeaturePermission() {
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
 
-        List<FeaturePermission> featurePermissions = featurePermissionRepository.findAll();
+        List<FeaturePermission> featurePermissions = featurePermissionRepository.findAllByOrderByCreateAtDesc();
 
         List<ResponseDataDTO> featurePermissionDTOs = new ArrayList<>();
 

@@ -8,9 +8,9 @@ import java.util.Optional;
 
 
 public interface SaleEventRepository extends JpaRepository<SaleEvent, Integer> {
-    public Optional<List<SaleEvent>> findAllByActiveIsTrue();
+    public Optional<List<SaleEvent>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<SaleEvent>> findAllByActiveIsFalse();
+    public Optional<List<SaleEvent>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<SaleEvent> findByIdAndActiveIsTrue(int id);
 

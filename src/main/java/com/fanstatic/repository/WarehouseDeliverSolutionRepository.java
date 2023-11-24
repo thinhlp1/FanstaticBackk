@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WarehouseDeliverSolutionRepository extends JpaRepository<WarehouseDeliverSolution, Integer> {
-    public Optional<List<WarehouseDeliverSolution>> findAllByActiveIsTrue();
+    public Optional<List<WarehouseDeliverSolution>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<WarehouseDeliverSolution>> findAllByActiveIsFalse();
+    public Optional<List<WarehouseDeliverSolution>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<WarehouseDeliverSolution> findByIdAndActiveIsTrue(int id);
 
@@ -18,4 +18,7 @@ public interface WarehouseDeliverSolutionRepository extends JpaRepository<Wareho
     public Optional<WarehouseDeliverSolution> findByDescriptionAndActiveIsTrue(String description);
 
     public Optional<WarehouseDeliverSolution> findByDescriptionAndActiveIsFalse(String description);
+
+    public List<WarehouseDeliverSolution> findAllByOrderByCreateAtDesc();
+
 }

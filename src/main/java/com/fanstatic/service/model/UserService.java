@@ -264,16 +264,16 @@ public class UserService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                users = userRepository.findAll();
+                users = userRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                users = userRepository.findAllByActiveIsTrue().orElse(users);
+                users = userRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(users);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                users = userRepository.findAllByActiveIsFalse().orElse(users);
+                users = userRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(users);
                 break;
             default:
-                users = userRepository.findAll();
+                users = userRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
 

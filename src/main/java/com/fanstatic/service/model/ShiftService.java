@@ -166,16 +166,16 @@ public class ShiftService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                shifts = shiftRepository.findAll();
+                shifts = shiftRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                shifts = shiftRepository.findAllByActiveIsTrue().orElse(shifts);
+                shifts = shiftRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(shifts);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                shifts = shiftRepository.findAllByActiveIsFalse().orElse(shifts);
+                shifts = shiftRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(shifts);
                 break;
             default:
-                shifts = shiftRepository.findAll();
+                shifts = shiftRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> shiftDTOS = new ArrayList<>();

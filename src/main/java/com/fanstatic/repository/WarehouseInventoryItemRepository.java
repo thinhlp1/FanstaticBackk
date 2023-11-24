@@ -8,9 +8,9 @@ import java.util.Optional;
 
 
 public interface WarehouseInventoryItemRepository extends JpaRepository<WarehouseInventoryItem, Integer> {
-    public Optional<List<WarehouseInventoryItem>> findAllByActiveIsTrue();
+    public Optional<List<WarehouseInventoryItem>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<WarehouseInventoryItem>> findAllByActiveIsFalse();
+    public Optional<List<WarehouseInventoryItem>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<WarehouseInventoryItem> findByIdAndActiveIsTrue(int id);
 

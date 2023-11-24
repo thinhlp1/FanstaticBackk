@@ -144,16 +144,16 @@ public class WarehouseDeliverService {
         //Dựa vào biến active mà sẽ cho hiển thị list voucher mong muốn
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                warehouseDeliverList = warehouseDeliverRepository.findAll();
+                warehouseDeliverList = warehouseDeliverRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                warehouseDeliverList = warehouseDeliverRepository.findAllByActiveIsFalse().orElse(warehouseDeliverList);
+                warehouseDeliverList = warehouseDeliverRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(warehouseDeliverList);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                warehouseDeliverList = warehouseDeliverRepository.findAllByActiveIsTrue().orElse(warehouseDeliverList);
+                warehouseDeliverList = warehouseDeliverRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(warehouseDeliverList);
                 break;
             default:
-                warehouseDeliverList = warehouseDeliverRepository.findAll();
+                warehouseDeliverList = warehouseDeliverRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
 //        Bắt đầu từ đoạn này chủ yếu để cấu hình cho json trả về theo dạng nào

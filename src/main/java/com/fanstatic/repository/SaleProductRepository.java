@@ -24,9 +24,9 @@ public interface SaleProductRepository extends JpaRepository<SaleProduct, Intege
     @Query("SELECT se FROM SaleEvent se JOIN SaleProduct sp ON se.id = sp.saleEvent.id " +
             "WHERE se.active = 1 AND sp.comboProduct.id = :comboId AND se.startAt <= CURRENT_TIMESTAMP AND se.endAt >= CURRENT_TIMESTAMP")
     Optional<SaleEvent> findSaleByComboId(@Param("comboId") Integer comboId);
-      public Optional<List<SaleProduct>> findAllByActiveIsTrue();
+      public Optional<List<SaleProduct>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<SaleProduct>> findAllByActiveIsFalse();
+    public Optional<List<SaleProduct>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<SaleProduct> findByIdAndActiveIsTrue(int id);
 

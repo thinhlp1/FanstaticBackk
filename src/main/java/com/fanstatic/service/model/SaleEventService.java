@@ -124,16 +124,16 @@ public class SaleEventService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                saleevents = saleEventRepository.findAll();
+                saleevents = saleEventRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                saleevents = saleEventRepository.findAllByActiveIsTrue().orElse(saleevents);
+                saleevents = saleEventRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(saleevents);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                saleevents = saleEventRepository.findAllByActiveIsFalse().orElse(saleevents);
+                saleevents = saleEventRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(saleevents);
                 break;
             default:
-                saleevents = saleEventRepository.findAll();
+                saleevents = saleEventRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> saleeventDTOS = new ArrayList<>();

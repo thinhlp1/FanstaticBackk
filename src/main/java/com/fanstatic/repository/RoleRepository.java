@@ -14,9 +14,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface RoleRepository extends JpaRepository<Role, Integer> {
-    public Optional<List<Role>> findAllByActiveIsTrue();
+    public Optional<List<Role>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<Role>> findAllByActiveIsFalse();
+    public Optional<List<Role>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<Role> findByIdAndActiveIsTrue(int id);
 

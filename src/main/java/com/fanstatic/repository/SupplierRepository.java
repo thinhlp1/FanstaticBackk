@@ -11,9 +11,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 
 public interface SupplierRepository extends JpaRepository<Supplier, Integer> {
-       public Optional<List<Supplier>> findAllByActiveIsTrue();
+       public Optional<List<Supplier>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<Supplier>> findAllByActiveIsFalse();
+    public Optional<List<Supplier>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<Supplier> findByIdAndActiveIsTrue(int id);
 

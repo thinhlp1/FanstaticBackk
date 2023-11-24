@@ -114,7 +114,7 @@ public class HotProductSerivce {
     }
 
     public ResponseDTO show() {
-        List<HotProduct> hotProducts = hotProductRepository.findAll();
+        List<HotProduct> hotProducts = hotProductRepository.findAllByOrderByCreateAtDesc();
 
         List<ResponseDataDTO> productDTOS = new ArrayList<>();
 
@@ -129,7 +129,7 @@ public class HotProductSerivce {
     }
 
     public ResponseDTO showOnOrder() {
-        List<HotProduct> hotProducts = hotProductRepository.findAll();
+        List<HotProduct> hotProducts = hotProductRepository.findAllByOrderByCreateAtDesc();
 
         List<ResponseDataDTO> productDTOS = new ArrayList<>();
 

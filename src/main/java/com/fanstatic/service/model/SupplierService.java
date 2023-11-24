@@ -163,16 +163,16 @@ public class SupplierService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                suppliers = supplierRepository.findAll();
+                suppliers = supplierRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                suppliers = supplierRepository.findAllByActiveIsTrue().orElse(suppliers);
+                suppliers = supplierRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(suppliers);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                suppliers = supplierRepository.findAllByActiveIsFalse().orElse(suppliers);
+                suppliers = supplierRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(suppliers);
                 break;
             default:
-                suppliers = supplierRepository.findAll();
+                suppliers = supplierRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> supplierDTOS = new ArrayList<>();

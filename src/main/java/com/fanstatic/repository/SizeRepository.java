@@ -9,9 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 
 public interface SizeRepository extends JpaRepository<Size, Integer> {
-    public Optional<List<Size>> findAllByActiveIsTrue();
+    public Optional<List<Size>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<Size>> findAllByActiveIsFalse();
+    public Optional<List<Size>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<Size> findByIdAndActiveIsTrue(int id);
 

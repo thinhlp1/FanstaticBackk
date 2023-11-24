@@ -252,16 +252,16 @@ public class ExtraPortionService {
         //Dựa vào biến active mà sẽ cho hiển thị list voucher mong muốn
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                extraPortions = extraPortionRepository.findAll();
+                extraPortions = extraPortionRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                extraPortions = extraPortionRepository.findAllByActiveIsFalse().orElse(extraPortions);
+                extraPortions = extraPortionRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(extraPortions);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                extraPortions = extraPortionRepository.findAllByActiveIsTrue().orElse(extraPortions);
+                extraPortions = extraPortionRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(extraPortions);
                 break;
             default:
-                extraPortions = extraPortionRepository.findAll();
+                extraPortions = extraPortionRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
 

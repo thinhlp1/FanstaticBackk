@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ShiftRepository extends JpaRepository<Shift, Integer> {
-    public Optional<List<Shift>> findAllByActiveIsTrue();
+    public Optional<List<Shift>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<Shift>> findAllByActiveIsFalse();
+    public Optional<List<Shift>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<Shift> findByIdAndActiveIsTrue(int id);
 

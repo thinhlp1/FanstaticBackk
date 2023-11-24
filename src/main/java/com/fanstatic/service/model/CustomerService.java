@@ -204,16 +204,16 @@ public class CustomerService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                users = customerRepository.findAll();
+                users = customerRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                users = customerRepository.findAllByActiveIsTrue().orElse(users);
+                users = customerRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(users);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                users = customerRepository.findAllByActiveIsFalse().orElse(users);
+                users = customerRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(users);
                 break;
             default:
-                users = customerRepository.findAll();
+                users = customerRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
 

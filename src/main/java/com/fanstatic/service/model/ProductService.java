@@ -664,16 +664,16 @@ public class ProductService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                products = productRepository.findAll();
+                products = productRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                products = productRepository.findAllByActiveIsTrue().orElse(products);
+                products = productRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(products);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                products = productRepository.findAllByActiveIsFalse().orElse(products);
+                products = productRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(products);
                 break;
             default:
-                products = productRepository.findAll();
+                products = productRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> productDTOS = new ArrayList<>();

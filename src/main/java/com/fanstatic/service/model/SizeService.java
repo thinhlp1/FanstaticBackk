@@ -172,16 +172,16 @@ public class SizeService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                sizes = sizeRepository.findAll();
+                sizes = sizeRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                sizes = sizeRepository.findAllByActiveIsTrue().orElse(sizes);
+                sizes = sizeRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(sizes);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                sizes = sizeRepository.findAllByActiveIsFalse().orElse(sizes);
+                sizes = sizeRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(sizes);
                 break;
             default:
-                sizes = sizeRepository.findAll();
+                sizes = sizeRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
         List<ResponseDataDTO> sizeDTOS = new ArrayList<>();

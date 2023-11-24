@@ -9,9 +9,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
-    public Optional<List<Category>> findAllByActiveIsTrue();
+    public Optional<List<Category>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<Category>> findAllByActiveIsFalse();
+    public Optional<List<Category>> findAllByActiveIsFalseOrderByCreateAtDesc();
 
     public Optional<List<Category>> findByLevel(Integer level);
 
@@ -28,6 +28,9 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     public Optional<List<Category>> findByLevelAndActiveIsTrue(Integer level);
 
     public Optional<List<Category>> findByLevelAndActiveIsFalse(Integer level);
+
+    public List<Category> findAllByOrderByCreateAtDesc();
+
 
 
 }

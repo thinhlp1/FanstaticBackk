@@ -1,16 +1,18 @@
 package com.fanstatic.repository;
 
 import com.fanstatic.model.ExtraPortion;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-
 public interface ExtraPortionRepository extends JpaRepository<ExtraPortion, Integer> {
-    public Optional<List<ExtraPortion>> findAllByActiveIsTrue();
+    public Optional<List<ExtraPortion>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<ExtraPortion>> findAllByActiveIsFalse();
+    public Optional<List<ExtraPortion>> findAllByActiveIsFalseOrderByCreateAtDesc();
+
+    public List<ExtraPortion> findAllByOrderByCreateAtDesc();
 
     public Optional<ExtraPortion> findByExtraPortionIdAndActiveIsTrue(int id);
 

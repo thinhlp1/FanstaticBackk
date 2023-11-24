@@ -290,7 +290,7 @@ public class CategoryService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                rootCategories = categoryRepository.findAll();
+                rootCategories = categoryRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsTrue(ROOT_LEVEL).orElse(rootCategories);
@@ -320,7 +320,7 @@ public class CategoryService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                rootCategories = categoryRepository.findAll();
+                rootCategories = categoryRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_TRUE:
                 rootCategories = categoryRepository.findByLevelAndActiveIsTrue(ROOT_LEVEL).orElse(rootCategories);

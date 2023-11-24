@@ -13,9 +13,11 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     public Optional<Product> findByCodeAndActiveIsTrue(String code);
 
-    public Optional<List<Product>> findAllByActiveIsTrue();
+    public Optional<List<Product>> findAllByActiveIsTrueOrderByCreateAtDesc();
 
-    public Optional<List<Product>> findAllByActiveIsFalse();
+    public Optional<List<Product>> findAllByActiveIsFalseOrderByCreateAtDesc();
+
+    public List<Product> findAllByOrderByCreateAtDesc();
 
     public Optional<Product> findByIdAndActiveIsFalse(int id);
 

@@ -175,16 +175,16 @@ public class FlavorCategoryService {
         //Dựa vào biến active mà sẽ cho hiển thị list voucher mong muốn
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                flavorCategories = flavorCategoryRepository.findAll();
+                flavorCategories = flavorCategoryRepository.findAllByOrderByCreateAtDesc();
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                flavorCategories = flavorCategoryRepository.findAllByActiveIsFalse().orElse(flavorCategories);
+                flavorCategories = flavorCategoryRepository.findAllByActiveIsFalseOrderByCreateAtDesc().orElse(flavorCategories);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                flavorCategories = flavorCategoryRepository.findAllByActiveIsTrue().orElse(flavorCategories);
+                flavorCategories = flavorCategoryRepository.findAllByActiveIsTrueOrderByCreateAtDesc().orElse(flavorCategories);
                 break;
             default:
-                flavorCategories = flavorCategoryRepository.findAll();
+                flavorCategories = flavorCategoryRepository.findAllByOrderByCreateAtDesc();
                 break;
         }
 //        Bắt đầu từ đoạn này chủ yếu để cấu hình cho json trả về theo dạng nào
