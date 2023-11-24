@@ -466,8 +466,8 @@ public class ComboProductService {
         comboProductDTO.setId(comboProduct.getId());
         comboProductDTO.setName(comboProduct.getName());
         comboProductDTO.setPrice(comboProduct.getPrice());
-        comboProductDTO.setActive(comboProduct.getActive());
-        comboProductDTO.setOutOfStock(comboProduct.getOutOfStock());
+        comboProductDTO.setActive(comboProduct.getActive() == 1 ? true : false);
+        comboProductDTO.setOutOfStock(comboProduct.getOutOfStock() == 1? true : false);
         comboProductDTO.setSoldQuantity(comboProductRepository.countSoldQuantityByProductId(comboProduct.getId()));
 
         SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orElse(null);

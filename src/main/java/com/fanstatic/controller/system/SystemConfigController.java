@@ -22,13 +22,13 @@ import lombok.RequiredArgsConstructor;
 public class SystemConfigController {
     private final SystemConfigService systemConfigService;
 
-    @GetMapping("/api/u/systemconfig/get-config")
+    @GetMapping("/api/manage/systemconfig/show/config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> getConfig() {
         return ResponseUtils.returnReponsetoClient(systemConfigService.getConfig());
     }
 
-    @PostMapping("/api/u/systemconfig/update-config")
+    @PostMapping("/api/manage/systemconfig/update/config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> updateConfig(@RequestBody SystemConfig config) {
 
@@ -36,27 +36,27 @@ public class SystemConfigController {
 
     }
 
-    @GetMapping("/api/u/systemconfig/get-ip-config")
+    @GetMapping("/api/manage/systemconfig/show/ip-config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> getIpConfig() {
         return ResponseUtils.returnReponsetoClient(systemConfigService.getConfig());
 
     }
 
-    @PostMapping("/api/u/systemconfig/update-ip-config")
+    @PostMapping("/api/manage/systemconfig/update/ip-config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> updateIpConfig(@RequestBody IpConfig config) {
         return ResponseUtils.returnReponsetoClient(systemConfigService.updateIpConfig(config));
     }
 
-    @GetMapping("/api/u/systemconfig/get-contact-config")
+    @GetMapping("/api/manage/systemconfig/show/contact-config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> getContactConfig() {
         return ResponseUtils.returnReponsetoClient(systemConfigService.getContactConfig());
 
     }
 
-    @PostMapping("/api/u/systemconfig/update-contact-config")
+    @PostMapping("/api/manage/systemconfig/update/contact-config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> updateConfig(@RequestBody ContactConfig config) {
 
@@ -64,13 +64,13 @@ public class SystemConfigController {
 
     }
 
-    @GetMapping("/api/u/systemconfig/get-point-program-config")
+    @GetMapping("/api/manage/systemconfig/show/point-program-config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> getPointProgram() {
         return ResponseUtils.returnReponsetoClient(systemConfigService.getPointProgramConfig());
     }
 
-    @PostMapping("/api/u/systemconfig/update-point-program-config")
+    @PostMapping("/api/manage/systemconfig/update/point-program-config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> updatePointProgramConfig(@RequestBody PointProgramConfig config) {
         return ResponseUtils.returnReponsetoClient(systemConfigService.updatePointProgram(config));

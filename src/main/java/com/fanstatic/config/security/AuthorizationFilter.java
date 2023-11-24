@@ -31,10 +31,9 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String[] urlPaths = currentUrl.split("/");
 
         String[] allowedPaths = { "home", "auth", "u", "handle-checkout", "cancel-checkout", "notification" };
+        String[] pathsForUser = { "profile" };
 
         for (String path : urlPaths) {
-            // Sử dụng phương thức Arrays.asList để chuyển mảng thành danh sách và sử dụng
-            // contains để kiểm tra
             if (path.equals("handle-checkout") || path.equals("cancel-checkout")) {
 
                 filterChain.doFilter(request, response);
@@ -43,8 +42,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         }
 
         for (String path : urlPaths) {
-            // Sử dụng phương thức Arrays.asList để chuyển mảng thành danh sách và sử dụng
-            // contains để kiểm tra
             if (Arrays.asList(allowedPaths).contains(path)) {
                 filterChain.doFilter(request, response);
                 return;
@@ -65,6 +62,12 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                 Account account = (Account) authentication.getPrincipal();
 
                 // api for user, dont need authrization
+                for (String path : urlPaths) {
+                    if (Arrays.asList(pathsForUser).contains(path)) {
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+                }
 
                 // kiem tra url api xem co hop le hay khong
                 if (urlPaths[1].equals("api") || urlPaths[1].equals("ws")) {
