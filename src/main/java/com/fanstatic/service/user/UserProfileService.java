@@ -6,6 +6,7 @@ import java.util.List;
 import javax.management.modelmbean.ModelMBean;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -14,8 +15,11 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.auth.ChangePasswordDTO;
 import com.fanstatic.dto.auth.ConfirmOtpDTO;
+import com.fanstatic.dto.auth.ConfirmPasswordDTO;
 import com.fanstatic.dto.auth.LoginDTO;
+import com.fanstatic.dto.auth.LoginPasswordDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.profile.ProfileUserDTO;
@@ -48,6 +52,7 @@ public class UserProfileService {
     private final OTPService otpService;
     private final JwtUtil jwtUtil;
     private final CookieUtils cookieUtils;
+    private final PasswordEncoder passwordEncoder;
     private final PlatformTransactionManager transactionManager;
 
     public ResponseDTO getUserProfile() {
@@ -119,7 +124,8 @@ public class UserProfileService {
                 String jwtToken = jwtUtil.generateToken(account);
                 cookieUtils.set("token", jwtToken, 24);
                 // systemService.writeLoginLog(jwtToken, account.getUser());
-                // systemService.writeSystemLog(user.getId(), user.getName(), "Thay đổi số điện thoại");
+                // systemService.writeSystemLog(user.getId(), user.getName(), "Thay đổi số điện
+                // thoại");
 
                 sessionUtils.remove("numberPhone");
 
@@ -145,6 +151,36 @@ public class UserProfileService {
             return ResponseUtils.success(200, "Gửi mã OTP thành công", null);
         } else {
             return ResponseUtils.fail(500, "Lỗi gửi mã OTP", null);
+        }
+    }
+
+    public ResponseDTO changePassword(ChangePasswordDTO changePasswordDTO) {
+
+        User user = systemService.getUserLogin();
+        Account account = user.getAccount();
+
+
+
+        if (!passwordEncoder.matches(changePasswordDTO.getOldPassword(), account.getPassword())) {
+            return ResponseUtils.fail(400, "Mật khẩu không đúng", null);
+        }
+
+        if (!changePasswordDTO.getPassword().equals(changePasswordDTO.getPassword())) {
+            return ResponseUtils.fail(400, "Mật khẩu không khóp", null);
+
+        }
+
+        account.setPassword(passwordEncoder.encode(changePasswordDTO.getPassword()));
+        Account accountSaved = accountRepository.save(account);
+        if (accountSaved != null) {
+            sessionUtils.set("accountExits", true);
+            String jwtToken = jwtUtil.generateToken(account);
+            cookieUtils.set("token", jwtToken, 24);
+            return ResponseUtils.success(200, "Đổi mật khẩu thành công", null);
+
+        } else {
+            return ResponseUtils.fail(500, "Đổi mật khẩu không thành công", null);
+
         }
     }
 

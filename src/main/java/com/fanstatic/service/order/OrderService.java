@@ -1463,7 +1463,8 @@ public class OrderService {
             } else {
                 itemPrice = comboProduct.getPrice();
             }
-            itemTotal = itemTotal + itemPrice;
+            // itemTotal = itemTotal + itemPrice;
+              itemTotal =   itemPrice * orderItem.getQuantity();
         }
 
         return itemTotal;

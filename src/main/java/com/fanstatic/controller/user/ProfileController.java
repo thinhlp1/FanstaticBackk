@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.auth.ChangePasswordDTO;
 import com.fanstatic.dto.auth.ConfirmOtpDTO;
 import com.fanstatic.dto.auth.LoginDTO;
 import com.fanstatic.service.user.UserProfileService;
@@ -35,6 +36,13 @@ public class ProfileController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> changeNumberPhone(@RequestBody @Valid LoginDTO loginDTO) {
         ResponseDTO responseDTO = userProfileService.changeNumberPhone(loginDTO);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PostMapping("/change-password")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> changePassword(@RequestBody @Valid ChangePasswordDTO changePasswordDTO) {
+        ResponseDTO responseDTO = userProfileService.changePassword(changePasswordDTO);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
