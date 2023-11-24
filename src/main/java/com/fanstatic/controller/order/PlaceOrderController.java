@@ -61,7 +61,7 @@ public class PlaceOrderController {
     @GetMapping("/show/hot-product")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showHotProduct() {
-        ResponseDTO reponseDTO = hotProductSerivce.show();
+        ResponseDTO reponseDTO = hotProductSerivce.showOnOrder();
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
