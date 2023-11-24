@@ -1,6 +1,7 @@
 package com.fanstatic.repository;
 
 import com.fanstatic.model.Order;
+import com.fanstatic.model.User;
 import com.google.common.base.Optional;
 
 import java.util.Date;
@@ -28,7 +29,9 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                         "OR o.status.id = 'CONFIRMING') " +
                         "AND o.customer.id = :customerId " +
                         "AND o.createAt >= :time")
-        Optional<List<Order>> findOrderUser(@Param("customerId") Integer customerId,@Param("time") Date time);
+        Optional<List<Order>> findOrderUser(@Param("customerId") Integer customerId, @Param("time") Date time);
+
+        List<Order> findAllByCustomerId(Integer customerId);
 
         List<Order> findByRootOrder(Integer rootOrder);
 

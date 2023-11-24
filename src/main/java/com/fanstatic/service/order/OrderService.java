@@ -105,12 +105,10 @@ public class OrderService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final SystemService systemService;
-    private final FileService fileService;
     private final PayOSService payOSService;
     private final PushNotificationService pushNotificationService;
     private final RolePermissionService rolePermissionService;
 
-    private final TableService tableService;
     private final ExtraPortionRepository extraPortionRepository;
     private final OrderItemRepository orderItemRepository;
     private final OptionRepository optionRepository;
@@ -126,8 +124,6 @@ public class OrderService {
     private final VoucherRepository voucherRepository;
     private final BillRepository billRepository;
     private final SaleProductRepository saleProductRepository;
-    private final SaleEventRepository saleEventRepository;
-    private final CategoryRepository categoryRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final OrderItemOptionRepository orderItemOptionRepository;
 
@@ -720,7 +716,7 @@ public class OrderService {
                 return ResponseUtils.fail(404, "Order item không tồn tại", null);
             }
 
-            if (orderItemUpdateDTO.getQuantity() < MIN_QUANTITY || orderItemUpdateDTO.getQuantity() > MAX_PEOPLE) {
+            if (orderItemUpdateDTO.getQuantity() < MIN_QUANTITY || orderItemUpdateDTO.getQuantity() > MAX_QUANTITY) {
                 return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
 
             }
@@ -788,7 +784,7 @@ public class OrderService {
         }
 
         if (orderExtraPortionUpdateDTO.getQuantity() < MIN_QUANTITY
-                || orderExtraPortionUpdateDTO.getQuantity() > MAX_PEOPLE) {
+                || orderExtraPortionUpdateDTO.getQuantity() > MAX_QUANTITY) {
             return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
 
         }
@@ -889,7 +885,7 @@ public class OrderService {
         }
 
         if (orderItemRequestDTO.getQuantity() < MIN_QUANTITY
-                || orderItemRequestDTO.getQuantity() > MAX_PEOPLE) {
+                || orderItemRequestDTO.getQuantity() > MAX_QUANTITY) {
             return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
 
         }
@@ -942,7 +938,7 @@ public class OrderService {
         }
 
         if (extraPortionOrderRequestDTO.getQuantity() < MIN_QUANTITY
-                || extraPortionOrderRequestDTO.getQuantity() > MAX_PEOPLE) {
+                || extraPortionOrderRequestDTO.getQuantity() > MAX_QUANTITY) {
             return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
 
         }
@@ -1049,6 +1045,24 @@ public class OrderService {
     public ResponseDTO getListOrder() {
         Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
         List<Order> orders = orderRepository.findOrdersCreated(twentyFourHoursAgo);
+        List<ResponseDataDTO> orderDTOs = new ArrayList<>();
+        for (Order order : orders) {
+            OrderDTO orderDTO = convertOrderToDTO(order);
+            orderDTOs.add(orderDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(orderDTOs);
+        return ResponseUtils.success(200, "Danh sách order", responseListDataDTO);
+
+    }
+
+    public ResponseDTO getListOrder(int userId) {
+        if (!systemService.checkCustomerResource(userId)) {
+            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        }
+
+        List<Order> orders = orderRepository.findAllByCustomerId(userId);
         List<ResponseDataDTO> orderDTOs = new ArrayList<>();
         for (Order order : orders) {
             OrderDTO orderDTO = convertOrderToDTO(order);
@@ -1353,7 +1367,8 @@ public class OrderService {
                             .orElse(null);
                     if (productVariant != null) {
 
-                        saleEvent = saleProductRepository.findSaleByProductVarientId(productVariant.getId()).orElse(null);
+                        saleEvent = saleProductRepository.findSaleByProductVarientId(productVariant.getId())
+                                .orElse(null);
                         if (saleEvent != null) {
                             itemPrice = (long) (productVariant.getPrice()
                                     - (productVariant.getPrice() * ((double) saleEvent.getPercent() / 100)));
@@ -1528,7 +1543,8 @@ public class OrderService {
             OrderItemDTO newOrderItemDTO = modelMapper.map(orderItem, OrderItemDTO.class);
             if (productVarient != null) {
                 Product product2 = productVarient.getProduct();
-                SaleEvent saleEvent = saleProductRepository.findSaleByProductVarientId(productVarient.getId()).orElse(null);
+                SaleEvent saleEvent = saleProductRepository.findSaleByProductVarientId(productVarient.getId())
+                        .orElse(null);
                 if (saleEvent != null) {
 
                     newOrderItemDTO.getProductVarient().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
