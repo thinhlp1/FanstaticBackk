@@ -25,7 +25,7 @@ public class WarehouseReceiveController {
         userService -> user = systemService.getUserLogin
      */
 
-    @GetMapping("/getUser")
+    @GetMapping("/create/getUser")
     public ResponseEntity<ResponseDTO> getUser() {
         ResponseDTO responseDTO = warehouseReceiveService.getUser(systemService.getUserLogin().getId());
         return ResponseUtils.returnReponsetoClient(responseDTO);
