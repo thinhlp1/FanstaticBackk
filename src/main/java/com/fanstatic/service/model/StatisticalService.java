@@ -3,12 +3,18 @@ package com.fanstatic.service.model;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.model.comboProduct.ComboProductDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
+import com.fanstatic.dto.model.product.ProductVarientDTO;
 import com.fanstatic.dto.model.statistical.DashBoardDataDTO;
 import com.fanstatic.dto.model.statistical.DataDTO;
+import com.fanstatic.dto.model.statistical.DataSellComboProductDTO;
 import com.fanstatic.dto.model.statistical.DataSellProductDTO;
+import com.fanstatic.dto.model.statistical.DataSellProductVariantDTO;
 import com.fanstatic.dto.model.statistical.StatisticalRevenueDTO;
+import com.fanstatic.model.ComboProduct;
 import com.fanstatic.model.Product;
+import com.fanstatic.model.ProductVarient;
 import com.fanstatic.repository.OrderItemRepository;
 import com.fanstatic.repository.OrderRepository;
 import com.fanstatic.util.CommonUtils;
@@ -33,8 +39,6 @@ public class StatisticalService {
     private final OrderItemRepository orderItemRepository;
     private final ModelMapper modelMapper;
 
-
-
     // thống kê data dashboard thống kê ngày , tuần , top sản phẩm
     public ResponseDTO analysisDashBoardOverViewData() {
 
@@ -44,7 +48,7 @@ public class StatisticalService {
         Date startDateOfMonth = getStartOfMonth(today);
         List<String> state = new ArrayList<>();
         state.add("COMPLETE");
-       
+        state.add("ITEM_COMPLETE");
 
         // Số lượng sản phẩm bán được trong hôm nay
         Integer soldProductsToday = orderItemRepository.countSoldProductsByDateRangeAndState(startDate, today,
@@ -64,41 +68,64 @@ public class StatisticalService {
         BigInteger revenueToday = orderRepository.calculateRevenueByDateRangeAndStates(startDate, today,
                 state);
 
-        // Doanh thu trong tuần này với các trạng thái A 
+        // Doanh thu trong tuần này với các trạng thái A
         BigInteger revenueThisWeek = orderRepository.calculateRevenueByDateRangeAndStates(startDateOfWeek,
                 today,
                 state);
 
-        // Doanh thu trong tháng này với các trạng thái A 
+        // Doanh thu trong tháng này với các trạng thái A
         BigInteger revenueThisMonth = orderRepository.calculateRevenueByDateRangeAndStates(startDateOfMonth,
                 today,
                 state);
 
-        // Số đơn hàng trong hôm nay với các trạng thái A 
+        // Số đơn hàng trong hôm nay với các trạng thái A
         Long ordersToday = orderRepository.countOrdersByDateRangeAndStates(startDate, today, state);
 
-        // Số đơn hàng trong tuần này với các trạng thái A 
+        // Số đơn hàng trong tuần này với các trạng thái A
         Long ordersThisWeek = orderRepository.countOrdersByDateRangeAndStates(startDateOfWeek, today, state);
 
-        // Số đơn hàng trong tháng này với các trạng thái A 
+        // Số đơn hàng trong tháng này với các trạng thái A
         Long ordersThisMonth = orderRepository.countOrdersByDateRangeAndStates(startDateOfMonth, today, state);
 
         Date startOfYear = getStartOfYear(today);
-        List<Object[]> listProduct = orderItemRepository.findTop10BestSellingProductsByRangeAndStates(startOfYear,
+        List<Object[]> listProductYear = orderItemRepository.findTop10BestSellingProductsByRangeAndStates(startOfYear,
                 today, state);
-       // listProduct.subList(0, 5);
+        List<Object[]> listComboProductYear = orderItemRepository.findTop10BestSellingComboProductsByRangeAndStates(startOfYear,
+                today, state);
+        List<Object[]> listProductVariantYear = orderItemRepository.findTop10BestSellingProductVariantByRangeAndStates(startOfYear,
+                today, state);
+        // listProduct.subList(0, 5);
 
         List<DataSellProductDTO> listDataSellProductDTOs = new ArrayList<>();
+        List<DataSellComboProductDTO> listDataSellComboProductDTOs = new ArrayList<>();
+        List<DataSellProductVariantDTO> listDataSellProductVariantDTOs = new ArrayList<>();
 
-        for (int i = 0; i < listProduct.size(); i++) {
-            Object[] result = listProduct.get(i);
-
+        for (int i = 0; i < listProductYear.size(); i++) {
+            Object[] result = listProductYear.get(i);
             Product product = (Product) result[0];
             long quantity = (Long) result[1];
             ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
             DataSellProductDTO dataSellProductDTO = new DataSellProductDTO(productDTO, quantity);
 
             listDataSellProductDTOs.add(dataSellProductDTO);
+        }
+         for (int i = 0; i < listComboProductYear.size(); i++) {
+            Object[] result = listComboProductYear.get(i);
+            ComboProduct comboProduct = (ComboProduct) result[0];
+            long quantity = (Long) result[1];
+            ComboProductDTO comboProductDTO = modelMapper.map(comboProduct, ComboProductDTO.class);
+            DataSellComboProductDTO dataSellComboProductDTO = new DataSellComboProductDTO(comboProductDTO, quantity);
+
+            listDataSellComboProductDTOs.add(dataSellComboProductDTO);
+        }
+         for (int i = 0; i < listProductVariantYear.size(); i++) {
+            Object[] result = listProductVariantYear.get(i);
+            ProductVarient productVariant = (ProductVarient) result[0];
+            long quantity = (Long) result[1];
+            ProductVarientDTO productVarientDTO = modelMapper.map(productVariant, ProductVarientDTO.class);
+            DataSellProductVariantDTO dataSellProductVariantDTO = new DataSellProductVariantDTO(productVarientDTO, quantity);
+
+            listDataSellProductVariantDTOs.add(dataSellProductVariantDTO);
         }
 
         if (soldProductsToday == null) {
@@ -141,11 +168,12 @@ public class StatisticalService {
                 .setListSoldProducts(new DataDTO(soldProductsToday, soldProductsThisWeek,
                         soldProductsThisMonth));
         dashBoardOverviewDTO.setListTopProduct(listDataSellProductDTOs);
+        dashBoardOverviewDTO.setListTopComboProduct(listDataSellComboProductDTOs);
+        dashBoardOverviewDTO.setListTopProductVariant(listDataSellProductVariantDTOs);
 
-       return ResponseUtils.success(200, "Data DashBoard", dashBoardOverviewDTO);
+        return ResponseUtils.success(200, "Data DashBoard", dashBoardOverviewDTO);
 
     }
-
 
     // tính doanh thu mỗi tháng trong năm
     public ResponseDTO calculateRevenueByMonths(Integer year) {
@@ -183,12 +211,11 @@ public class StatisticalService {
         return ResponseUtils.success(200, "Data Thống Kê Doanh thu Tháng", statisticalRevenueDTO);
     }
 
-
     // count số lượng khách hàng trong mỗi tháng của năm
     public ResponseDTO countCustomersByMonths(Integer year) {
 
         Calendar calendar = Calendar.getInstance();
-      
+
         int currentYear = calendar.get(Calendar.YEAR);
         if (year != null) {
             currentYear = year;
@@ -226,7 +253,7 @@ public class StatisticalService {
     // cout số lượng oder mỗi tháng trong năm
     public ResponseDTO countOrdersByMonths(Integer year) {
         Calendar calendar = Calendar.getInstance();
-       // int currentMonth = calendar.get(Calendar.MONTH);
+        // int currentMonth = calendar.get(Calendar.MONTH);
         int currentYear = calendar.get(Calendar.YEAR);
 
         if (year != null) {
@@ -262,7 +289,7 @@ public class StatisticalService {
 
     public ResponseDTO findTop10BestSellingProducts(Integer year) {
         Date today = new Date();
-      //  Date startDate = startDate(today);
+        // Date startDate = startDate(today);
         Date startOfYear = getStartOfYear(today);
 
         if (year != null) {
@@ -293,7 +320,6 @@ public class StatisticalService {
         return ResponseUtils.success(200, "Danh sách top 10 bán chạy", reponseListDataDTO);
     }
 
-
     // truyền vào date trả về ngày đầu tuần của date truyền vào
     private Date getStartOfWeek(Date date) {
         Calendar calendar = Calendar.getInstance();
@@ -309,8 +335,7 @@ public class StatisticalService {
         return calendar.getTime();
     }
 
-
-    //set date giờ phút giây, mili giây về 0
+    // set date giờ phút giây, mili giây về 0
     private Date truncateDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -320,7 +345,6 @@ public class StatisticalService {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
-
 
     // trả về tháng đầu tiên ngày đầu tiên của năm
     private Date getStartOfYear(Date date) {
@@ -351,13 +375,11 @@ public class StatisticalService {
         return calendar.getTime();
     }
 
-
     // năm hiện tại
     private static int getCurrentYear() {
         Calendar calendar = Calendar.getInstance();
         return calendar.get(Calendar.YEAR);
     }
-
 
     // khởi tạo danh sách từ năm -> năm hiện tại
     public List<Integer> getYearRange() {

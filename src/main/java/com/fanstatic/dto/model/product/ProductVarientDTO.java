@@ -8,11 +8,13 @@ import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 
 import com.fanstatic.dto.model.size.SizeDTO;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class ProductVarientDTO extends ResponseDataDTO {
 
     private int id;

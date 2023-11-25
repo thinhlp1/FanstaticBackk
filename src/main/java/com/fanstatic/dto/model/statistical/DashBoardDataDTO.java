@@ -18,4 +18,6 @@ public class DashBoardDataDTO  extends ResponseDataDTO{
     private DataDTO listRevenue;
     private DataDTO listOrders;
     private List<DataSellProductDTO> listTopProduct;
+    private List<DataSellComboProductDTO> listTopComboProduct;
+    private List<DataSellProductVariantDTO> listTopProductVariant;
 }
