@@ -16,7 +16,7 @@ public class SystemConfig extends ResponseDataDTO{
     private OrderConfig allowOrder;
     private ContactConfig contact;
     private List<PointProgramConfig> pointProgram;
-    private IpConfig ipConfig;
+    private List<IpConfig> ipConfigs;
 
 
 }

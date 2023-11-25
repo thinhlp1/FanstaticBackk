@@ -25,6 +25,7 @@ import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.category.CategoryDTO;
 import com.fanstatic.dto.model.combo.ComboProductDTO;
+import com.fanstatic.dto.model.hotproduct.HotProductDTO;
 import com.fanstatic.dto.model.option.OptionGroupDTO;
 import com.fanstatic.dto.model.option.OptionGroupRequestDTO;
 import com.fanstatic.dto.model.option.OptionRequestDTO;
@@ -718,9 +719,27 @@ public class ProductService {
             comboProductDTOs.add(comboProdutDTO);
         }
 
+        List<HotProductDTO> hotProductDTOs = new ArrayList<>();
+        for (ProductDTO productDTO : productDTOS) {
+            if (productDTO.isHotProduct()) {
+                HotProductDTO hotProductDTO = new HotProductDTO();
+                hotProductDTO.setProduct(productDTO);
+                hotProductDTOs.add(hotProductDTO);
+            }
+        }
+
+        for (ComboProductDTO comboProductDTO : comboProductDTOs) {
+            if (comboProductDTO.isHotProduct()) {
+                HotProductDTO hotProductDTO = new HotProductDTO();
+                hotProductDTO.setComboProduct(comboProductDTO);
+                hotProductDTOs.add(hotProductDTO);
+            }
+        }
+
         OrderShowProductDTO orderShowProductDTO = new OrderShowProductDTO();
         orderShowProductDTO.setComboProducts(comboProductDTOs);
         orderShowProductDTO.setProducts(productDTOS);
+        orderShowProductDTO.setHotProductDTOs(hotProductDTOs);
 
         return ResponseUtils.success(200, "Danh sách sản phẩm", orderShowProductDTO);
     }

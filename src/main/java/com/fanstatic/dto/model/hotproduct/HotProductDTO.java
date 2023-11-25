@@ -2,6 +2,7 @@ package com.fanstatic.dto.model.hotproduct;
 
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.combo.ComboProductCompactDTO;
+import com.fanstatic.dto.model.combo.ComboProductDTO;
 import com.fanstatic.dto.model.product.ProductCompactDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
 import com.google.cloud.Date;
@@ -16,7 +17,7 @@ public class HotProductDTO extends ResponseDataDTO {
 
     private ProductDTO product;
 
-    private ComboProductCompactDTO comboProduct;
+    private ComboProductDTO comboProduct;
 
     private Date startAt;
 

@@ -39,15 +39,15 @@ public class SystemConfigController {
     @GetMapping("/api/manage/systemconfig/show/ip-config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> getIpConfig() {
-        return ResponseUtils.returnReponsetoClient(systemConfigService.getConfig());
+        return ResponseUtils.returnReponsetoClient(systemConfigService.getIpConfig());
 
     }
 
-    @PostMapping("/api/manage/systemconfig/update/ip-config")
-    @ResponseBody
-    public ResponseEntity<ResponseDTO> updateIpConfig(@RequestBody IpConfig config) {
-        return ResponseUtils.returnReponsetoClient(systemConfigService.updateIpConfig(config));
-    }
+    // @PostMapping("/api/manage/systemconfig/update/ip-config")
+    // @ResponseBody
+    // public ResponseEntity<ResponseDTO> updateIpConfig(@RequestBody IpConfig config) {
+    //     return ResponseUtils.returnReponsetoClient(systemConfigService.updateIpConfig(config));
+    // }
 
     @GetMapping("/api/manage/systemconfig/show/contact-config")
     @ResponseBody

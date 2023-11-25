@@ -2,6 +2,7 @@ package com.fanstatic.service.system;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.tomcat.util.json.JSONParser;
@@ -15,6 +16,8 @@ import com.fanstatic.config.system.IpConfig;
 import com.fanstatic.config.system.PointProgramConfig;
 import com.fanstatic.config.system.SystemConfig;
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.util.ResponseUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,7 +43,14 @@ public class SystemConfigService {
 
     public ResponseDTO getIpConfig() {
         loadConfig();
-        return ResponseUtils.success(200, "Cấu hình hệ thống", systemConfig.getIpConfig());
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        List<IpConfig> ipConfigs = systemConfig.getIpConfigs();
+        List<ResponseDataDTO> iResponseDataDTOs = new ArrayList<>();
+        for (IpConfig ipConfig : ipConfigs) {
+            iResponseDataDTOs.add(ipConfig);
+        }
+        responseListDataDTO.setDatas(iResponseDataDTOs);
+        return ResponseUtils.success(200, "Cấu hình hệ thống", responseListDataDTO);
     }
 
     public ResponseDTO getPointProgramConfig() {
@@ -64,9 +74,9 @@ public class SystemConfigService {
 
     }
 
-    public ResponseDTO updateIpConfig(IpConfig newIpConfig) {
+    public ResponseDTO updateIpConfig(List<IpConfig> ipconfigs) {
         loadConfig();
-        systemConfig.setIpConfig(newIpConfig);
+        systemConfig.getIpConfigs().clear();
         saveConfig();
         return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 

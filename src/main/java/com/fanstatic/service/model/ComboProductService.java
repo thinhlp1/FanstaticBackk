@@ -38,6 +38,7 @@ import com.fanstatic.repository.CategoryRepository;
 import com.fanstatic.repository.ComboProductDetailsRepository;
 import com.fanstatic.repository.ComboProductRepository;
 import com.fanstatic.repository.ExtraPortionRepository;
+import com.fanstatic.repository.HotProductRepository;
 import com.fanstatic.repository.ProductRepository;
 import com.fanstatic.repository.ProductVarientRepository;
 import com.fanstatic.repository.SaleProductRepository;
@@ -59,6 +60,7 @@ public class ComboProductService {
     private final ExtraPortionRepository extraPortionRepository;
     private final ComboProductDetailsRepository comboProductDetailsRepository;
     private final SaleProductRepository saleProductRepository;
+    private final HotProductRepository hotProductRepository;
 
     private final ModelMapper modelMapper;
     private final SystemService systemService;
@@ -467,12 +469,19 @@ public class ComboProductService {
         comboProductDTO.setName(comboProduct.getName());
         comboProductDTO.setPrice(comboProduct.getPrice());
         comboProductDTO.setActive(comboProduct.getActive() == 1 ? true : false);
-        comboProductDTO.setOutOfStock(comboProduct.getOutOfStock() == 1? true : false);
+        comboProductDTO.setOutOfStock(comboProduct.getOutOfStock() == 1 ? true : false);
         comboProductDTO.setSoldQuantity(comboProductRepository.countSoldQuantityByProductId(comboProduct.getId()));
 
         SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orElse(null);
         if (saleEvent != null) {
             comboProductDTO.setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+        }
+
+        if (hotProductRepository.findByComboProduct(comboProduct).isPresent()) {
+            comboProductDTO.setHotProduct(true);
+        } else {
+            comboProductDTO.setHotProduct(false);
+
         }
 
         CategoryCompactDTO categoryDTO = modelMapper.map(comboProduct.getCategory(), CategoryCompactDTO.class);
