@@ -14,7 +14,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
         public Optional<OrderItem> findByIdAndOrder(Integer id, Order order);
 
-        @Query("SELECT SUM(oi.quantity) FROM OrderItem oi WHERE oi.order.createAt >= :startDate AND oi.order.createAt <= :endDate AND oi.order.status.id IN :orderStateId")
+        @Query("SELECT SUM(oi.quantityCompleted) FROM OrderItem oi WHERE oi.order.createAt >= :startDate AND oi.order.createAt <= :endDate AND oi.status.id IN :orderStateId")
         Integer countSoldProductsByDateRangeAndState(Date startDate, Date endDate, List<String> orderStateId);
     
 

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.fanstatic.dto.ResponseDTO;
-import com.fanstatic.dto.model.shift.ShiftRequestDTO;
 
 import com.fanstatic.service.model.SizeService;
 import com.fanstatic.service.model.StatisticalService;
