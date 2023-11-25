@@ -211,6 +211,12 @@ public class OrderService {
 
         }
 
+        boolean isHasOrder = checkUserHasOrder().isSuccess();
+        if (isHasOrder) {
+            return ResponseUtils.fail(201, "Khách hàng đang có order được đặt ", null);
+
+        }
+
         Order order = modelMapper.map(orderRequestDTO, Order.class);
 
         OrderType orderType = orderTypeRepository.findById(orderRequestDTO.getOrderType()).orElse(null);
@@ -366,8 +372,10 @@ public class OrderService {
 
             transactionManager.commit(transactionStatus);
 
-            pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(),
-                    "Order của bạn đã được nhân viên tiếp nhận");
+            if (order.getCustomer() != null) {
+                pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(),
+                        "Order của bạn đã được nhân viên tiếp nhận");
+            }
 
             return ResponseUtils.success(200, "Duyệt order thành công", null);
         } else {
@@ -915,7 +923,7 @@ public class OrderService {
         orderItemRequestDTOs.add(orderItemRequestDTO);
         ResponseDTO isSaved = createOrderItem(orderItemRequestDTOs, order);
         if (isSaved.isSuccess()) {
-            List<OrderItem> orderItems2= orderItemRepository.findAllByOrder(order);
+            List<OrderItem> orderItems2 = orderItemRepository.findAllByOrder(order);
             order.setOrderItems(orderItems2);
             return ResponseUtils.success(200, "Thêm mới thành công",
                     convertOrderToDTO(order));
