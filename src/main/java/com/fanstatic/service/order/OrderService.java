@@ -97,6 +97,7 @@ import com.fanstatic.util.ResponseUtils;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -285,10 +286,11 @@ public class OrderService {
         } else {
             pushNotificationOrder(order.getCustomer().getId(), orderSaved.getOrderId(),
                     "Order của bạn đã được gửi cho nhân viên");
-
         }
 
-        return ResponseUtils.success(200, "Tạo order thành công", null);
+        OrderDTO orderDTO = convertOrderToDTO(orderSaved);
+
+        return ResponseUtils.success(200, "Tạo order thành công", orderDTO);
 
     }
 
@@ -454,7 +456,7 @@ public class OrderService {
 
         transactionManager.commit(transactionStatus);
 
-        return ResponseUtils.success(200, "Tạo order thành công", null);
+        return ResponseUtils.success(200, "Tạo order thành công", convertOrderToDTO(orderSaved));
 
     }
 
@@ -703,10 +705,9 @@ public class OrderService {
     }
 
     public ResponseDTO updateOrderItem(OrderItemUpdateDTO orderItemUpdateDTO) {
-        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        Order order = orderRepository.findById(orderItemUpdateDTO.getOrderId()).orElse(null);
 
         try {
-            Order order = orderRepository.findById(orderItemUpdateDTO.getOrderId()).orElse(null);
             if (order == null) {
                 return ResponseUtils.fail(404, "Order không tồn tại", null);
             }
@@ -728,7 +729,6 @@ public class OrderService {
 
             orderItem.setQuantity(orderItemUpdateDTO.getQuantity());
             orderItem.setNote(orderItemUpdateDTO.getNote());
-            orderItemRepository.save(orderItem);
 
             List<Integer> optionsId = orderItemUpdateDTO.getOptionsId();
             List<OrderItemOption> orderItemOptions = orderItem.getOrderItemOptions();
@@ -759,14 +759,17 @@ public class OrderService {
             for (OrderItemOption orderItemOption : optionsInDbNotInList) {
                 orderItemOptionRepository.deleteById(orderItemOption.getId());
             }
-
             orderItemOptionRepository.saveAllAndFlush(orderItemOptions2);
+
+            // orderItem.setOrderItemOptions(orderItemOptions2);
+            orderItemRepository.save(orderItem);
+
         } catch (Exception e) {
 
         }
-        transactionManager.commit(transactionStatus);
 
-        return ResponseUtils.success(200, "Update thành công", null);
+        order = orderRepository.findById(orderItemUpdateDTO.getOrderId()).orElse(null);
+        return ResponseUtils.success(200, "Update thành công", convertOrderToDTO(order));
     }
 
     public ResponseDTO updateOrderExtraPortion(OrderExtraPortionUpdateDTO orderExtraPortionUpdateDTO) {
@@ -898,7 +901,7 @@ public class OrderService {
 
                 orderItem.setQuantity(orderItem.getQuantity() +
                         orderItemRequestDTO.getQuantity());
-                orderItemRepository.save(orderItem);
+                orderItemRepository.saveAndFlush(orderItem);
                 order = orderRepository.findById(orderItemRequestDTO.getOrderId()).orElse(null);
 
                 return ResponseUtils.success(200, "Thêm mới thành công",
@@ -912,7 +915,8 @@ public class OrderService {
         orderItemRequestDTOs.add(orderItemRequestDTO);
         ResponseDTO isSaved = createOrderItem(orderItemRequestDTOs, order);
         if (isSaved.isSuccess()) {
-            order = orderRepository.findById(orderItemRequestDTO.getOrderId()).orElse(null);
+            List<OrderItem> orderItems2= orderItemRepository.findAllByOrder(order);
+            order.setOrderItems(orderItems2);
             return ResponseUtils.success(200, "Thêm mới thành công",
                     convertOrderToDTO(order));
 
@@ -921,6 +925,7 @@ public class OrderService {
 
     }
 
+    @Transactional
     public ResponseDTO addNewOrderExtraPortion(ExtraPortionOrderRequestDTO extraPortionOrderRequestDTO) {
         Order order = orderRepository.findById(extraPortionOrderRequestDTO.getOrderId()).orElse(null);
         if (order == null) {
@@ -962,11 +967,11 @@ public class OrderService {
         orderExtraPortion.setCreateBy(systemService.getUserLogin());
         orderExtraPortion.setExtraPortion(extraPortion);
         orderExtraPortion.setOrder(order);
-        order = orderRepository.findById(extraPortionOrderRequestDTO.getOrderId()).orElse(null);
 
-        orderExtraPortionRepository.save(orderExtraPortion);
-        order = orderRepository.findById(extraPortionOrderRequestDTO.getOrderId()).orElse(null);
+        orderExtraPortionRepository.saveAndFlush(orderExtraPortion);
 
+        List<OrderExtraPortion> orderExtraPortions = orderExtraPortionRepository.findAllByOrder(order);
+        order.setOrderExtraPortions(orderExtraPortions);
         return ResponseUtils.success(200, "Thêm mới thành công",
                 convertOrderToDTO(order));
     }
@@ -1098,7 +1103,11 @@ public class OrderService {
         }
 
         orderDTO.setTables(getTables(order.getOrderTables()));
-        orderDTO.setBill(modelMapper.map(order.getBill(), BillDTO.class));
+
+        if (order.getBill() != null) {
+            orderDTO.setBill(modelMapper.map(order.getBill(), BillDTO.class));
+
+        }
         orderDTO.setCreateAt(order.getCreateAt());
         orderDTO.setDeleteAt(order.getDeleteAt());
         orderDTO.setUpdateAt(order.getUpdateAt());
@@ -1152,6 +1161,7 @@ public class OrderService {
         try {
             List<OrderExtraPortion> listSaved = orderExtraPortionRepository.saveAll(orderExtraPortions);
             if (listSaved != null) {
+                order.setOrderExtraPortions(listSaved);
                 return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
             }
             return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
@@ -1228,6 +1238,7 @@ public class OrderService {
         try {
             List<OrderItem> listSaved = orderItemRepository.saveAll(orderItems);
             if (listSaved != null) {
+                order.setOrderItems(listSaved);
                 return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
             }
             return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
@@ -1260,6 +1271,8 @@ public class OrderService {
         try {
             List<OrderTable> listSaved = orderTableRepository.saveAll(orderTables);
             if (listSaved != null) {
+                order.setOrderTables(listSaved);
+
                 return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
             }
             return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
@@ -1285,11 +1298,11 @@ public class OrderService {
             return ResponseUtils.fail(404, "Số lượng người không hợp lệ", null);
         }
 
-        order.setPeople(orderId);
+        order.setPeople(people);
         order.setUpdateAt(new Date());
         order.setUpdateBy(systemService.getUserLogin());
         orderRepository.save(order);
-        return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
+        return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, convertOrderToDTO(order));
 
     }
 
@@ -1464,7 +1477,7 @@ public class OrderService {
                 itemPrice = comboProduct.getPrice();
             }
             // itemTotal = itemTotal + itemPrice;
-              itemTotal =   itemPrice * orderItem.getQuantity();
+            itemTotal = itemPrice * orderItem.getQuantity();
         }
 
         return itemTotal;
@@ -1526,6 +1539,11 @@ public class OrderService {
 
             File image = orderExtraPortion.getExtraPortion().getImageFile();
             orderExtraPortionDTO.getExtraPortion().setImageFileUrl(image != null ? image.getLink() : "");
+
+            Long total = calculateExtraPortionTotal(orderExtraPortion);
+
+            orderExtraPortionDTO.setTotal(total);
+
             orderExtraPortionDTOs.add(orderExtraPortionDTO);
 
         }
@@ -1594,11 +1612,15 @@ public class OrderService {
             newOrderItemDTO.setTotal(total);
 
             List<OptionDTO> optionDTOs = new ArrayList<>();
-            for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
-                OptionDTO optionDTO = modelMapper.map(orderItemOption.getOption(),
-                        OptionDTO.class);
-                optionDTOs.add(optionDTO);
+
+            if (orderItem.getOrderItemOptions() != null) {
+                for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
+                    OptionDTO optionDTO = modelMapper.map(orderItemOption.getOption(),
+                            OptionDTO.class);
+                    optionDTOs.add(optionDTO);
+                }
             }
+
             newOrderItemDTO.setOptions(optionDTOs);
             orderItemDTOs.add(newOrderItemDTO);
 
