@@ -22,4 +22,8 @@ public class RequestStaffNotificationDTO extends ResponseDataDTO{
 
     private Date confirmAt;
 
+    private String status;
+
+    private Date denyAt;
+
 }

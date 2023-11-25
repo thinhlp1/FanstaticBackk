@@ -30,8 +30,8 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String currentUrl = request.getRequestURI();
         String[] urlPaths = currentUrl.split("/");
 
-        String[] allowedPaths = { "home", "auth", "u", "handle-checkout", "cancel-checkout", "notification" };
-        String[] pathsForUser = { "profile" };
+        String[] allowedPaths = { "home", "auth", "u", "handle-checkout", "cancel-checkout" };
+        String[] pathsForUser = { "profile","request-staff" };
 
         for (String path : urlPaths) {
             if (path.equals("handle-checkout") || path.equals("cancel-checkout")) {

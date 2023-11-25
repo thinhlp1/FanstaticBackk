@@ -2,6 +2,7 @@ package com.fanstatic.controller.manage;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -42,7 +43,7 @@ public class RequestStaffController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @PutMapping("/api/manage/notification/confirm/{id}")
+    @PutMapping("/api/manage/notification/update/confirm/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> confirm(@PathVariable("id") Integer id) {
 
@@ -57,7 +58,7 @@ public class RequestStaffController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @PutMapping("/api/manage/notification/deny/{id}")
+    @PutMapping("/api/manage/notification/update/deny/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> deny(@PathVariable("id") Integer id) {
 
@@ -72,5 +73,22 @@ public class RequestStaffController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-   
+    @GetMapping("/api/manage/notification/show")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> show() {
+
+        ResponseDTO responseDTO = requestStaffNotifacationService.show();
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/api/manage/notification/show-today")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showToday() {
+
+        ResponseDTO responseDTO = requestStaffNotifacationService.showToDay();
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
 }
