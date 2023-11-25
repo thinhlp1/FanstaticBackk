@@ -1,5 +1,6 @@
 package com.fanstatic.repository;
 
+import com.fanstatic.model.Category;
 import com.fanstatic.model.ComboProduct;
 
 import java.util.List;
@@ -36,5 +37,7 @@ public interface ComboProductRepository extends JpaRepository<ComboProduct, Inte
             "WHERE oi.order.status.id = 'COMPLETE' " +
             "AND oi.comboProduct.id = :comboId")
     Integer countSoldQuantityByProductId(@Param("comboId") Integer comboId);
+
+    public List<ComboProduct> findByCategory(Category category);
 
 }

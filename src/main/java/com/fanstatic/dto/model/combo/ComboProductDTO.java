@@ -30,9 +30,9 @@ public class ComboProductDTO extends ResponseDataDTO {
 
     private CategoryCompactDTO category;
 
-    private byte active;
+    private boolean active;
 
-    private byte outOfStock;
+    private boolean outOfStock;
 
     private Integer soldQuantity;
 

@@ -1,5 +1,6 @@
 package com.fanstatic.repository;
 
+import com.fanstatic.model.Category;
 import com.fanstatic.model.Product;
 
 import java.util.List;
@@ -35,5 +36,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             "WHERE oi.order.status.id = 'COMPLETE' " +
             "AND oi.product.id = :productId")
     Integer countSoldQuantityByProductId(@Param("productId") Integer productId);
+
+   // Tìm tất cả sản phẩm có một category cụ thể và active là true
+   List<Product> findByProductCategoriesCategoryAndActiveIsTrue(Category category);
 
 }

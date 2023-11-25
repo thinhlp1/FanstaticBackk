@@ -37,6 +37,7 @@ public class HotProductSerivce {
     private final ComboProductRepository comboProductRepository;
     private final ModelMapper modelMapper;
     private final SystemService systemService;
+    private final ProductService productService;
     private final PlatformTransactionManager transactionManager;
 
     public ResponseDTO addHotProduct(List<HotProductRequestDTO> hotProductRequestDTOs) {
@@ -127,4 +128,19 @@ public class HotProductSerivce {
         return ResponseUtils.success(200, "Danh sách hot product", reponseListDataDTO);
     }
 
+    public ResponseDTO showOnOrder() {
+        List<HotProduct> hotProducts = hotProductRepository.findAll();
+
+        List<ResponseDataDTO> productDTOS = new ArrayList<>();
+
+        for (HotProduct hotProduct : hotProducts) {
+            HotProductDTO hotProductDTO = modelMapper.map(hotProduct, HotProductDTO.class);
+            // if 
+            productDTOS.add(hotProductDTO);
+        }
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+        reponseListDataDTO.setDatas(productDTOS);
+        reponseListDataDTO.setNameList("Danh sách hot product");
+        return ResponseUtils.success(200, "Danh sách hot product", reponseListDataDTO);
+    }
 }

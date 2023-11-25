@@ -38,6 +38,9 @@ public class FlavorCategory {
     @OneToMany(mappedBy = "flavorCategory")
     private List<Flavor> flavor;
 
+    @OneToMany(mappedBy = "flavorCategory")
+    private List<WarehouseInventory> warehouseInventoryList;
+
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "update_at")

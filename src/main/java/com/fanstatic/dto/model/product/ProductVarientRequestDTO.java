@@ -24,4 +24,6 @@ public class ProductVarientRequestDTO extends ResponseDataDTO {
     @NotNull(message = "{NotNull.productVarient.size}")
     private int size;
 
+    private boolean defaultSize;
+
 }

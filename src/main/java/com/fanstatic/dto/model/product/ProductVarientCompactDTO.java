@@ -20,10 +20,11 @@ public class ProductVarientCompactDTO {
 
     private SizeDTO size;
 
-    private List<ProductImageDTO> imageUrl;
 
     private SaleEventDTO saleEvent;
     
     private List<CategoryCompactDTO> categories;
+
+    private boolean defaultSize;
 
 }

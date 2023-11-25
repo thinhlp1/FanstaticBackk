@@ -37,6 +37,8 @@ public class OptionGroup {
 
     private byte multichoice;
 
+    private byte require;
+
     @OneToMany(mappedBy = "optionGroup")
     List<Option> options;
 

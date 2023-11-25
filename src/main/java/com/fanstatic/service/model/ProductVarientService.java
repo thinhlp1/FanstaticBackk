@@ -63,6 +63,8 @@ public class ProductVarientService {
                 productVarient.setCreateBy(systemService.getUserLogin());
                 productVarient.setSize(size);
                 productVarient.setProduct(product);
+                productVarient.setDefaultSize(
+                        productVarientDTO.isDefaultSize() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
 
                 ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
                 if (productVarientSaved == null) {
@@ -111,6 +113,8 @@ public class ProductVarientService {
             productVarient.setCreateBy(systemService.getUserLogin());
             productVarient.setSize(size);
             productVarient.setProduct(product);
+            productVarient
+                    .setDefaultSize(productVarientRequestDTO.isDefaultSize() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
 
             ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
             if (productVarientSaved == null) {
@@ -151,6 +155,8 @@ public class ProductVarientService {
             productVarient.setUpdateAt(new Date());
             productVarient.setUpdateBy(systemService.getUserLogin());
             productVarient.setSize(size);
+              productVarient
+                    .setDefaultSize(productVarientDTO.isDefaultSize() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
 
             ProductVarient productVarientSaved = productVarientRepository.save(productVarient);
             if (productVarientSaved == null) {
@@ -241,5 +247,4 @@ public class ProductVarientService {
         return ResponseUtils.success(200, MessageConst.DELETE_SUCCESS, null);
     }
 
-  
 }

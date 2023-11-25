@@ -14,5 +14,7 @@ public class OptionGroupDTO {
 
     private boolean multichoice;
 
+    private boolean require;
+
     private List<OptionDTO> options;
 }

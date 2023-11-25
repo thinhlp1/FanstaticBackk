@@ -10,6 +10,8 @@ import com.fanstatic.service.model.HotProductSerivce;
 import com.fanstatic.service.model.ProductService;
 import com.fanstatic.service.model.SizeService;
 import com.fanstatic.util.ResponseUtils;
+
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -37,6 +39,13 @@ public class PlaceOrderController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
+    @GetMapping("/show/products-by-category")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showProductByCategory(@RequestParam Integer category) {
+        ResponseDTO reponseDTO = productService.showByCategoryId(category);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
     @GetMapping("/show/categories")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showCategory() {
@@ -61,7 +70,7 @@ public class PlaceOrderController {
     @GetMapping("/show/hot-product")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showHotProduct() {
-        ResponseDTO reponseDTO = hotProductSerivce.show();
+        ResponseDTO reponseDTO = hotProductSerivce.showOnOrder();
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
