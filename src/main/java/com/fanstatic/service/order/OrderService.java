@@ -1867,6 +1867,8 @@ public class OrderService {
                 urlToOrder);
     }
 
+   
+
     private boolean isSameProductOrVariantOrCombo(OrderItem orderItem, OrderItem rootOrderItem) {
         // Kiểm tra theo product
         if ((orderItem.getProduct() != null && rootOrderItem.getProduct() != null)) {
