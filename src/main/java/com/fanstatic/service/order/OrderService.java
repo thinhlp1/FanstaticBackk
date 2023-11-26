@@ -440,7 +440,7 @@ public class OrderService {
 
         order.setCreateAt(new Date());
         order.setCreateBy(systemService.getUserLogin());
-        order.setCustomer(systemService.getUserLogin());
+        order.setCustomer(rootOrder.getCustomer());
         order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.CONFIRMING).get());
         order.setTotal(total(orderRequestDTO));
         order.setOrderType(orderType);
