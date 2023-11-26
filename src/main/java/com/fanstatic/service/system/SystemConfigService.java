@@ -58,10 +58,15 @@ public class SystemConfigService {
         return ResponseUtils.success(200, "Cấu hình hệ thống", responseListDataDTO);
     }
 
+    public PointProgramConfig getPointProgramConfigModel() {
+        loadConfig();
+        return systemConfig.getPointProgram();
+    }
+
     public ResponseDTO getPointProgramConfig() {
         loadConfig();
         return ResponseUtils.success(200, "Cấu hình hệ thống",
-                systemConfig.getPointProgram().get(systemConfig.getPointProgram().size() - 1));
+                systemConfig.getPointProgram());
     }
 
     public ResponseDTO updateConfig(SystemConfig newConfig) {
@@ -90,7 +95,7 @@ public class SystemConfigService {
 
     public ResponseDTO updatePointProgram(PointProgramConfig pointProgramConfig) {
         loadConfig();
-        systemConfig.getPointProgram().add(pointProgramConfig);
+        systemConfig.setPointProgram(pointProgramConfig);
         saveConfig();
         return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 

@@ -12,16 +12,11 @@ import lombok.NoArgsConstructor;
 public class PointProgramConfig extends ResponseDataDTO {
     private Long minPoint;
     private Long maxPoint;
-    private ConvertRate convertRate;
+    private ConvertRate moneyToPoint;
+    private ConvertRate pointToMoney;
+
     private String startAt;
     private String endAt;
 
 }
 
-@Data
-class ConvertRate  {
-    private Long from;
-    private Long to;
-    private String currency;
-
-}

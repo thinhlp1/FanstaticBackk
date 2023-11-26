@@ -37,6 +37,9 @@ public class OrderItem {
 
 	private Integer quantity;
 
+	@Column(name = "item_price")
+	private Long itemPrice;
+
 	@Column(name = "quantity_completed")
 	private Integer quantityCompleted;
 
