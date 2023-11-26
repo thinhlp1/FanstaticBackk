@@ -41,6 +41,11 @@ public class SystemConfigService {
         return ResponseUtils.success(200, "Cấu hình hệ thống", systemConfig.getContact());
     }
 
+    public List<IpConfig> getListIpConfig() {
+        loadConfig();
+        return systemConfig.getIpConfigs();
+    }
+
     public ResponseDTO getIpConfig() {
         loadConfig();
         ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
@@ -77,6 +82,7 @@ public class SystemConfigService {
     public ResponseDTO updateIpConfig(List<IpConfig> ipconfigs) {
         loadConfig();
         systemConfig.getIpConfigs().clear();
+        systemConfig.setIpConfigs(ipconfigs);
         saveConfig();
         return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 

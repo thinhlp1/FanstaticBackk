@@ -132,9 +132,13 @@ public class RoleService {
             case ApplicationConst.CUSTOMER_ROLE_ID:
                 return ResponseUtils.fail(500, "Vai trò này là khách hàng. Không được xóa", null);
             case ApplicationConst.CASHIER_ROLE_ID:
-                return ResponseUtils.fail(500, "Vai trò này là khách hàng. Không được xóa", null);
+                return ResponseUtils.fail(500, "Vai trò này là thu ngân. Không được xóa", null);
             case ApplicationConst.ADNIN_ROLE_ID:
-                return ResponseUtils.fail(500, "Vai trò này là khách hàng. Không được xóa", null);
+                return ResponseUtils.fail(500, "Vai trò này là admin. Không được xóa", null);
+            case ApplicationConst.MANAGER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là quản lý. Không được xóa", null);
+            case ApplicationConst.WAITER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là phục vụ. Không được xóa", null);
             default:
                 break;
         }

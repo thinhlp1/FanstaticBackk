@@ -67,7 +67,6 @@ import com.fanstatic.model.User;
 import com.fanstatic.model.Voucher;
 import com.fanstatic.repository.BillRepository;
 import com.fanstatic.repository.CancelReasonRepository;
-import com.fanstatic.repository.CategoryRepository;
 import com.fanstatic.repository.ComboProductRepository;
 import com.fanstatic.repository.ExtraPortionRepository;
 import com.fanstatic.repository.OptionRepository;
@@ -81,18 +80,16 @@ import com.fanstatic.repository.PaymentMethodRepository;
 import com.fanstatic.repository.ProductCategoryRepository;
 import com.fanstatic.repository.ProductRepository;
 import com.fanstatic.repository.ProductVarientRepository;
-import com.fanstatic.repository.SaleEventRepository;
 import com.fanstatic.repository.SaleProductRepository;
 import com.fanstatic.repository.StatusRepository;
 import com.fanstatic.repository.TableRepository;
 import com.fanstatic.repository.UserRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.RolePermissionService;
-import com.fanstatic.service.model.TableService;
 import com.fanstatic.service.payos.PayOSService;
-import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.PushNotificationService;
 import com.fanstatic.service.system.SystemService;
+import com.fanstatic.util.DateUtils;
 import com.fanstatic.util.ResponseUtils;
 
 import jakarta.persistence.EntityManager;
@@ -109,6 +106,7 @@ public class OrderService {
     private final PayOSService payOSService;
     private final PushNotificationService pushNotificationService;
     private final RolePermissionService rolePermissionService;
+    private final DateUtils dateUtils;
 
     private final ExtraPortionRepository extraPortionRepository;
     private final OrderItemRepository orderItemRepository;
@@ -164,8 +162,8 @@ public class OrderService {
         User customer = systemService.getUserLogin();
         List<Order> orders = orderRepository.findOrderUser(customer.getId(), twentyFourHoursAgo).orNull();
 
-        if (orders == null) {
-            return ResponseUtils.success(202, "Không có order", null);
+        if (orders == null || orders.isEmpty()) {
+            return ResponseUtils.fail(202, "Không có order", null);
 
         }
         List<ResponseDataDTO> orderDTOs = new ArrayList<>();
@@ -211,9 +209,9 @@ public class OrderService {
 
         }
 
-        boolean isHasOrder = checkUserHasOrder().isSuccess();
-        if (isHasOrder) {
-            return ResponseUtils.fail(201, "Khách hàng đang có order được đặt ", null);
+        ResponseDTO responseDTO = checkUserHasOrder();
+        if (responseDTO.isSuccess()) {
+            return ResponseUtils.fail(201, "Khách hàng đang có order được đặt ", responseDTO.getData());
 
         }
 
@@ -1222,9 +1220,13 @@ public class OrderService {
             List<OrderItemOption> orderItemOptions = new ArrayList<>();
             if (orderItemDTO.getOptionsId() != null) {
                 for (Integer optionId : orderItemDTO.getOptionsId()) {
-                    System.out.println(optionId);
                     OrderItemOption orderItemOption = new OrderItemOption();
-                    orderItemOption.setOption(optionRepository.findById(optionId).get());
+                    Option option = optionRepository.findById(optionId).orElse(null);
+                    if (option == null) {
+                        return ResponseUtils.fail(500, "Option không tồn tại", null);
+
+                    }
+                    orderItemOption.setOption(option);
                     orderItemOption.setOrderItem(orderItem);
 
                     orderItemOption.setCreateAt(new Date());
@@ -1315,8 +1317,14 @@ public class OrderService {
     }
 
     public ResponseDTO test() {
-        User user = userRepository.findById(33).get();
-        pushNotificationOrder(user.getId(), 150, "dfdsf");
+        // User user = userRepository.findById(33).get();
+        // pushNotificationOrder(user.getId(), 150, "dfdsf");
+        String startTime = "22:30:00";
+        String endTime = "5:20:00";
+        Date startDate = DateUtils.getStartOfToday(startTime);
+        Date endDate = DateUtils.getEndOfToday(endTime);
+        System.out.println("STARTDATE: " + startDate);
+        System.out.println("ENDATE:  " + endDate);
 
         return ResponseUtils.success(200, "OKE", null);
     }
@@ -1435,7 +1443,14 @@ public class OrderService {
 
         }
 
-        return itemTotal;
+        long totalOption = 0;
+        for (Integer optionId : orderItemDTO.getOptionsId()) {
+            Option option = optionRepository.findById(optionId).get();
+
+            totalOption += option.getPrice();
+        }
+
+        return itemTotal + totalOption;
     }
 
     private long calculateItemTotal(OrderItem orderItem) {
@@ -1468,6 +1483,7 @@ public class OrderService {
                 } else {
                     itemPrice = product.getPrice();
                 }
+
             }
             itemTotal = itemPrice * orderItem.getQuantity();
         }
@@ -1488,7 +1504,12 @@ public class OrderService {
             itemTotal = itemPrice * orderItem.getQuantity();
         }
 
-        return itemTotal;
+        long totalOption = 0;
+        for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
+            totalOption += orderItemOption.getOption().getPrice();
+        }
+
+        return itemTotal + totalOption;
     }
 
     private long calculateExtraPortionTotal(ExtraPortionOrderRequestDTO extraPortionOrderRequestDTO) {
@@ -1866,8 +1887,6 @@ public class OrderService {
         pushNotificationService.pushNotification(userId, PushNotificationService.HIGT, "Order của bạn", body,
                 urlToOrder);
     }
-
-   
 
     private boolean isSameProductOrVariantOrCombo(OrderItem orderItem, OrderItem rootOrderItem) {
         // Kiểm tra theo product
