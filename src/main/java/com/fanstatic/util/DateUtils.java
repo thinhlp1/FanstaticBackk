@@ -78,36 +78,52 @@ public class DateUtils {
         }
     }
 
-    private static int getHourFromTime(Date time) {
+    public static int getHourFromTime(Date time) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(time);
         return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
-    private static int getMinuteFromTime(Date time) {
+    public static int getMinuteFromTime(Date time) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(time);
         return calendar.get(Calendar.MINUTE);
     }
 
-    private static Date getStartOfDay(Date date) throws ParseException {
+    public static Date getStartOfDay(Date date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return dateFormat.parse(dateFormat.format(date));
+        try {
+            return dateFormat.parse(dateFormat.format(date));
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
-    // private static Date getEndOfDay(Date date) throws ParseException {
-    // Calendar calendar = Calendar.getInstance();
-    // calendar.setTime(date);
-    // calendar.add(Calendar.DAY_OF_MONTH, 1);
-    // calendar.add(Calendar.SECOND, -1);
-    // return calendar.getTime();
-    // }
-    private static Date getEndOfDay(Date date) throws ParseException {
+    public static Date getDateBefore(Integer day) {
+        Date today = new Date(); // Ngày hiện tại
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(today);
+        calendar.add(Calendar.DAY_OF_MONTH, -day); // Lùi về theo số ngày
+        Date startDate = calendar.getTime();
+        return startDate;
+    }
+
+    public static Date getDayBeforeTime(Integer hour) {
+        Date date = new Date(System.currentTimeMillis() - (hour * 60 * 60 * 1000)); // Lùi về theo giờ
+        return date;
+    }
+
+    public static Date getEndOfDay(Date date) throws ParseException {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         return calendar.getTime();
+    }
+
+    public static int getCurrentYear() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.YEAR);
     }
 }

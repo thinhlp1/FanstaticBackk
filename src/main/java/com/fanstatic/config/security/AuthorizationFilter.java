@@ -29,8 +29,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("AUTHEN FILTER");
-
         Boolean jwtFilterValided = (Boolean) sessionUtils.get("jwtFiltetValided");
         String currentUrl = request.getRequestURI();
         String[] urlPaths = currentUrl.split("/");

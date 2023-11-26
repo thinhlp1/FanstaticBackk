@@ -139,6 +139,9 @@ public class OrderService {
     private final int MIN_QUANTITY = 1;
     private final int MAX_QUANTITY = 99;
 
+    private final String START_DAY = "00:00:00";
+    private final String END_DAY = "23:59:59";
+
     public ResponseDTO checkTableOrdered(int tableId) {
         Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
 
@@ -1002,14 +1005,12 @@ public class OrderService {
 
         if (currentDate.after(startAt) && currentDate.before(endAt)) {
             // Hôm nay nằm giữa startAt và endAt
-            System.out.println("Voucher thời gian hợp lệ vl");
 
             if (voucher.getPriceCondition().intValue() <= total) {
 
                 ApplyVoucherDTO applyVoucherDTO = new ApplyVoucherDTO();
 
                 long discount = (long) (total * ((double) voucher.getPercent() / 100));
-                System.out.println(discount);
 
                 if (discount > voucher.getValue()) {
                     discount = voucher.getValue();
@@ -1027,12 +1028,10 @@ public class OrderService {
 
         } else if (currentDate.after(endAt)) {
             // Hôm nay không nằm giữa startAt và endAt
-            System.out.println("Voucher đã hết hạn");
             return ResponseUtils.fail(400, "Voucher đã hết hạn", null);
 
         } else if (currentDate.before(startAt)) {
             // Hôm nay không nằm giữa startAt và endAt
-            System.out.println("Voucher chưa bắt đầu áp dụng");
             return ResponseUtils.fail(400, "Voucher chưa áp dụng", null);
         }
         return ResponseUtils.fail(400, "Chưa đủ điều kiện áp dụng", null);
@@ -1040,7 +1039,7 @@ public class OrderService {
     }
 
     public ResponseDTO getListOrderAwaitCheckout() {
-        Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
+        Date twentyFourHoursAgo = DateUtils.getDayBeforeTime(24);
         List<Order> orders = orderRepository.findOrdersCreatedAwaitCheckout(twentyFourHoursAgo);
         List<ResponseDataDTO> orderDTOs = new ArrayList<>();
         for (Order order : orders) {
@@ -1053,8 +1052,23 @@ public class OrderService {
         return ResponseUtils.success(200, "Danh sách order chờ thanh toán", responseListDataDTO);
     }
 
+    public ResponseDTO getListOrderConfirming() {
+        Date twentyFourHoursAgo = DateUtils.getDayBeforeTime(24);
+        List<Order> orders = orderRepository.findOrderConfirming(twentyFourHoursAgo);
+        List<ResponseDataDTO> orderDTOs = new ArrayList<>();
+        for (Order order : orders) {
+            OrderDTO orderDTO = convertOrderToDTO(order);
+            orderDTOs.add(orderDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(orderDTOs);
+        responseListDataDTO.setNameList("Danh sách order chờ xác nhận");
+        return ResponseUtils.success(200, "Danh sách order chờ xác nhận", responseListDataDTO);
+    }
+
     public ResponseDTO getListOrder() {
-        Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
+        Date twentyFourHoursAgo = DateUtils.getDayBeforeTime(24);
         List<Order> orders = orderRepository.findOrdersCreated(twentyFourHoursAgo);
         List<ResponseDataDTO> orderDTOs = new ArrayList<>();
         for (Order order : orders) {
@@ -1064,7 +1078,8 @@ public class OrderService {
 
         ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
         responseListDataDTO.setDatas(orderDTOs);
-        return ResponseUtils.success(200, "Danh sách order", responseListDataDTO);
+        responseListDataDTO.setNameList("Danh sách order hiện tại");
+        return ResponseUtils.success(200, "Danh sách order hiện tại", responseListDataDTO);
 
     }
 
@@ -1084,6 +1099,69 @@ public class OrderService {
         responseListDataDTO.setDatas(orderDTOs);
         return ResponseUtils.success(200, "Danh sách order", responseListDataDTO);
 
+    }
+
+    public ResponseDTO showToDay() {
+        Date today = DateUtils.getStartOfDay(new Date());
+        List<Order> orders = orderRepository.findOrderInDate(today);
+        List<ResponseDataDTO> orderDTOs = new ArrayList<>();
+
+        for (Order order : orders) {
+            OrderDTO orderDTO = convertOrderToDTO(order);
+            orderDTOs.add(orderDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(orderDTOs);
+        responseListDataDTO.setNameList("Order hôm nay");
+
+        return ResponseUtils.success(200, "Order hôm nay", responseListDataDTO);
+    }
+
+    public ResponseDTO showInDay(Integer day) {
+        Date date = DateUtils.getDateBefore(day);
+        date = DateUtils.getStartOfDay(date);
+        List<Order> orders = orderRepository.findOrderInDate(date);
+        List<ResponseDataDTO> orderDTOs = new ArrayList<>();
+
+        for (Order order : orders) {
+            OrderDTO orderDTO = convertOrderToDTO(order);
+            orderDTOs.add(orderDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(orderDTOs);
+        responseListDataDTO.setNameList("Order theo ngày");
+
+        return ResponseUtils.success(200, "Order theo ngày", responseListDataDTO);
+    }
+
+    public ResponseDTO showInTime(Integer year, Integer month) {
+        List<Order> orders = new ArrayList<>();
+        if (year == null && month != null) {
+            year = DateUtils.getCurrentYear();
+            orders = orderRepository.findOrdersInMonth(year, month);
+        } else if (year != null && month == null) {
+            orders = orderRepository.findOrdersInYear(year);
+        } else if (month != null && year != null) {
+            orders = orderRepository.findOrdersInMonth(year, month);
+
+        }else{
+            return ResponseUtils.fail(400, "Tham số không hợp lệ", null);
+        }
+
+        List<ResponseDataDTO> orderDTOs = new ArrayList<>();
+
+        for (Order order : orders) {
+            OrderDTO orderDTO = convertOrderToDTO(order);
+            orderDTOs.add(orderDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(orderDTOs);
+        responseListDataDTO.setNameList("Order theo thời gian");
+
+        return ResponseUtils.success(200, "Order theo thời gian", responseListDataDTO);
     }
 
     private OrderDTO convertOrderToDTO(Order order) {
@@ -1863,7 +1941,6 @@ public class OrderService {
         String checkoutUrl = null;
         while (true) {
             int orderCode = Integer.valueOf(orderCodePrefix + String.valueOf(order.getOrderId()));
-            System.out.println(orderCode);
             checkoutUrl = payOSService.getCheckoutUrl(orderCode, total,
                     "Thanh toán hóa đơn");
 

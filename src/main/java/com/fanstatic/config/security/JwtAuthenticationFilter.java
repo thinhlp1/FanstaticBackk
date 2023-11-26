@@ -42,7 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
          * username == number Phone trong co so du lieu va model
          */
 
-        System.out.println("JWT FILTER");
 
         String token = cookieUtils.getValue("token");
         String jwt;
