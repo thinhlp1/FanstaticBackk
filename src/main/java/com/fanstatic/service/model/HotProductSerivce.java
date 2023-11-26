@@ -116,14 +116,16 @@ public class HotProductSerivce {
     public ResponseDTO show() {
         List<HotProduct> hotProducts = hotProductRepository.findAll();
 
-        List<ResponseDataDTO> productDTOS = new ArrayList<>();
+        List<ResponseDataDTO> hotProductDTOs = new ArrayList<>();
 
         for (HotProduct hotProduct : hotProducts) {
             HotProductDTO hotProductDTO = modelMapper.map(hotProduct, HotProductDTO.class);
-            productDTOS.add(hotProductDTO);
+            ProductDTO productDTO = (ProductDTO) productService.detail(hotProduct.getProduct().getId()).getData();
+            hotProductDTO.setProduct(productDTO);
+            hotProductDTOs.add(hotProductDTO);
         }
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
-        reponseListDataDTO.setDatas(productDTOS);
+        reponseListDataDTO.setDatas(hotProductDTOs);
         reponseListDataDTO.setNameList("Danh sách hot product");
         return ResponseUtils.success(200, "Danh sách hot product", reponseListDataDTO);
     }
