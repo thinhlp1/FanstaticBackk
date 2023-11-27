@@ -275,11 +275,12 @@ public class OrderService {
                 }
             }
 
-            ResponseDTO orderTableSaved = createOrderTable(List.of(orderRequestDTO.getTableId()), orderSaved);
-            if (!orderTableSaved.isSuccess()) {
-                transactionManager.rollback(transactionStatus);
-                return ResponseUtils.fail(orderTableSaved.getStatusCode(), orderTableSaved.getMessage(), null);
-
+            if (orderRequestDTO.getTableId() != null) {
+                ResponseDTO orderTableSaved = createOrderTable(List.of(orderRequestDTO.getTableId()), orderSaved);
+                if (!orderTableSaved.isSuccess()) {
+                    transactionManager.rollback(transactionStatus);
+                    return ResponseUtils.fail(orderTableSaved.getStatusCode(), orderTableSaved.getMessage(), null);
+                }
             }
 
             List<ExtraPortionOrderRequestDTO> extraPortionDTOs = orderRequestDTO.getExtraPortions();
@@ -419,16 +420,22 @@ public class OrderService {
 
         }
 
+        if (!systemService.checkCustomerResource(rootOrder.getCustomer().getId())) {
+            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
+        }
+
         if (rootOrder.getStatus().getId().equals(ApplicationConst.OrderStatus.CONFIRMING)) {
             return ResponseUtils.fail(404, "Order trước của bạn đang chờ duyệt", null);
 
         }
 
-        boolean isOpcciped = checkTalbeOccupied(orderRequestDTO.getTableId(), orderRequestDTO.getId());
-        if (isOpcciped) {
-            return ResponseUtils.fail(201, "Bàn đã được đặt ", null);
+        // boolean isOpcciped = checkTalbeOccupied(orderRequestDTO.getTableId(),
+        // orderRequestDTO.getId());
+        // if (isOpcciped) {
+        // return ResponseUtils.fail(201, "Bàn đã được đặt ", null);
 
-        }
+        // }
 
         Order order = modelMapper.map(orderRequestDTO, Order.class);
 
@@ -445,6 +452,8 @@ public class OrderService {
         order.setTotal(total(orderRequestDTO));
         order.setOrderType(orderType);
         order.setRootOrder(orderRequestDTO.getId());
+        List<OrderTable> orderTables = new ArrayList<>(rootOrder.getOrderTables());
+        order.setOrderTables(orderTables);
 
         Order orderSaved = orderRepository.saveAndFlush(order);
 
@@ -1612,10 +1621,13 @@ public class OrderService {
         }
 
         long totalOption = 0;
-        for (Integer optionId : orderItemDTO.getOptionsId()) {
-            Option option = optionRepository.findById(optionId).get();
+        if (orderItemDTO.getOptionsId() != null) {
+            for (Integer optionId : orderItemDTO.getOptionsId()) {
+                Option option = optionRepository.findById(optionId).get();
 
-            totalOption += option.getPrice();
+                totalOption += option.getPrice();
+            }
+
         }
 
         return itemTotal + totalOption;
@@ -1666,10 +1678,16 @@ public class OrderService {
         // // itemTotal = itemTotal + itemPrice;
         // itemTotal = itemPrice * orderItem.getQuantity();
         // }
-        long itemTotal = orderItem.getItemPrice() * orderItem.getQuantity();
+        long itemTotal = 0;
+        if (orderItem.getItemPrice() != null) {
+            itemTotal = orderItem.getItemPrice() * orderItem.getQuantity();
+
+        }
         long totalOption = 0;
-        for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
-            totalOption += orderItemOption.getOption().getPrice();
+        if (orderItem.getOrderItemOptions() != null) {
+            for (OrderItemOption orderItemOption : orderItem.getOrderItemOptions()) {
+                totalOption += orderItemOption.getOption().getPrice();
+            }
         }
 
         return itemTotal + totalOption;
