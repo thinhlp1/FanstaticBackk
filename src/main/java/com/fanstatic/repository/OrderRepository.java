@@ -39,10 +39,11 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByRootOrder(Integer rootOrder);
 
     boolean existsById(Integer id);
-
+    // đếm số lượng oder
     @Query("SELECT COUNT(o) FROM Order o WHERE o.createAt >= :startDate AND o.createAt <= :endDate AND o.status.id IN :orderStateIds")
     Long countOrdersByDateRangeAndStates(Date startDate, Date endDate, List<String> orderStateIds);
 
+    // tính tổng tiền
     @Query("SELECT SUM( o.total ) FROM Order o WHERE o.createAt >= :startDate AND o.createAt <= :endDate AND o.status.id IN :orderStateIds")
     BigInteger calculateRevenueByDateRangeAndStates(Date startDate, Date endDate, List<String> orderStateIds);
 

@@ -28,6 +28,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
          // lay top 10 productvariant
          @Query("SELECT oi.productVarient, SUM(oi.quantityCompleted) FROM OrderItem oi JOIN oi.order o WHERE oi.order.createAt >= :startDate AND oi.order.createAt <= :endDate AND oi.status.id IN :orderStateIds GROUP BY oi.productVarient ORDER BY SUM(oi.quantityCompleted) DESC")
          List<Object[]> findTop10BestSellingProductVariantByRangeAndStates(Date startDate, Date endDate, List<String> orderStateIds);
-        public List<OrderItem> findAllByOrder(Order order);
+      
+      
+         public List<OrderItem> findAllByOrder(Order order);
 
 }

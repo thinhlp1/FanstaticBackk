@@ -3,6 +3,7 @@ import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.comboProduct.ComboProductDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
 import com.fanstatic.dto.model.product.ProductForSaleDTO;
+import com.fanstatic.dto.model.product.ProductNotVariantForSaleDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.model.ComboProduct;
@@ -21,10 +22,10 @@ import lombok.Builder;
 @NoArgsConstructor
 public class GetAllProductDTO extends ResponseDataDTO {
 
-    private List<ProductForSaleDTO> products;
+    private List<ProductNotVariantForSaleDTO> productNotVariants;
 
      private List<ComboProductDTO> comboProducts;
 
-       private List<ProductVarientDTO> productVarients;
+       private List<ProductForSaleDTO> productVariants;
 }
 
