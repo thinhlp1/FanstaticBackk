@@ -98,7 +98,14 @@ public class PurchaseOrderController {
 
     }
 
-    @GetMapping("/api/purchase/order/detail/order-point/{id}")
+    @GetMapping("/api/purchase/order/create/order-voucher/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getVoucherCanApply(@PathVariable Integer id) {
+        ResponseDTO responseDTO = orderService.getVoucherCanApply(id);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/api/purchase/order/create/order-point/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> getPoint(@PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.getPoint(id);

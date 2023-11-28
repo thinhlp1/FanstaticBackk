@@ -7,7 +7,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ApplyVoucherDTO extends ResponseDataDTO{
+public class ApplyVoucherDTO extends ResponseDataDTO {
+
+    private String message;
+
+    private boolean canApply;
 
     private long total;
 

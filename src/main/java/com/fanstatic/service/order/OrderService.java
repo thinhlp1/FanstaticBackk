@@ -47,6 +47,7 @@ import com.fanstatic.dto.model.status.StatusDTO;
 import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
+import com.fanstatic.dto.model.voucher.VourcherApplyOrderDTO;
 import com.fanstatic.model.Bill;
 import com.fanstatic.model.CancelReason;
 import com.fanstatic.model.Category;
@@ -88,6 +89,7 @@ import com.fanstatic.repository.SaleProductRepository;
 import com.fanstatic.repository.StatusRepository;
 import com.fanstatic.repository.TableRepository;
 import com.fanstatic.repository.UserRepository;
+import com.fanstatic.repository.UserVoucherRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.RolePermissionService;
 import com.fanstatic.service.payos.PayOSService;
@@ -132,6 +134,7 @@ public class OrderService {
     private final SaleProductRepository saleProductRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final OrderItemOptionRepository orderItemOptionRepository;
+    private final UserVoucherRepository userVoucherRepository;
 
     private final ProductRepository productRepository;
     private final ProductVarientRepository productVarientRepository;
@@ -642,7 +645,6 @@ public class OrderService {
 
         if (checkoutRequestDTO.isRedeem() == true) {
             Long redeem = ((OrderPointResponseDTO) getPoint(order.getOrderId()).getData()).getMoneyCanReem();
-            System.out.println("REDEM: " + redeem);
             order.setRedeem(redeem);
         }
 
@@ -692,6 +694,17 @@ public class OrderService {
 
         if (order.getRedeem() != null) {
             bill.setTotal(bill.getTotal() - order.getRedeem());
+        }
+
+        if (order.getVoucher() != null) {
+            Long voucherRedeem = (long) (order.getTotal() * (order.getVoucher().getPercent() / 100.0));
+            if (bill.getTotal() - voucherRedeem <= 0) {
+                bill.setTotal(0L);
+
+            } else {
+                bill.setTotal(bill.getTotal() - voucherRedeem);
+
+            }
         }
 
         if (paymentMethod.getId().equals(ApplicationConst.PaymentMethod.CASH)) {
@@ -1094,6 +1107,47 @@ public class OrderService {
                 convertOrderToDTO(order));
     }
 
+    public ResponseDTO checkVoucherApply(Long total, VoucherDTO voucher) {
+
+        Date currentDate = new Date();
+        Date startAt = voucher.getStartAt();
+        Date endAt = voucher.getEndAt();
+
+        if (currentDate.after(startAt) && currentDate.before(endAt)) {
+            // Hôm nay nằm giữa startAt và endAt
+
+            if (voucher.getPriceCondition().intValue() <= total) {
+
+                ApplyVoucherDTO applyVoucherDTO = new ApplyVoucherDTO();
+
+                long discount = (long) (total * ((double) voucher.getPercent() / 100));
+
+                if (discount > voucher.getValue()) {
+                    discount = voucher.getValue();
+                }
+                long finalTotal = total - discount;
+
+                applyVoucherDTO.setDiscount(discount);
+                applyVoucherDTO.setFinalTotal(finalTotal);
+                applyVoucherDTO.setTotal(total);
+
+                return ResponseUtils.success(200, "Áp dụng thành công", applyVoucherDTO);
+            } else {
+                return ResponseUtils.fail(400, "Chưa đủ điều kiện áp dụng", null);
+            }
+
+        } else if (currentDate.after(endAt)) {
+            // Hôm nay không nằm giữa startAt và endAt
+            return ResponseUtils.fail(400, "Voucher đã hết hạn", null);
+
+        } else if (currentDate.before(startAt)) {
+            // Hôm nay không nằm giữa startAt và endAt
+            return ResponseUtils.fail(400, "Voucher chưa áp dụng", null);
+        }
+        return ResponseUtils.fail(400, "Chưa đủ điều kiện áp dụng", null);
+
+    }
+
     public ResponseDTO checkVoucherApply(CheckVoucherRequestDTO checkVoucherRequestDTO) {
 
         Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(checkVoucherRequestDTO.getVoucherId()).orElse(null);
@@ -1323,7 +1377,7 @@ public class OrderService {
         if (order.getVoucher() != null) {
             orderDTO.setVoucher(modelMapper.map(order.getVoucher(), VoucherDTO.class));
             orderDTO.setVoucherRedeem(
-                    (long) ((long) order.getTotal() - (order.getTotal() * (order.getVoucher().getPercent() / 100.0))));
+                    (long) (order.getTotal() * (order.getVoucher().getPercent() / 100.0)));
         }
 
         if (order.getPaymentMethod() != null) {
@@ -1331,10 +1385,20 @@ public class OrderService {
         }
 
         if (orderDTO.getPointRedeem() != null) {
-            orderDTO.setFinalTotal(orderDTO.getTotal() - orderDTO.getPointRedeem());
+            if (orderDTO.getTotal() - orderDTO.getPointRedeem() < 0) {
+                orderDTO.setFinalTotal(0L);
+            } else {
+                orderDTO.setFinalTotal(orderDTO.getTotal() - orderDTO.getPointRedeem());
+
+            }
         }
         if (orderDTO.getVoucherRedeem() != null) {
-            orderDTO.setFinalTotal(orderDTO.getFinalTotal() - orderDTO.getVoucherRedeem());
+            if (orderDTO.getFinalTotal() - orderDTO.getVoucherRedeem() < 0) {
+                orderDTO.setFinalTotal(0L);
+            } else {
+                orderDTO.setFinalTotal(orderDTO.getFinalTotal() - orderDTO.getVoucherRedeem());
+
+            }
 
         }
 
@@ -1618,6 +1682,50 @@ public class OrderService {
         responseListDataDTO.setNameList("Phương thức thanh toán");
 
         return ResponseUtils.success(200, "Phương thức thanh toán", responseListDataDTO);
+    }
+
+    public ResponseDTO getVoucherCanApply(Integer id) {
+        Order order = orderRepository.findById(id).orElse(null);
+
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
+        }
+
+        List<Voucher> vouchers = userVoucherRepository.findActiveVouchersForUser(order.getCustomer().getId(),
+                new Date());
+        List<VoucherDTO> voucherDTOs = new ArrayList<>();
+        for (Voucher voucher : vouchers) {
+            VoucherDTO voucherDTO = modelMapper.map(voucher, VoucherDTO.class);
+            voucherDTOs.add(voucherDTO);
+        }
+
+        List<ResponseDataDTO> vourcherApplyOrderDTOs = new ArrayList<>();
+        for (VoucherDTO voucherDTO : voucherDTOs) {
+            ResponseDTO checkResponseDTO = checkVoucherApply(order.getTotal(), voucherDTO);
+            ApplyVoucherDTO applyVoucherDTO = new ApplyVoucherDTO();
+            if (!checkResponseDTO.isSuccess()) {
+                applyVoucherDTO.setCanApply(false);
+                applyVoucherDTO.setMessage((String) checkResponseDTO.getMessage());
+            } else {
+                applyVoucherDTO = (ApplyVoucherDTO) checkResponseDTO.getData();
+                applyVoucherDTO.setCanApply(true);
+                applyVoucherDTO.setMessage((String) checkResponseDTO.getMessage());
+            }
+
+            VourcherApplyOrderDTO vourcherApplyOrderDTO = modelMapper.map(voucherDTO, VourcherApplyOrderDTO.class);
+            vourcherApplyOrderDTO.setApplyVoucherDTO(applyVoucherDTO);
+            vourcherApplyOrderDTOs.add(vourcherApplyOrderDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(vourcherApplyOrderDTOs);
+        responseListDataDTO.setNameList("Danh sách voucher");
+        return ResponseUtils.success(200, "Danh sách voucher", responseListDataDTO);
     }
 
     public Long convertMoneyToPoints(long money) {

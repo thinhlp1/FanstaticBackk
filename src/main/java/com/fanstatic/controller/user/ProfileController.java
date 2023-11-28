@@ -3,7 +3,9 @@ package com.fanstatic.controller.user;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,6 +31,13 @@ public class ProfileController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> showUserProfile() {
         ResponseDTO responseDTO = userProfileService.getUserProfile();
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/collect-voucher/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> collectVoucher(@PathVariable("id") Integer voucherId) {
+        ResponseDTO responseDTO = userProfileService.collectVoucher(voucherId);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
