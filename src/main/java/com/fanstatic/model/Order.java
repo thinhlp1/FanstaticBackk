@@ -50,6 +50,10 @@ public class Order {
 
 	private Long total;
 
+	private Long point;
+
+	private Long redeem;
+
 	private Integer people;
 
 	// @ManyToOne
@@ -64,7 +68,7 @@ public class Order {
 	@JoinColumn(name = "status_id")
 	private Status status;
 
-	@OneToMany(mappedBy = "order",fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
 	private List<Bill> bill;
 
 	// bi-directional many-to-one association to OrderExtraPortion

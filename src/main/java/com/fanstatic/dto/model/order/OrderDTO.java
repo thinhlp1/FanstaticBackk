@@ -34,7 +34,15 @@ public class OrderDTO extends ResponseDataDTO {
 
     private CustomerDTO customer;
 
-    private long total;
+    private Long total;
+
+    private Long point;
+
+    private Long pointRedeem;
+
+    private long finalTotal;
+
+    private Long voucherRedeem;
 
     private StatusDTO status;
 

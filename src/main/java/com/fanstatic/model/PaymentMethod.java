@@ -34,6 +34,9 @@ public class PaymentMethod  {
 
 	private String name;
 
+	@ManyToOne
+    @JoinColumn(name = "image_id")
+    private File image;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")

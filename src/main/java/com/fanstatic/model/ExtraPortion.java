@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
-
 
 /**
  * /**
@@ -34,42 +32,39 @@ public class ExtraPortion {
 
     private String code;
 
-	private Long price;
-    
-    private String name;
+    private Long price;
 
+    private String name;
 
     private String type;
 
-    //bi-directional many-to-one association to Category
+    // bi-directional many-to-one association to Category
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
-    //bi-directional many-to-one association to File
+    // bi-directional many-to-one association to File
     @ManyToOne
     @JoinColumn(name = "image_id")
     private File imageFile;
 
-    //bi-directional many-to-one association to OrderExtraPortion
+    // bi-directional many-to-one association to OrderExtraPortion
     @OneToMany(mappedBy = "extraPortion")
     private List<OrderExtraPortion> orderExtraPortions;
-
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "update_at")
     private Date updateAt;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "update_by")
     private User updateBy;
-
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "create_at")
     private Date createAt;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "create_by")
     private User createBy;
 
@@ -77,7 +72,7 @@ public class ExtraPortion {
     @Column(name = "delete_at")
     private Date deleteAt;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "delete_by")
     private User deleteBy;
 

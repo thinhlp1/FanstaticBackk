@@ -53,7 +53,7 @@ public class ProductController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
-     @PostMapping("/create/product-option")
+    @PostMapping("/create/product-option")
     @ResponseBody
     public ResponseEntity<ResponseDTO> createProductOption(
             @RequestBody ProductOptionRequestDTO productOptionRequestDTO) {
@@ -69,8 +69,6 @@ public class ProductController {
         ResponseDTO reponseDTO = productService.update(data);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
-
-    
 
     @PutMapping("/update/varient/{id}")
     @ResponseBody
@@ -130,6 +128,13 @@ public class ProductController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> show(@RequestParam(name = "active") int active) {
         ResponseDTO reponseDTO = productService.show(active);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @GetMapping("/show/option-group")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showOptionGroups() {
+        ResponseDTO reponseDTO = productService.getOptionShared();
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 

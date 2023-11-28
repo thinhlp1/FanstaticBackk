@@ -47,9 +47,28 @@ public class WebsocketConst {
      */
     public static final String TOPIC_ORDER_CANCEL_CHECKOUT = TOPIC + "/purchase/order/cancel-checkout";
 
-    // public static final String TOPIC_CURRENT_ORDER = TOPIC +
-    // "/purchase/order/current-order";
-
+    /*
+     * lắng nghe sự kiện khi có sản phẩm vừa mới cập nhật hết hàng hoặc còn hàng
+     * data : dữ liệu order vừa mới update
+     */
     public static final String TOPIC_PRODUCT_CHANGE_STOCK = TOPIC + "/product/change-stock";
+
+    /*
+     * lắng nghe sự kiện khi có khách hàng tạo thông báo yêu cầu
+     * data : dữ liệu order vừa mới update
+     */
+    public static final String TOPIC_REQUEST_STAFF_NEW = TOPIC + "/request-staff/new";
+
+    /*
+     * lắng nghe sự kiện khi có yêu cầu có thay đổi như xác nhận hoặc từ chối
+     * data : dữ liệu order vừa mới update
+     */
+    public static final String TOPIC_REQUEST_STAFF_UPDATE = TOPIC + "/request-staff/udpate";
+
+    /*
+     * lắng nghe sự kiện khi xác nhận hoặc từ chối yêu cầu
+     * data : dữ liệu order vừa mới update
+     */
+    public static final String TOPIC_REQUEST_STAFF_DETAIL = TOPIC + "/request-staff/detail";
 
 }

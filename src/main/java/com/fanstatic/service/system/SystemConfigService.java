@@ -2,6 +2,7 @@ package com.fanstatic.service.system;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.tomcat.util.json.JSONParser;
@@ -15,6 +16,8 @@ import com.fanstatic.config.system.IpConfig;
 import com.fanstatic.config.system.PointProgramConfig;
 import com.fanstatic.config.system.SystemConfig;
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.util.ResponseUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,15 +41,32 @@ public class SystemConfigService {
         return ResponseUtils.success(200, "Cấu hình hệ thống", systemConfig.getContact());
     }
 
+    public List<IpConfig> getListIpConfig() {
+        loadConfig();
+        return systemConfig.getIpConfigs();
+    }
+
     public ResponseDTO getIpConfig() {
         loadConfig();
-        return ResponseUtils.success(200, "Cấu hình hệ thống", systemConfig.getIpConfig());
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        List<IpConfig> ipConfigs = systemConfig.getIpConfigs();
+        List<ResponseDataDTO> iResponseDataDTOs = new ArrayList<>();
+        for (IpConfig ipConfig : ipConfigs) {
+            iResponseDataDTOs.add(ipConfig);
+        }
+        responseListDataDTO.setDatas(iResponseDataDTOs);
+        return ResponseUtils.success(200, "Cấu hình hệ thống", responseListDataDTO);
+    }
+
+    public PointProgramConfig getPointProgramConfigModel() {
+        loadConfig();
+        return systemConfig.getPointProgram();
     }
 
     public ResponseDTO getPointProgramConfig() {
         loadConfig();
         return ResponseUtils.success(200, "Cấu hình hệ thống",
-                systemConfig.getPointProgram().get(systemConfig.getPointProgram().size() - 1));
+                systemConfig.getPointProgram());
     }
 
     public ResponseDTO updateConfig(SystemConfig newConfig) {
@@ -64,9 +84,10 @@ public class SystemConfigService {
 
     }
 
-    public ResponseDTO updateIpConfig(IpConfig newIpConfig) {
+    public ResponseDTO updateIpConfig(List<IpConfig> ipconfigs) {
         loadConfig();
-        systemConfig.setIpConfig(newIpConfig);
+        systemConfig.getIpConfigs().clear();
+        systemConfig.setIpConfigs(ipconfigs);
         saveConfig();
         return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 
@@ -74,7 +95,7 @@ public class SystemConfigService {
 
     public ResponseDTO updatePointProgram(PointProgramConfig pointProgramConfig) {
         loadConfig();
-        systemConfig.getPointProgram().add(pointProgramConfig);
+        systemConfig.setPointProgram(pointProgramConfig);
         saveConfig();
         return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 

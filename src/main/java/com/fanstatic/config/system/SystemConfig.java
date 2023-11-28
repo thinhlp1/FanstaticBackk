@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 public class SystemConfig extends ResponseDataDTO{
     private OrderConfig allowOrder;
     private ContactConfig contact;
-    private List<PointProgramConfig> pointProgram;
-    private IpConfig ipConfig;
+    private PointProgramConfig pointProgram;
+    private List<IpConfig> ipConfigs;
 
 
 }

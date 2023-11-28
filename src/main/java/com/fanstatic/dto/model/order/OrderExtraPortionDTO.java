@@ -1,4 +1,5 @@
 package com.fanstatic.dto.model.order;
+
 import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
 
 import lombok.Data;
@@ -12,4 +13,6 @@ public class OrderExtraPortionDTO {
     private ExtraPortionDTO extraPortion;
 
     private int quantity;
+
+    private Long total;
 }

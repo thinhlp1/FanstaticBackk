@@ -54,7 +54,7 @@ public class User {
 	@Column(name = "place_residence")
 	private String placeResidence;
 
-	private BigInteger point;
+	private Long point;
 
 	// bi-directional many-to-one association to Loginlog
 	// @OneToMany(mappedBy = "user")
@@ -76,9 +76,9 @@ public class User {
 	// private List<Systemlog> systemlogs;
 
 	// bi-directional many-to-one association to File
-	@ManyToOne
-	@JoinColumn(name = "bacnk_cccd_image_id")
-	private File backCCCD;
+	// @ManyToOne
+	// @JoinColumn(name = "bacnk_cccd_image_id")
+	// private File backCCCD;
 
 	// bi-directional many-to-one association to File
 	@ManyToOne
@@ -86,9 +86,9 @@ public class User {
 	private File image;
 
 	// bi-directional many-to-one association to File
-	@ManyToOne
-	@JoinColumn(name = "front_cccd_image_id")
-	private File frontCCCD;
+	// @ManyToOne
+	// @JoinColumn(name = "front_cccd_image_id")
+	// private File frontCCCD;
 
 	// bi-directional many-to-one association to Role
 	@ManyToOne

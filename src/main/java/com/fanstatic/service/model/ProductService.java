@@ -24,9 +24,12 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.category.CategoryDTO;
+import com.fanstatic.dto.model.combo.ComboProductDTO;
+import com.fanstatic.dto.model.hotproduct.HotProductDTO;
 import com.fanstatic.dto.model.option.OptionGroupDTO;
 import com.fanstatic.dto.model.option.OptionGroupRequestDTO;
 import com.fanstatic.dto.model.option.OptionRequestDTO;
+import com.fanstatic.dto.model.order.OrderShowProductDTO;
 import com.fanstatic.dto.model.permissioin.RoleDTO;
 import com.fanstatic.dto.model.product.ProductChangeStockDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
@@ -36,6 +39,7 @@ import com.fanstatic.dto.model.product.ProductRequestDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.model.Category;
+import com.fanstatic.model.ComboProduct;
 import com.fanstatic.model.File;
 import com.fanstatic.model.Option;
 import com.fanstatic.model.OptionGroup;
@@ -46,6 +50,7 @@ import com.fanstatic.model.ProductOption;
 import com.fanstatic.model.ProductVarient;
 import com.fanstatic.model.SaleEvent;
 import com.fanstatic.repository.CategoryRepository;
+import com.fanstatic.repository.ComboProductRepository;
 import com.fanstatic.repository.HotProductRepository;
 import com.fanstatic.repository.OptionGroupRepository;
 import com.fanstatic.repository.OptionRepository;
@@ -68,6 +73,7 @@ public class ProductService {
     private final PlatformTransactionManager transactionManager;
     private final ModelMapper modelMapper;
     private final SystemService systemService;
+    private final ComboProductService comboProductService;
 
     private final CategoryRepository categoryRepository;
     private final OrderItemRepository orderItemRepository;
@@ -79,6 +85,7 @@ public class ProductService {
     private final OptionRepository optionRepository;
     private final OptionGroupRepository optionGroupRepository;
     private final HotProductRepository hotProductRepository;
+    private final ComboProductRepository comboProductRepository;
     private final FileService fileService;
 
     @Autowired
@@ -590,7 +597,7 @@ public class ProductService {
             }
             productVarientDTO.setImageUrl(getProductVarientImage(productVarient));
 
-            if (productVarient.getDefaultSize() == 1){
+            if (productVarient.getDefaultSize() == 1) {
                 productDTO.setVarientPrice(productVarientDTO.getPrice());
             }
 
@@ -686,6 +693,69 @@ public class ProductService {
         reponseListDataDTO.setDatas(productDTOS);
         reponseListDataDTO.setNameList("Danh sách sản phẩm");
         return ResponseUtils.success(200, "Danh sách sản phẩm", reponseListDataDTO);
+    }
+
+    public ResponseDTO getOptionShared() {
+        List<OptionGroup> optionGroups = optionGroupRepository.findAllByShareIsTrue().orElse(null);
+        List<ResponseDataDTO> optionGroupDTOs = new ArrayList<>();
+        for (OptionGroup optionGroup : optionGroups) {
+            OptionGroupDTO optionGroupDTO = modelMapper.map(optionGroup, OptionGroupDTO.class);
+            optionGroupDTOs.add(optionGroupDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(optionGroupDTOs);
+        return ResponseUtils.success(200, "Danh sách option group dùng chung", responseListDataDTO);
+
+    }
+
+    public ResponseDTO showByCategoryId(Integer categoryId) {
+
+        Category category = categoryRepository.findByIdAndActiveIsTrue(categoryId).orElse(null);
+        if (category == null) {
+            return ResponseUtils.fail(404, "Category không tồn tại", null);
+        }
+
+        List<Product> products = productRepository.findByProductCategoriesCategoryAndActiveIsTrue(category);
+        List<ProductDTO> productDTOS = new ArrayList<>();
+
+        for (Product product : products) {
+            ProductDTO productDTO = (ProductDTO) detail(product.getId()).getData();
+            productDTOS.add(productDTO);
+        }
+
+        List<ComboProduct> comboProducts = comboProductRepository.findByCategory(category);
+        List<ComboProductDTO> comboProductDTOs = new ArrayList<>();
+
+        for (ComboProduct comboProduct : comboProducts) {
+            ComboProductDTO comboProdutDTO = (ComboProductDTO) comboProductService.detail(comboProduct.getId())
+                    .getData();
+            comboProductDTOs.add(comboProdutDTO);
+        }
+
+        List<HotProductDTO> hotProductDTOs = new ArrayList<>();
+        for (ProductDTO productDTO : productDTOS) {
+            if (productDTO.isHotProduct()) {
+                HotProductDTO hotProductDTO = new HotProductDTO();
+                hotProductDTO.setProduct(productDTO);
+                hotProductDTOs.add(hotProductDTO);
+            }
+        }
+
+        for (ComboProductDTO comboProductDTO : comboProductDTOs) {
+            if (comboProductDTO.isHotProduct()) {
+                HotProductDTO hotProductDTO = new HotProductDTO();
+                hotProductDTO.setComboProduct(comboProductDTO);
+                hotProductDTOs.add(hotProductDTO);
+            }
+        }
+
+        OrderShowProductDTO orderShowProductDTO = new OrderShowProductDTO();
+        orderShowProductDTO.setComboProducts(comboProductDTOs);
+        orderShowProductDTO.setProducts(productDTOS);
+        orderShowProductDTO.setHotProductDTOs(hotProductDTOs);
+
+        return ResponseUtils.success(200, "Danh sách sản phẩm", orderShowProductDTO);
     }
 
     public ResponseDTO changeIsOutOfStock(ProductChangeStockDTO productChangeStockDTO) {

@@ -56,17 +56,15 @@ public class Category implements Serializable {
     @OneToMany(mappedBy = "category")
     private List<ExtraPortion> extraPortions;
 
-
     // bi-directional many-to-one association to Product
     @OneToMany(mappedBy = "category")
     private List<ProductCategory> productCategories;
-
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "update_at")
     private Date updateAt;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "update_by")
     private User updateBy;
 
@@ -74,7 +72,7 @@ public class Category implements Serializable {
     @Column(name = "create_at")
     private Date createAt;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "create_by")
     private User createBy;
 
@@ -82,7 +80,7 @@ public class Category implements Serializable {
     @Column(name = "delete_at")
     private Date deleteAt;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "delete_by")
     private User deleteBy;
 }

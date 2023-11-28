@@ -24,6 +24,8 @@ public class OrderItemDTO {
 
     private ComboProductDTO comboProduct;
 
+    private Long itemPrice;
+
     private String note;
 
     private int quantity;
