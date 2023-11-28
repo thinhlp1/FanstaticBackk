@@ -72,7 +72,7 @@ public class OrderItem {
 	@Column(name = "update_at")
 	private Date updateAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "update_by")
 	private User updateBy;
 
@@ -80,7 +80,7 @@ public class OrderItem {
 	@Column(name = "create_at")
 	private Date createAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "create_by")
 	private User createBy;
 
@@ -88,7 +88,7 @@ public class OrderItem {
 	@Column(name = "delete_at")
 	private Date deleteAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "delete_by")
 	private User deleteBy;
 

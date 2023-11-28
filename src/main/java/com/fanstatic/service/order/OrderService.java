@@ -18,6 +18,7 @@ import com.fanstatic.config.system.PointProgramConfig;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.SingleReponseDataDTO;
 import com.fanstatic.dto.model.bill.BillDTO;
 import com.fanstatic.dto.model.category.CategoryCompactDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
@@ -25,6 +26,7 @@ import com.fanstatic.dto.model.option.OptionDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.OrderItemDTO;
+import com.fanstatic.dto.model.order.OrderPointResponseDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
@@ -638,16 +640,24 @@ public class OrderService {
             }
         }
 
+        if (checkoutRequestDTO.isRedeem() == true) {
+            Long redeem = ((OrderPointResponseDTO) getPoint(order.getOrderId()).getData()).getMoneyCanReem();
+            System.out.println("REDEM: " + redeem);
+            order.setRedeem(redeem);
+        }
+
+        Long point = convertMoneyToPoints(order.getTotal());
+        order.setPoint(point);
         Status status = statusRepository.findById(ApplicationConst.OrderStatus.AWAIT_CHECKOUT).get();
         order.setStatus(status);
-
+        order.setPaymentMethod(paymentMethod);
         order.setUpdateAt(new Date());
         order.setUpdateBy(systemService.getUserLogin());
 
         orderRepository.save(order);
         pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Đã gửi yêu cầu thành toán");
 
-        return ResponseUtils.success(200, "Yêu cầu thanh toán thành công", null);
+        return ResponseUtils.success(200, "Yêu cầu thanh toán thành công", convertOrderToDTO(order));
 
     }
 
@@ -673,27 +683,60 @@ public class OrderService {
             return ResponseUtils.fail(400, "Phương thức thanh toán không hợp lệ", null);
         }
 
-        Long receiveMoney = confirmCheckoutRequestDTO.getReceiveMoney();
-        Status status = statusRepository.findById(ApplicationConst.BillStatus.AWAIT_PAYMENT).get();
-
         Bill bill = new Bill();
         bill.setCreateAt(new Date());
         bill.setCreateBy(systemService.getUserLogin());
         bill.setPaymentMethod(paymentMethod);
-        bill.setReceiveMoney(receiveMoney);
         bill.setTotal(total(order));
-        bill.setStatus(status);
         bill.setOrder(order);
 
-        bill.setCheckoutUrl(generateOrderCheckoutUrl(order, bill.getTotal()));
+        if (order.getRedeem() != null) {
+            bill.setTotal(bill.getTotal() - order.getRedeem());
+        }
 
-        Bill billSaved = billRepository.saveAndFlush(bill);
-        if (billSaved != null) {
+        if (paymentMethod.getId().equals(ApplicationConst.PaymentMethod.CASH)) {
+            Long receiveMoney = confirmCheckoutRequestDTO.getReceiveMoney();
+            bill.setReceiveMoney(receiveMoney);
+
+            Status status = statusRepository.findById(ApplicationConst.BillStatus.PAID).get();
+            Status orderStatus = statusRepository.findById(ApplicationConst.OrderStatus.COMPLETE).get();
+
+            bill.setStatus(status);
+            bill.setUpdateAt(new Date());
+            billRepository.save(bill);
+
+            order.setStatus(orderStatus);
+            order.setUpdateAt(new Date());
+            orderRepository.save(order);
+
+            OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
+                    .getData());
+            Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
+            User customer = order.getCustomer();
+            customer.setPoint(point);
+            userRepository.save(customer);
 
             OrderDTO orderDTO = convertOrderToDTO(order);
 
-            return ResponseUtils.success(200, "Xác nhận thanh toán thành công", orderDTO);
+            return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
+
+        } else if (paymentMethod.getId().equals(ApplicationConst.PaymentMethod.INTERNET_BANKING)) {
+            Status status = statusRepository.findById(ApplicationConst.BillStatus.AWAIT_PAYMENT).get();
+            bill.setStatus(status);
+
+            bill.setCheckoutUrl(generateOrderCheckoutUrl(order, bill.getTotal()));
+            Bill billSaved = billRepository.saveAndFlush(bill);
+            if (billSaved != null) {
+
+                OrderDTO orderDTO = convertOrderToDTO(order);
+
+                return ResponseUtils.success(200, "Xác nhận thanh toán thành công", orderDTO);
+            }
+
         }
+
+        // Long point = convertMoneyToPoints(bill.getTotal());
+        // order.setPoint(point);
 
         return ResponseUtils.fail(500, "Xác nhận thanh toán không thành công ở dưới", null);
 
@@ -724,9 +767,15 @@ public class OrderService {
         order.setUpdateAt(new Date());
         orderRepository.save(order);
 
+        OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId()).getData());
+        Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
+        User customer = order.getCustomer();
+        customer.setPoint(point);
+        userRepository.save(customer);
+
         OrderDTO orderDTO = convertOrderToDTO(order);
 
-        return ResponseUtils.success(200, "Thanh toán order đã bị hủy", orderDTO);
+        return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
     }
 
     public ResponseDTO cacncelCheckout(Integer orderCode) {
@@ -1231,6 +1280,8 @@ public class OrderService {
         orderDTO.setOrderType(order.getOrderType().getName());
         orderDTO.setPeople(order.getPeople());
         orderDTO.setTotal(total(order));
+        orderDTO.setPoint(order.getPoint());
+        orderDTO.setPointRedeem(order.getRedeem());
 
         orderDTO.setCustomer(modelMapper.map(order.getCustomer(),
                 CustomerDTO.class));
@@ -1255,6 +1306,7 @@ public class OrderService {
             orderDTO.setBill(modelMapper.map(order.getBill(), BillDTO.class));
 
         }
+
         orderDTO.setCreateAt(order.getCreateAt());
         orderDTO.setDeleteAt(order.getDeleteAt());
         orderDTO.setUpdateAt(order.getUpdateAt());
@@ -1270,15 +1322,25 @@ public class OrderService {
 
         if (order.getVoucher() != null) {
             orderDTO.setVoucher(modelMapper.map(order.getVoucher(), VoucherDTO.class));
+            orderDTO.setVoucherRedeem(
+                    (long) ((long) order.getTotal() - (order.getTotal() * (order.getVoucher().getPercent() / 100.0))));
         }
 
         if (order.getPaymentMethod() != null) {
-            orderDTO.setPaymentMethodDTO(modelMapper.map(orderDTO, PaymentMethodDTO.class));
+            orderDTO.setPaymentMethodDTO(modelMapper.map(order.getPaymentMethod(), PaymentMethodDTO.class));
+        }
+
+        if (orderDTO.getPointRedeem() != null) {
+            orderDTO.setFinalTotal(orderDTO.getTotal() - orderDTO.getPointRedeem());
+        }
+        if (orderDTO.getVoucherRedeem() != null) {
+            orderDTO.setFinalTotal(orderDTO.getFinalTotal() - orderDTO.getVoucherRedeem());
+
         }
 
         Bill bill = billRepository.findBillCheckouted(order.getOrderId()).orNull();
         if (bill != null) {
-            bill.setStatus(null);
+            // bill.setStatus(null);
             orderDTO.setBill(modelMapper.map(bill, BillDTO.class));
             orderDTO.getBill().setStatus(modelMapper.map(bill.getStatus(), StatusDTO.class));
         }
@@ -1500,10 +1562,79 @@ public class OrderService {
         // long point = (long) (total / (double) convertRate.getFrom());
 
         long total = 100000;
-        long point = 20;
+        // long point = convertPointToMoney(5000, new ConvertRate(1000L, 500L));
         // double money = point * (pointProgramConfig.getPointToMoney().get);
 
-        return ResponseUtils.success(200, point, null);
+        return ResponseUtils.success(200, 100, null);
+    }
+
+    public ResponseDTO getPoint(Integer orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        OrderPointResponseDTO orderPointResponseDTO = new OrderPointResponseDTO();
+        Long customerPoint = order.getCustomer().getPoint();
+
+        if (customerPoint == null) {
+            customerPoint = 0L;
+        }
+
+        if (customerPoint > pointProgramConfig.getMinPoint()) {
+            Long moneyRedeem = convertPointToMoney(customerPoint);
+
+            if (moneyRedeem >= order.getTotal()) {
+                Long moneyLeft = moneyRedeem - order.getTotal();
+                Long pointLeft = calculatePointLeft(moneyLeft);
+                moneyRedeem = order.getTotal();
+                orderPointResponseDTO.setPointLeft(pointLeft);
+            } else {
+                orderPointResponseDTO.setPointLeft(0L);
+            }
+
+            orderPointResponseDTO.setMoneyCanReem(moneyRedeem);
+        }
+        orderPointResponseDTO.setMinPrice(pointProgramConfig.getMinPoint());
+        orderPointResponseDTO.setPoint(customerPoint);
+        return ResponseUtils.success(200, "Điểm của người dùng", orderPointResponseDTO);
+    }
+
+    public ResponseDTO getPaymentMethod() {
+        List<PaymentMethod> paymentMethods = paymentMethodRepository.findAll();
+        List<ResponseDataDTO> paymentMethodDTOs = new ArrayList<>();
+        for (PaymentMethod paymentMethod : paymentMethods) {
+            PaymentMethodDTO paymentMethodDTO = modelMapper.map(paymentMethod, PaymentMethodDTO.class);
+            File image = paymentMethod.getImage();
+            if (image != null) {
+                paymentMethodDTO.setImageUrl(image.getLink());
+            }
+            paymentMethodDTOs.add(paymentMethodDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(paymentMethodDTOs);
+        responseListDataDTO.setNameList("Phương thức thanh toán");
+
+        return ResponseUtils.success(200, "Phương thức thanh toán", responseListDataDTO);
+    }
+
+    public Long convertMoneyToPoints(long money) {
+        ConvertRate convertRate = pointProgramConfig.getMoneyToPoint();
+
+        return (long) (money * ((double) convertRate.getTo()) / convertRate.getFrom());
+    }
+
+    public Long calculatePointLeft(long money) {
+        ConvertRate convertRate = pointProgramConfig.getPointToMoney();
+
+        return (long) (money * ((double) convertRate.getFrom()) / convertRate.getTo());
+    }
+
+    public Long convertPointToMoney(long point) {
+        ConvertRate convertRate = pointProgramConfig.getPointToMoney();
+        return (long) (point * ((double) convertRate.getTo()) / convertRate.getFrom());
     }
 
     private Long total(Order order) {
@@ -1527,6 +1658,10 @@ public class OrderService {
                 orderTotal += itemTotal;
             }
         }
+
+        // if (order.getRedeem() != null) {
+        // orderTotal = orderTotal - order.getRedeem();
+        // }
 
         return orderTotal;
 
@@ -2239,4 +2374,5 @@ public class OrderService {
         }
         return false;
     }
+
 }

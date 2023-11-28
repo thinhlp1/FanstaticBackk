@@ -695,6 +695,20 @@ public class ProductService {
         return ResponseUtils.success(200, "Danh sách sản phẩm", reponseListDataDTO);
     }
 
+    public ResponseDTO getOptionShared() {
+        List<OptionGroup> optionGroups = optionGroupRepository.findAllByShareIsTrue().orElse(null);
+        List<ResponseDataDTO> optionGroupDTOs = new ArrayList<>();
+        for (OptionGroup optionGroup : optionGroups) {
+            OptionGroupDTO optionGroupDTO = modelMapper.map(optionGroup, OptionGroupDTO.class);
+            optionGroupDTOs.add(optionGroupDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(optionGroupDTOs);
+        return ResponseUtils.success(200, "Danh sách option group dùng chung", responseListDataDTO);
+
+    }
+
     public ResponseDTO showByCategoryId(Integer categoryId) {
 
         Category category = categoryRepository.findByIdAndActiveIsTrue(categoryId).orElse(null);

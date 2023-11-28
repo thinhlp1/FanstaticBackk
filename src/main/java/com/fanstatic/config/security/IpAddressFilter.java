@@ -60,7 +60,7 @@ public class IpAddressFilter extends OncePerRequestFilter {
                     for (IpConfig ipConfig : ipConfigs) {
                         // System.out.println("IPCONFIG: " + ipConfig.getIpAddress());
                         if (ipConfig.getIpAddress().equals(remoteAddr) || remoteAddr.equals("0:0:0:0:0:0:0:1")) {
-                            filterChain.doFilter(request, response);
+                            filterChain.doFilter(request, response);    
                             return;
                         }
                     }

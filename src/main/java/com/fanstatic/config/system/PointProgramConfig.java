@@ -15,8 +15,5 @@ public class PointProgramConfig extends ResponseDataDTO {
     private ConvertRate moneyToPoint;
     private ConvertRate pointToMoney;
 
-    private String startAt;
-    private String endAt;
-
 }
 

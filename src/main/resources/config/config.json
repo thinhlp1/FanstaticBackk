@@ -6,13 +6,10 @@
     "zalo": "zalo.com/thinh"
   },
   "pointProgram": {
-    "minPoint": 0,
-    "maxPoint": 2000000,
-    "pointToMoney": { "from": 1, "to": 10000 },
-    "moneyToPoint": { "from": 10000, "to": 1 },
-
-    "startAt": "13/09/2023",
-    "endAt": "15/09/2023"
+    "minPoint": 1000,
+    "maxPoint": 1000000,
+    "pointToMoney": { "from": 1000, "to": 1000 },
+    "moneyToPoint": { "from": 1000, "to": 100 }
   },
   "ipConfigs": [
     { "ipAddress": "192.168.1.254" },
