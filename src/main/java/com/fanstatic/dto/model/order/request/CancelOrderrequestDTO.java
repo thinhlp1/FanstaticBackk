@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CancalOrderRequestDTO {
+public class CancelOrderrequestDTO {
 
     @NotNull
     private Integer orderId;

@@ -18,7 +18,6 @@ import com.fanstatic.config.system.PointProgramConfig;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
-import com.fanstatic.dto.SingleReponseDataDTO;
 import com.fanstatic.dto.model.bill.BillDTO;
 import com.fanstatic.dto.model.category.CategoryCompactDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
@@ -27,6 +26,7 @@ import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.OrderItemDTO;
 import com.fanstatic.dto.model.order.OrderPointResponseDTO;
+import com.fanstatic.dto.model.order.checkout.ApplyVoucherDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
@@ -35,8 +35,7 @@ import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemUpdateDTO;
-import com.fanstatic.dto.model.order.checkout.ApplyVoucherDTO;
-import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
+import com.fanstatic.dto.model.order.request.CancelOrderrequestDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
@@ -528,8 +527,8 @@ public class OrderService {
         return ResponseUtils.success(200, "Chi tiết order", orderDTO);
     }
 
-    public ResponseDTO cancel(CancalOrderRequestDTO cancalOrderRequestDTO) {
-        Order order = orderRepository.findById(cancalOrderRequestDTO.getOrderId()).orElse(null);
+    public ResponseDTO cancel(CancelOrderrequestDTO cancelOrderRequestDTO) {
+        Order order = orderRepository.findById(cancelOrderRequestDTO.getOrderId()).orElse(null);
         if (order == null) {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
 
@@ -546,7 +545,7 @@ public class OrderService {
         }
 
         Status status = statusRepository.findById(ApplicationConst.OrderStatus.CANCEL).get();
-        CancelReason cancelReason = cancelReasonRepository.findById(cancalOrderRequestDTO.getCancelId()).orElse(null);
+        CancelReason cancelReason = cancelReasonRepository.findById(cancelOrderRequestDTO.getCancelId()).orElse(null);
 
         if (cancelReason != null) {
             order.setCancelReason(cancelReason);
