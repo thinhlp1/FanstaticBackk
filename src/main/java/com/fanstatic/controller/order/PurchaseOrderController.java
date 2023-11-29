@@ -20,6 +20,7 @@ import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemUpdateDTO;
+import com.fanstatic.dto.model.order.edit.OrderUpdateDTO;
 import com.fanstatic.dto.model.order.request.CancelOrderrequestDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
@@ -117,9 +118,23 @@ public class PurchaseOrderController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
+    @PutMapping("/api/purchase/order/update")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateOrder(@RequestBody @Valid OrderUpdateDTO orderUpdateDTO) {
+        ResponseDTO responseDTO = orderService.updateOrder(orderUpdateDTO);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderUpdateDTO.getOrderId());
+        }
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
     @PutMapping("/api/purchase/order/create/customer/update-people/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> cupdatePeople(@PathVariable Integer id, @RequestBody Integer people) {
+    public ResponseEntity<ResponseDTO> cUpdatePeople(@PathVariable Integer id, @RequestBody Integer people) {
         ResponseDTO responseDTO = orderService.updatePeople(people, id);
 
         if (responseDTO.isSuccess()) {
