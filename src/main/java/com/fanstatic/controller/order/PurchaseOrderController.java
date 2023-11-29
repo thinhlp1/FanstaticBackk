@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.fanstatic.config.constants.WebsocketConst;
 import com.fanstatic.dto.ResponseDTO;
-import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
@@ -20,7 +20,7 @@ import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemUpdateDTO;
-import com.fanstatic.dto.model.order.request.CancalOrderRequestDTO;
+import com.fanstatic.dto.model.order.request.CancelOrderrequestDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
@@ -29,9 +29,7 @@ import com.fanstatic.service.model.UserService;
 import com.fanstatic.service.order.OrderService;
 import com.fanstatic.util.ResponseUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -331,7 +329,7 @@ public class PurchaseOrderController {
 
     @PutMapping("/api/purchase/order/cancel")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> cancel(@RequestBody @Valid CancalOrderRequestDTO cancalOrderRequestDTO) {
+    public ResponseEntity<ResponseDTO> cancel(@RequestBody @Valid CancelOrderrequestDTO cancalOrderRequestDTO) {
         ResponseDTO responseDTO = orderService.cancel(cancalOrderRequestDTO);
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
