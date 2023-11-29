@@ -36,7 +36,7 @@ public class OTPService {
 
         OtpDTO otpDTO = new OtpDTO();
 
-        long expirationTimeMillis = new Date().getTime() + 60 * 1000;
+        long expirationTimeMillis = new Date().getTime() + 180 * 1000;
 
         otpDTO.setOtp(otp);
         otpDTO.setPhoneNumber(numberPhone);
