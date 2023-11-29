@@ -1,5 +1,7 @@
 package com.fanstatic.controller.system;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,13 +41,13 @@ public class SystemConfigController {
     @GetMapping("/api/manage/systemconfig/show/ip-config")
     @ResponseBody
     public ResponseEntity<ResponseDTO> getIpConfig() {
-        return ResponseUtils.returnReponsetoClient(systemConfigService.getConfig());
+        return ResponseUtils.returnReponsetoClient(systemConfigService.getIpConfig());
 
     }
 
     @PostMapping("/api/manage/systemconfig/update/ip-config")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> updateIpConfig(@RequestBody IpConfig config) {
+    public ResponseEntity<ResponseDTO> updateIpConfig(@RequestBody List<IpConfig> config) {
         return ResponseUtils.returnReponsetoClient(systemConfigService.updateIpConfig(config));
     }
 

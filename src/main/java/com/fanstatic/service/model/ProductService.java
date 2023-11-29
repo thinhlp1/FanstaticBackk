@@ -25,6 +25,7 @@ import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.category.CategoryDTO;
 import com.fanstatic.dto.model.combo.ComboProductDTO;
+import com.fanstatic.dto.model.hotproduct.HotProductDTO;
 import com.fanstatic.dto.model.option.OptionGroupDTO;
 import com.fanstatic.dto.model.option.OptionGroupRequestDTO;
 import com.fanstatic.dto.model.option.OptionRequestDTO;
@@ -694,6 +695,20 @@ public class ProductService {
         return ResponseUtils.success(200, "Danh sách sản phẩm", reponseListDataDTO);
     }
 
+    public ResponseDTO getOptionShared() {
+        List<OptionGroup> optionGroups = optionGroupRepository.findAllByShareIsTrue().orElse(null);
+        List<ResponseDataDTO> optionGroupDTOs = new ArrayList<>();
+        for (OptionGroup optionGroup : optionGroups) {
+            OptionGroupDTO optionGroupDTO = modelMapper.map(optionGroup, OptionGroupDTO.class);
+            optionGroupDTOs.add(optionGroupDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(optionGroupDTOs);
+        return ResponseUtils.success(200, "Danh sách option group dùng chung", responseListDataDTO);
+
+    }
+
     public ResponseDTO showByCategoryId(Integer categoryId) {
 
         Category category = categoryRepository.findByIdAndActiveIsTrue(categoryId).orElse(null);
@@ -718,9 +733,27 @@ public class ProductService {
             comboProductDTOs.add(comboProdutDTO);
         }
 
+        List<HotProductDTO> hotProductDTOs = new ArrayList<>();
+        for (ProductDTO productDTO : productDTOS) {
+            if (productDTO.isHotProduct()) {
+                HotProductDTO hotProductDTO = new HotProductDTO();
+                hotProductDTO.setProduct(productDTO);
+                hotProductDTOs.add(hotProductDTO);
+            }
+        }
+
+        for (ComboProductDTO comboProductDTO : comboProductDTOs) {
+            if (comboProductDTO.isHotProduct()) {
+                HotProductDTO hotProductDTO = new HotProductDTO();
+                hotProductDTO.setComboProduct(comboProductDTO);
+                hotProductDTOs.add(hotProductDTO);
+            }
+        }
+
         OrderShowProductDTO orderShowProductDTO = new OrderShowProductDTO();
         orderShowProductDTO.setComboProducts(comboProductDTOs);
         orderShowProductDTO.setProducts(productDTOS);
+        orderShowProductDTO.setHotProductDTOs(hotProductDTOs);
 
         return ResponseUtils.success(200, "Danh sách sản phẩm", orderShowProductDTO);
     }

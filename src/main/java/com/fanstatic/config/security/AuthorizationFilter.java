@@ -22,6 +22,9 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     private final RolePermissionService rolePermissionService;
     private final SessionUtils sessionUtils;
 
+    String[] allowedPaths = { "home", "auth", "u", "handle-checkout", "cancel-checkout" };
+    String[] pathsForUser = { "profile", "request-staff" };
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -29,9 +32,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         Boolean jwtFilterValided = (Boolean) sessionUtils.get("jwtFiltetValided");
         String currentUrl = request.getRequestURI();
         String[] urlPaths = currentUrl.split("/");
-
-        String[] allowedPaths = { "home", "auth", "u", "handle-checkout", "cancel-checkout", "notification" };
-        String[] pathsForUser = { "profile" };
 
         for (String path : urlPaths) {
             if (path.equals("handle-checkout") || path.equals("cancel-checkout")) {

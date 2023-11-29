@@ -54,41 +54,13 @@ public class User {
 	@Column(name = "place_residence")
 	private String placeResidence;
 
-	private BigInteger point;
+	private Long point;
 
-	// bi-directional many-to-one association to Loginlog
-	// @OneToMany(mappedBy = "user")
-	// private List<Loginlog> loginlogs;
-
-	// bi-directional many-to-one association to Order
-	// @OneToMany(mappedBy = "customer")
-	// private List<Order> customerOrder;
-
-	// bi-directional many-to-one association to Order
-	// @OneToMany(mappedBy = "employeeConfirmed")
-	// private List<Order> confirmedOrder;
-
-	// bi-directional many-to-one association to RegisterShift
-	// @OneToMany(mappedBy = "employee")
-	// private List<RegisterShift> registerShifts;
-
-	// @OneToMany(mappedBy = "user")
-	// private List<Systemlog> systemlogs;
-
-	// bi-directional many-to-one association to File
-	@ManyToOne
-	@JoinColumn(name = "bacnk_cccd_image_id")
-	private File backCCCD;
 
 	// bi-directional many-to-one association to File
 	@ManyToOne
 	@JoinColumn(name = "image_id")
 	private File image;
-
-	// bi-directional many-to-one association to File
-	@ManyToOne
-	@JoinColumn(name = "front_cccd_image_id")
-	private File frontCCCD;
 
 	// bi-directional many-to-one association to Role
 	@ManyToOne
@@ -97,10 +69,6 @@ public class User {
 
 	@OneToOne(mappedBy = "user")
 	private Account account;
-
-	// bi-directional many-to-one association to WarehouseDeliver
-	// @OneToMany(mappedBy = "employee")
-	// private List<WarehouseDeliver> warehouseDelivers;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")
@@ -126,10 +94,6 @@ public class User {
 	@JoinColumn(name = "delete_by")
 	private User deleteBy;
 
-	// @Override
-	// public String toString() {
-	// return "dfsdsfsf";
-	// }
 
 	@Override
 	public String toString() {

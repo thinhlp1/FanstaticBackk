@@ -20,6 +20,28 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         List<Order> findOrdersCreated(@Param("time") Date time);
 
         @Query("SELECT o FROM Order o " +
+                        "WHERE o.createAt >= :time " +
+                        "ORDER BY o.createAt DESC") // Sắp xếp theo thời gian tạo giảm dần
+        List<Order> findOrderInDate(@Param("time") Date time);
+
+        @Query("SELECT o FROM Order o " +
+                        "WHERE o.status.id = 'CONFIRMING' " +
+                        "AND o.createAt >= :time " +
+                        "ORDER BY o.createAt DESC") // Sắp xếp theo thời gian tạo giảm dần
+        List<Order> findOrderConfirming(@Param("time") Date time);
+
+        @Query("SELECT o FROM Order o " +
+                        "WHERE EXTRACT(YEAR FROM o.createAt) = :year " +
+                        "AND EXTRACT(MONTH FROM o.createAt) = :month " +
+                        "ORDER BY o.createAt DESC")
+        List<Order> findOrdersInMonth(@Param("year") int year, @Param("month") int month);
+
+        @Query("SELECT o FROM Order o " +
+                        "WHERE EXTRACT(YEAR FROM o.createAt) = :year " +
+                        "ORDER BY o.createAt DESC")
+        List<Order> findOrdersInYear(@Param("year") int year);
+
+        @Query("SELECT o FROM Order o " +
                         "WHERE o.status.id = 'AWAIT_CHECKOUT' " +
                         "AND o.createAt >= :time " +
                         "ORDER BY o.createAt DESC")

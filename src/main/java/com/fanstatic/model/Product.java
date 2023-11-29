@@ -44,9 +44,9 @@ public class Product {
 	@Column(name = "out_of_stock")
 	private Byte outOfStock;
 
-	// bi-directional many-to-one association to ComboProductDetail
-	@OneToMany(mappedBy = "product")
-	private List<ComboProductDetail> comboProductDetails;
+	// // bi-directional many-to-one association to ComboProductDetail
+	// @OneToMany(mappedBy = "product")
+	// private List<ComboProductDetail> comboProductDetails;
 
 	// bi-directional many-to-one association to HotProduct
 	@OneToMany(mappedBy = "product")
@@ -86,7 +86,7 @@ public class Product {
 	@Column(name = "update_at")
 	private Date updateAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "update_by")
 	private User updateBy;
 
@@ -94,7 +94,7 @@ public class Product {
 	@Column(name = "create_at")
 	private Date createAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "create_by")
 	private User createBy;
 
@@ -102,7 +102,7 @@ public class Product {
 	@Column(name = "delete_at")
 	private Date deleteAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "delete_by")
 	private User deleteBy;
 

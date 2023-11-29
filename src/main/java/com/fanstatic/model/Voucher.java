@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
@@ -12,7 +11,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
-
 
 /**
  * /**
@@ -37,6 +35,9 @@ public class Voucher {
     private String name;
 
     private int percent;
+
+    // thịnh thêm thuộc tính quantity
+    private Integer quantity;
 
     private byte active;
 

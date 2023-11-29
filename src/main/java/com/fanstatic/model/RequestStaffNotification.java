@@ -35,7 +35,7 @@ public class RequestStaffNotification {
     @ManyToOne
     private User customer;
 
-    @JoinColumn(name = "emmployee_confirm")
+    @JoinColumn(name = "employee_confirm")
     @ManyToOne
     private User employeeConfirm;
 

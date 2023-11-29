@@ -34,6 +34,8 @@ public class ComboProductDTO extends ResponseDataDTO {
 
     private boolean outOfStock;
 
+    private boolean hotProduct;
+
     private Integer soldQuantity;
 
     private List<ComboProductDetailDTO> comboProductDetails;

@@ -98,6 +98,27 @@ public class PurchaseOrderController {
 
     }
 
+    @GetMapping("/api/purchase/order/create/order-voucher/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getVoucherCanApply(@PathVariable Integer id) {
+        ResponseDTO responseDTO = orderService.getVoucherCanApply(id);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/api/purchase/order/create/order-point/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getPoint(@PathVariable Integer id) {
+        ResponseDTO responseDTO = orderService.getPoint(id);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/api/purchase/order/create/payment-method")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getPaymentMethod() {
+        ResponseDTO responseDTO = orderService.getPaymentMethod();
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
     @PutMapping("/api/purchase/order/create/customer/update-people/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> cupdatePeople(@PathVariable Integer id, @RequestBody Integer people) {

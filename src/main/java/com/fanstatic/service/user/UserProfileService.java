@@ -1,6 +1,7 @@
 package com.fanstatic.service.user;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.management.modelmbean.ModelMBean;
@@ -24,10 +25,15 @@ import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.profile.ProfileUserDTO;
 import com.fanstatic.dto.model.user.UserDTO;
+import com.fanstatic.dto.model.voucher.VoucherDTO;
 import com.fanstatic.model.Account;
 import com.fanstatic.model.User;
+import com.fanstatic.model.UserVoucher;
+import com.fanstatic.model.Voucher;
 import com.fanstatic.repository.AccountRepository;
 import com.fanstatic.repository.UserRepository;
+import com.fanstatic.repository.UserVoucherRepository;
+import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.CustomerService;
 import com.fanstatic.service.order.OrderService;
 import com.fanstatic.service.system.OTPService;
@@ -42,12 +48,14 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
-    private final CustomerService customerService;
     private final OrderService orderService;
     private final SystemService systemService;
     private final ModelMapper modelMapper;
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final UserVoucherRepository userVoucherRepository;
+    private final VoucherRepository voucherRepository;
+
     private final SessionUtils sessionUtils;
     private final OTPService otpService;
     private final JwtUtil jwtUtil;
@@ -71,9 +79,17 @@ public class UserProfileService {
                 orderDTOs = responseListDataDTO.getDatas();
             }
 
+            List<Voucher> vouchers = userVoucherRepository.findActiveVouchersForUser(customer.getId(), new Date());
+            List<VoucherDTO> voucherDTOs = new ArrayList<>();
+            for (Voucher voucher : vouchers) {
+                VoucherDTO voucherDTO = modelMapper.map(voucher, VoucherDTO.class);
+                voucherDTOs.add(voucherDTO);
+            }
+
             ProfileUserDTO profileUserDTO = new ProfileUserDTO();
-            profileUserDTO.setCustomerDTO(customerDTO);
-            profileUserDTO.setOrderDTOs(orderDTOs);
+            profileUserDTO.setCustomer(customerDTO);
+            profileUserDTO.setOrders(orderDTOs);
+            profileUserDTO.setVouchers(voucherDTOs);
 
             return ResponseUtils.success(200, "Profile user", profileUserDTO);
 
@@ -159,8 +175,6 @@ public class UserProfileService {
         User user = systemService.getUserLogin();
         Account account = user.getAccount();
 
-
-
         if (!passwordEncoder.matches(changePasswordDTO.getOldPassword(), account.getPassword())) {
             return ResponseUtils.fail(400, "Mật khẩu không đúng", null);
         }
@@ -184,13 +198,23 @@ public class UserProfileService {
         }
     }
 
-    // public ResponseDTO changeNumberPhone(LoginDTO loginDTO) {
-    // User customer = systemService.getUserLogin();
+    public ResponseDTO collectVoucher(Integer voucherId) {
 
-    // ResponseDTO responseDTO =
+        Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(voucherId).orElse(null);
+        if (voucher == null) {
+            return ResponseUtils.fail(404, "Voucher không tồn tại", null);
+        }
 
-    // return ResponseUtils.success(200, "Profile user", null);
+        User user = systemService.getUserLogin();
 
-    // }
+        UserVoucher userVoucher = new UserVoucher();
+        userVoucher.setUser(user);
+        userVoucher.setVoucher(voucher);
+        userVoucher.setCollectAt(new Date());
+
+        userVoucherRepository.save(userVoucher);
+
+        return ResponseUtils.success(200, "Thu thập voucher thành công", null);
+    }
 
 }

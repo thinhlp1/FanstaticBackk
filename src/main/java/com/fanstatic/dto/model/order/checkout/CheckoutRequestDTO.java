@@ -19,4 +19,6 @@ public class CheckoutRequestDTO {
 
     @NotNull
     private Integer voucherId;
+
+    private boolean redeem;
 }
