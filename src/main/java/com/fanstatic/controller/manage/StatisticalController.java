@@ -31,7 +31,7 @@ public class StatisticalController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
-    @GetMapping("/show/oder")
+    @GetMapping("/show/order")
     @ResponseBody
     public ResponseEntity<ResponseDTO> GetOder(@RequestParam(required = false) Integer year) {
         ResponseDTO reponseDTO = statisticalService.countOrdersByMonths(year);
@@ -58,6 +58,19 @@ public class StatisticalController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> GetProduct(@RequestParam(required = false) Integer year) {
         ResponseDTO reponseDTO = statisticalService.findTop10BestSellingProducts(year);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+     @GetMapping("/show/comboproduct")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> GetComboProduct(@RequestParam(required = false) Integer year) {
+        ResponseDTO reponseDTO = statisticalService.findTop10BestSellingComboProducts(year);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+     @GetMapping("/show/productvariant")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> GetProductVariant(@RequestParam(required = false) Integer year) {
+        ResponseDTO reponseDTO = statisticalService.findTop10BestSellingProductVariant(year);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 

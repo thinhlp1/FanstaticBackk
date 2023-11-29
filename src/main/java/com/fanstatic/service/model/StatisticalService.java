@@ -15,6 +15,7 @@ import com.fanstatic.dto.model.statistical.StatisticalRevenueDTO;
 import com.fanstatic.model.ComboProduct;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductVarient;
+import com.fanstatic.repository.BillRepository;
 import com.fanstatic.repository.OrderItemRepository;
 import com.fanstatic.repository.OrderRepository;
 import com.fanstatic.util.CommonUtils;
@@ -37,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class StatisticalService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final BillRepository billRepository;
     private final ModelMapper modelMapper;
 
     // thống kê data dashboard thống kê ngày , tuần , top sản phẩm
@@ -49,6 +51,7 @@ public class StatisticalService {
         List<String> state = new ArrayList<>();
         state.add("COMPLETE");
         state.add("ITEM_COMPLETE");
+         state.add("PAID");
 
         // Số lượng sản phẩm bán được trong hôm nay
         Integer soldProductsToday = orderItemRepository.countSoldProductsByDateRangeAndState(startDate, today,
@@ -65,16 +68,16 @@ public class StatisticalService {
                 today, state);
 
         // Doanh thu trong hôm nay với các trạng thái A
-        BigInteger revenueToday = orderRepository.calculateRevenueByDateRangeAndStates(startDate, today,
+        BigInteger revenueToday = billRepository.calculateRevenueByDateRangeAndStates(startDate, today,
                 state);
 
         // Doanh thu trong tuần này với các trạng thái A
-        BigInteger revenueThisWeek = orderRepository.calculateRevenueByDateRangeAndStates(startDateOfWeek,
+        BigInteger revenueThisWeek = billRepository.calculateRevenueByDateRangeAndStates(startDateOfWeek,
                 today,
                 state);
 
         // Doanh thu trong tháng này với các trạng thái A
-        BigInteger revenueThisMonth = orderRepository.calculateRevenueByDateRangeAndStates(startDateOfMonth,
+        BigInteger revenueThisMonth = billRepository.calculateRevenueByDateRangeAndStates(startDateOfMonth,
                 today,
                 state);
 
@@ -221,15 +224,23 @@ public class StatisticalService {
         // Số đơn hàng trong tháng này với các trạng thái A
         Long ordersThisMonth = orderRepository.countOrdersByDateRangeAndStates(startDateOfMonth, today, state);
 
-        Date startOfYear = getStartOfYear(today);
-        List<Object[]> listProductYear = orderItemRepository.findTop10BestSellingProductsByRangeAndStates(startOfYear,
+    //    Date startOfYear = getStartOfYear(today);
+        List<Object[]> listProductYear = orderItemRepository.findTop10BestSellingProductsByRangeAndStates(startDateOfMonth,
                 today, state);
-        List<Object[]> listComboProductYear = orderItemRepository.findTop10BestSellingComboProductsByRangeAndStates(startOfYear,
+        List<Object[]> listComboProductYear = orderItemRepository.findTop10BestSellingComboProductsByRangeAndStates(startDateOfMonth,
                 today, state);
-        List<Object[]> listProductVariantYear = orderItemRepository.findTop10BestSellingProductVariantByRangeAndStates(startOfYear,
+        List<Object[]> listProductVariantYear = orderItemRepository.findTop10BestSellingProductVariantByRangeAndStates(startDateOfMonth,
                 today, state);
-        // listProduct.subList(0, 5);
-
+         if (listProductYear.size() > 6){
+               listProductYear.subList(0, 5);
+         }  
+           if (listComboProductYear.size() > 6){
+               listComboProductYear.subList(0, 5);
+         }    
+           if (listProductVariantYear.size() > 6){
+               listProductVariantYear.subList(0, 5);
+         }      
+      
         List<DataSellProductDTO> listDataSellProductDTOs = new ArrayList<>();
         List<DataSellComboProductDTO> listDataSellComboProductDTOs = new ArrayList<>();
         List<DataSellProductVariantDTO> listDataSellProductVariantDTOs = new ArrayList<>();
@@ -337,6 +348,7 @@ public class StatisticalService {
 
         List<String> state = new ArrayList<>();
         state.add("COMPLETE");
+         state.add("PAID");
         DataDTO dataMonths = new DataDTO();
        
         for (int month = 0; month < 12; month++) {
@@ -345,7 +357,7 @@ public class StatisticalService {
             calendar.set(currentYear, month, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
             Date endDate = calendar.getTime();
 
-            BigInteger revenue = orderRepository.calculateRevenueByDateRangeAndStates(startDate, endDate,
+            BigInteger revenue = billRepository.calculateRevenueByDateRangeAndStates(startDate, endDate,
                     state);
             revenue = revenue == null ? BigInteger.valueOf(0) : revenue;
 
@@ -453,7 +465,6 @@ public class StatisticalService {
         state.add("ITEM_COMPLETE");
         List<Object[]> topProducts = orderItemRepository
                 .findTop10BestSellingProductsByRangeAndStates(startOfYear, today, state);
-
         List<ResponseDataDTO> listDataSellProductDTOs = new ArrayList<>();
 
         for (int i = 0; i < topProducts.size(); i++) {
@@ -469,7 +480,70 @@ public class StatisticalService {
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
         reponseListDataDTO.setDatas(listDataSellProductDTOs);
 
-        return ResponseUtils.success(200, "Danh sách top 10 bán chạy", reponseListDataDTO);
+        return ResponseUtils.success(200, "Danh sách top 10 sản phẩm bán chạy", reponseListDataDTO);
+    }
+    public ResponseDTO findTop10BestSellingComboProducts(Integer year) {
+        Date today = new Date();
+        // Date startDate = startDate(today);
+        Date startOfYear = getStartOfYear(today);
+
+        if (year != null) {
+            startOfYear = getStartOfYear(year);
+            today = getEndOfYear(year);
+        }
+
+        List<String> state = new ArrayList<>();
+        state.add("ITEM_COMPLETE");
+        List<Object[]> topComboProducts = orderItemRepository
+                .findTop10BestSellingComboProductsByRangeAndStates(startOfYear, today, state);
+        List<ResponseDataDTO> listDataSellProductDTOs = new ArrayList<>();
+
+        for (int i = 0; i < topComboProducts.size(); i++) {
+            Object[] result = topComboProducts.get(i);
+
+            ComboProduct comboProduct = (ComboProduct) result[0];
+            long quantity = (Long) result[1];
+            ComboProductDTO comboProductDTO = modelMapper.map(comboProduct, ComboProductDTO.class);
+            DataSellComboProductDTO dataSellComboProductDTO = new DataSellComboProductDTO(comboProductDTO, quantity);
+
+            listDataSellProductDTOs.add(dataSellComboProductDTO);
+        }
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+        reponseListDataDTO.setDatas(listDataSellProductDTOs);
+
+        return ResponseUtils.success(200, "Danh sách top 10 combo bán chạy", reponseListDataDTO);
+    }
+
+     public ResponseDTO findTop10BestSellingProductVariant(Integer year) {
+        Date today = new Date();
+        // Date startDate = startDate(today);
+        Date startOfYear = getStartOfYear(today);
+
+        if (year != null) {
+            startOfYear = getStartOfYear(year);
+            today = getEndOfYear(year);
+        }
+        List<String> state = new ArrayList<>();
+        state.add("ITEM_COMPLETE");
+        List<Object[]> topProductVariants = orderItemRepository
+                .findTop10BestSellingProductVariantByRangeAndStates(startOfYear, today, state);
+        List<ResponseDataDTO> listDataSellProductDTOs = new ArrayList<>();
+    
+
+        for (int i = 0; i < topProductVariants.size(); i++) {
+            Object[] result = topProductVariants.get(i);
+
+            ProductVarient productVariant = (ProductVarient) result[0];
+            long quantity = (Long) result[1];
+            ProductVarientDTO productVarientDTO = modelMapper.map(productVariant, ProductVarientDTO.class);
+            DataSellProductVariantDTO dataSellProductVariantDTO = new DataSellProductVariantDTO(productVarientDTO, quantity);
+
+            listDataSellProductDTOs.add(dataSellProductVariantDTO);
+        }
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+        reponseListDataDTO.setDatas(listDataSellProductDTOs);
+
+        return ResponseUtils.success(200, "Danh sách top 10 sản phẩm size bán chạy", reponseListDataDTO);
     }
 
     // truyền vào date trả về ngày đầu tuần của date truyền vào
