@@ -44,11 +44,12 @@ public class TableTypeService {
         }
 
         if (tableTypeRepository.findByNameAndActiveIsTrue(tableTypeRequestDTO.getName()).isPresent()) {
-            errors.add(new FieldError("tableTypeRequestDTO", "name", "TableType đã tồn tại"));
+            errors.add(new FieldError("tableTypeRequestDTO", "name", "Teen bàn đã tồn tại"));
         }
 
         // Nếu có lỗi, ném ra một lượt với danh sách lỗi
         if (!errors.isEmpty()) {
+            System.out.println(errors);
             throw new ValidationException(errors);
         }
 
@@ -128,12 +129,12 @@ public class TableTypeService {
         // check image
         if (image != null) {
             if (tableType.getImage() != null) {
-                fileService.updateFile(image, ImageConst.CATEGORY_FOLDER, tableType.getImage());
-
                 fileService.deleteFireStore(tableType.getImage().getName());
 
+                fileService.updateFile(image, ImageConst.TALBE_FOLDER, tableType.getImage());
+
             } else {
-                File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+                File file = fileService.upload(image, ImageConst.TALBE_FOLDER);
                 tableType.setImage(file);
 
             }

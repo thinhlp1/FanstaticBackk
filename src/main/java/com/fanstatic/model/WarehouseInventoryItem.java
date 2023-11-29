@@ -1,23 +1,19 @@
 package com.fanstatic.model;
 
 
-import java.util.Date;
-import jakarta.persistence.*;
 import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 
 
 /**
- * 
- * 
  * /**
  * The persistent class for the warehouse_inventory_item database table.
- * 
  */
 
 @Table(name = "warehouse_inventory_item")
@@ -26,44 +22,57 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WarehouseInventoryItem  {
-	
-	@Id
-	private int id;
+public class WarehouseInventoryItem {
 
-	@Column(name = "quantity_inventory")
-	private int quantityInventory;
+    @Id
+    private int id;
 
-	private String reason;
+    @Column(name = "quantity_in_inventory")
+    private int quantityInInventory;
 
-	private String solution;
+    @Column(name = "quantity_in_paper")
+    private int quantityInPaper;
 
-	// bi-directional many-to-one association to Flavor
-	@ManyToOne
-	private Flavor flavor;
+    @Column(name = "quantity_different")
+    private int quantityDifferent;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "update_at")
-	private Date updateAt;
+    private String reason;
 
-	@OneToOne
-	@JoinColumn(name = "update_by")
-	private User updateBy;
+    private String solution;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_at")
-	private Date createAt;
+    private byte active;
 
-	@OneToOne
-	@JoinColumn(name = "create_by")
-	private User createBy;
+    // bi-directional many-to-one association to Flavor
+    @ManyToOne
+    @JoinColumn(name = "flavor_id")
+    private Flavor flavor;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "delete_at")
-	private Date deleteAt;
+    @ManyToOne
+    @JoinColumn(name = "inventory_id")
+    private WarehouseInventory warehouseInventory;
 
-	@OneToOne
-	@JoinColumn(name = "delete_by")
-	private User deleteBy;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "update_at")
+    private Date updateAt;
+
+    @OneToOne
+    @JoinColumn(name = "update_by")
+    private User updateBy;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "create_at")
+    private Date createAt;
+
+    @OneToOne
+    @JoinColumn(name = "create_by")
+    private User createBy;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "delete_at")
+    private Date deleteAt;
+
+    @OneToOne
+    @JoinColumn(name = "delete_by")
+    private User deleteBy;
 
 }

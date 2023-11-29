@@ -107,6 +107,7 @@ public class TableService {
                 for (Integer id : tableRequestDTO.getDeleteTables()) {
                     Table table = tableRepository.findByIdAndActiveIsTrue(id).orElse(null);
                     if (table != null) {
+
                         table.setActive(DataConst.ACTIVE_FALSE);
                         table.setDeleteAt(new Date());
                         table.setDeleteBy(systemService.getUserLogin());
@@ -126,9 +127,17 @@ public class TableService {
                         return ResponseUtils.fail(404, "Bàn không tồn tại", null);
                     }
 
-                    table.setNumberTable(updateTable.getNumberTable());
+                    TableType tableType = tableTypeRepository.findByIdAndActiveIsTrue(updateTable.getTableType())
+                            .orElse(null);
+                    if (tableType == null) {
+                        transactionManager.rollback(transactionStatus);
+
+                        return ResponseUtils.fail(404, "Loại bàn không tồn tại", null);
+                    }
 
                     table.setNumberTable(updateTable.getNumberTable());
+
+                    table.setTableType(tableType);
                     table.setUpdateAt(new Date());
                     table.setUpdateBy(systemService.getUserLogin());
                     tableRepository.save(table);
@@ -149,8 +158,14 @@ public class TableService {
             for (Table table : tableSaveds) {
                 TableDTO tableDTO = modelMapper.map(table, TableDTO.class);
                 String qrCodeUrl = table.getQrCode().getImage().getLink();
+                TableTypeDTO tableTypeDTO = modelMapper.map(table.getTableType(), TableTypeDTO.class);
+                File file = table.getTableType().getImage();
+                if (file != null) {
+                    tableTypeDTO.setImageUrl(file.getLink());
+
+                }
                 tableDTO.setQrImageUrl(qrCodeUrl);
-                tableDTO.setTableTypeDTO(modelMapper.map(table.getTableType(), TableTypeDTO.class));
+                tableDTO.setTableTypeDTO(tableTypeDTO);
                 tableDTOs.add(tableDTO);
             }
 
@@ -192,8 +207,16 @@ public class TableService {
             TableDTO tableDTO = new TableDTO();
             modelMapper.map(table, tableDTO);
             String qrCodeUrl = table.getQrCode().getImage().getLink();
+
+            TableTypeDTO tableTypeDTO = modelMapper.map(table.getTableType(), TableTypeDTO.class);
+            File file = table.getTableType().getImage();
+            if (file != null) {
+                tableTypeDTO.setImageUrl(file.getLink());
+
+            }
+
             tableDTO.setQrImageUrl(qrCodeUrl);
-            tableDTO.setTableTypeDTO(modelMapper.map(table.getTableType(), TableTypeDTO.class));
+            tableDTO.setTableTypeDTO(tableTypeDTO);
             tableDTOS.add(tableDTO);
         }
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();

@@ -1,17 +1,18 @@
 package com.fanstatic.model;
 
-import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+import java.util.List;
+
 /**
- * 
  * /**
  * The persistent class for the file database table.
- * 
  */
 
 @Entity
@@ -20,37 +21,38 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class File {
+public class File implements Serializable {
 
-	public final static String FILE_TYPE_IMAGE = "IMAGE";
-	public final static String FILE_TYPE_QR = "QR";
-	public final static String FILE_TYPE_TABLE_LAYOUT = "TABLE_LAYOUT";
+    public final static String FILE_TYPE_IMAGE = "IMAGE";
+    public final static String FILE_TYPE_QR = "QR";
+    public final static String FILE_TYPE_TABLE_LAYOUT = "TABLE_LAYOUT";
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-	private byte active;
+    private byte active;
 
-	private String extension;
+    private String extension;
 
-	@Column(name = "link_in_project")
-	private String link;
+    @Column(name = "link_in_project")
+    private String link;
 
-	private String name;
+    private String name;
 
-	private long size;
+    private long size;
 
-	@Column(name = "file_type")
-	private String fileType;
+    @Column(name = "file_type")
+    private String fileType;
 
-	public File(byte active, String extension, String link, String name, long size, String fileType) {
-		this.active = active;
-		this.extension = extension;
-		this.link = link;
-		this.name = name;
-		this.size = size;
-		this.fileType = fileType;
-	}
+
+    public File(byte active, String extension, String link, String name, long size, String fileType) {
+        this.active = active;
+        this.extension = extension;
+        this.link = link;
+        this.name = name;
+        this.size = size;
+        this.fileType = fileType;
+    }
 
 }

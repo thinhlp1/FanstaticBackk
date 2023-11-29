@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import java.util.Date;
 import java.util.List;
 
@@ -11,8 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
 
 /**
  * 
@@ -28,32 +25,41 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderItem  {
-	
+public class OrderItem {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private String note;
 
-	private int priority;
+	private Integer priority;
 
-	private int quantity;
+	private Integer quantity;
+
+	@Column(name = "item_price")
+	private Long itemPrice;
+
+	@Column(name = "quantity_completed")
+	private Integer quantityCompleted;
 
 	// bi-directional many-to-one association to Order
-	@ManyToOne
+	@ManyToOne()
 	@JoinColumn(name = "order_id")
 	private Order order;
 
 	// bi-directional many-to-one association to Product
-	@ManyToOne
+	@ManyToOne()
 	private Product product;
 
 	// bi-directional many-to-one association to ProductVarient
-	@ManyToOne
+	@ManyToOne()
 	@JoinColumn(name = "product_variant_id")
 	private ProductVarient productVarient;
 
+	@ManyToOne()
+	@JoinColumn(name = "combo_id")
+	private ComboProduct comboProduct;
 	// bi-directional many-to-one association to Status
 	@ManyToOne
 	private Status status;
@@ -66,7 +72,7 @@ public class OrderItem  {
 	@Column(name = "update_at")
 	private Date updateAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "update_by")
 	private User updateBy;
 
@@ -74,7 +80,7 @@ public class OrderItem  {
 	@Column(name = "create_at")
 	private Date createAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "create_by")
 	private User createBy;
 
@@ -82,7 +88,7 @@ public class OrderItem  {
 	@Column(name = "delete_at")
 	private Date deleteAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "delete_by")
 	private User deleteBy;
 

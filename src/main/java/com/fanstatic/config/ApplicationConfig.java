@@ -68,7 +68,17 @@ public class ApplicationConfig {
                 "classpath:validate-message/user",
                 "classpath:validate-message/role",
                 "classpath:validate-message/voucher",
-                "classpath:validate-message/extraPortion"
+                "classpath:validate-message/extraPortion",
+                "classpath:validate-message/flavor",
+                "classpath:validate-message/flavorcategory",
+                "classpath:validate-message/warehouseReceive",
+                "classpath:validate-message/warehouseReceiveItem",
+                "classpath:validate-message/warehouseDeliver",
+                "classpath:validate-message/warehouseDeliverReason",
+                "classpath:validate-message/warehouseDeliverSolution",
+                "classpath:validate-message/warehouseDeliverItem",
+                "classpath:validate-message/warehouseInventory",
+                "classpath:validate-message/warehouseInventoryItem"
         );
         ms.setDefaultEncoding("utf-8");
         return ms;

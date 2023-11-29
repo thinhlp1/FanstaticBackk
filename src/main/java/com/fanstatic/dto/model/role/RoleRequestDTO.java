@@ -29,6 +29,4 @@ public class RoleRequestDTO {
     private String description;
 
 
-    private List<FeaturePermissonDTO> featurePermissions;
-
 }

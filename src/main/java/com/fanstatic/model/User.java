@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.Objects;
 
 /**
  * The persistent class for the user database table.
@@ -17,7 +18,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "user")
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
@@ -54,7 +54,7 @@ public class User {
 	@Column(name = "place_residence")
 	private String placeResidence;
 
-	private BigInteger point;
+	private Long point;
 
 	// bi-directional many-to-one association to Loginlog
 	// @OneToMany(mappedBy = "user")
@@ -72,14 +72,13 @@ public class User {
 	// @OneToMany(mappedBy = "employee")
 	// private List<RegisterShift> registerShifts;
 
-	// bi-directional many-to-one association to Systemlog
 	// @OneToMany(mappedBy = "user")
 	// private List<Systemlog> systemlogs;
 
 	// bi-directional many-to-one association to File
-	@ManyToOne
-	@JoinColumn(name = "bacnk_cccd_image_id")
-	private File backCCCD;
+	// @ManyToOne
+	// @JoinColumn(name = "bacnk_cccd_image_id")
+	// private File backCCCD;
 
 	// bi-directional many-to-one association to File
 	@ManyToOne
@@ -87,12 +86,13 @@ public class User {
 	private File image;
 
 	// bi-directional many-to-one association to File
-	@ManyToOne
-	@JoinColumn(name = "front_cccd_image_id")
-	private File frontCCCD;
+	// @ManyToOne
+	// @JoinColumn(name = "front_cccd_image_id")
+	// private File frontCCCD;
 
 	// bi-directional many-to-one association to Role
 	@ManyToOne
+	@JoinColumn(name = "role_id")
 	private Role role;
 
 	@OneToOne(mappedBy = "user")
@@ -125,5 +125,20 @@ public class User {
 	@OneToOne
 	@JoinColumn(name = "delete_by")
 	private User deleteBy;
+
+	// @Override
+	// public String toString() {
+	// return "dfsdsfsf";
+	// }
+
+	@Override
+	public String toString() {
+		return "Not to String";
+	}
+
+	@Override
+	public int hashCode() {
+		return -1;
+	}
 
 }

@@ -66,23 +66,15 @@ public class CustomerService {
 
         // check image
         MultipartFile image = customerRequestDTO.getImage();
-        if (image != null) {
-            String fileName = image.getOriginalFilename();
-            String contentType = image.getContentType();
-            long fileSize = image.getSize();
-
-            // save image to Fisebase and file table
-        }
 
         User user = modelMapper.map(customerRequestDTO, User.class);
-
 
         user.setRole(roleService.getById(3));
         user.setActive(DataConst.ACTIVE_TRUE);
         user.setCreateAt(new Date());
         user.setCreateBy(systemService.getUserLogin());
 
-        File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+        File file = fileService.upload(image, ImageConst.USER_FOLDER);
         user.setImage(file);
 
         User userSaved = customerRepository.saveAndFlush(user);
@@ -105,6 +97,7 @@ public class CustomerService {
 
         }
     }
+
     public ResponseDTO update(CustomerRequestDTO customerRequestDTO) {
         List<FieldError> errors = new ArrayList<>();
 
@@ -116,17 +109,18 @@ public class CustomerService {
 
         // check data exits
         if (customerRepository
-                .findByNumberPhoneAndActiveIsTrueAndIdNot(customerRequestDTO.getNumberPhone(), customerRequestDTO.getId())
+                .findByNumberPhoneAndActiveIsTrueAndIdNot(customerRequestDTO.getNumberPhone(),
+                        customerRequestDTO.getId())
                 .isPresent()) {
 
             errors.add(new FieldError("customerRequestDTO", "numberPhone", "Số điện thoại đã được sử dụng."));
         }
 
-        if (customerRepository.findByEmailAndActiveIsTrueAndIdNot(customerRequestDTO.getEmail(), customerRequestDTO.getId())
+        if (customerRepository
+                .findByEmailAndActiveIsTrueAndIdNot(customerRequestDTO.getEmail(), customerRequestDTO.getId())
                 .isPresent()) {
             errors.add(new FieldError("customerRequestDTO", "email", "Email đã được sử dụng"));
         }
-
 
         // Nếu có lỗi, ném ra một lượt với danh sách lỗi
         if (!errors.isEmpty()) {
@@ -205,7 +199,6 @@ public class CustomerService {
 
     }
 
-
     public ResponseDTO show(int active) {
         List<User> users = new ArrayList<>();
 
@@ -246,9 +239,9 @@ public class CustomerService {
         if (user == null) {
             return ResponseUtils.fail(404, "Khách hàng không tồn tại", null);
         }
-        //Tìm account đặt lại pass mặc định
+        // Tìm account đặt lại pass mặc định
         Account account = accountService.getByUserID(user.getId());
-        if(account == null){
+        if (account == null) {
             return ResponseUtils.fail(404, "Khách hàng chưa có tài khoản", null);
         }
         AccountRequestDTO accountDTO = modelMapper.map(account, AccountRequestDTO.class);

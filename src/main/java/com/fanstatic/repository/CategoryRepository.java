@@ -1,6 +1,7 @@
 package com.fanstatic.repository;
 
 import com.fanstatic.model.Category;
+import com.fanstatic.model.Product;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,5 +28,6 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     public Optional<List<Category>> findByLevelAndActiveIsTrue(Integer level);
 
     public Optional<List<Category>> findByLevelAndActiveIsFalse(Integer level);
+
 
 }

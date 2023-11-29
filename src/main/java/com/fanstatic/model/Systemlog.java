@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 public class Systemlog {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	@ManyToOne
@@ -46,7 +47,7 @@ public class Systemlog {
 	@Column(name = "object_name")
 	private String objectName;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 

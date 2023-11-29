@@ -41,13 +41,13 @@ public class Voucher {
     private byte active;
 
     @Column(name = "price_condition")
-    private BigInteger priceCondition;
+    private Long priceCondition;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "start_at")
     private Date startAt;
 
-    private BigInteger value;
+    private Long value;
 
     @Column(name = "voucher_code")
     private String voucherCode;

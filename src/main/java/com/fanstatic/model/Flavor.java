@@ -1,88 +1,75 @@
 package com.fanstatic.model;
 
 
-import java.util.Date;
-import java.util.List;
-
+import jakarta.persistence.Table;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+import java.util.List;
+
 
 /**
-
-
-/**
+ * /**
  * The persistent class for the flavor database table.
- * 
  */
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Flavor  {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+@Table(name = "flavor")
+public class Flavor {
 
-	private byte active;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-	private String code;
+    private byte active;
 
-	private String description;
+    private String code;
 
-	private String name;
-
-
-	//bi-directional many-to-one association to Category
-	@ManyToOne
-	private Category category;
-
-	//bi-directional many-to-one association to Unit
-	@ManyToOne
-	private Unit unit;
-
-	//bi-directional many-to-one association to WarehouseDeliverItem
-	@OneToMany(mappedBy="flavor")
-	private List<WarehouseDeliverItem> warehouseDeliverItems;
-
-	//bi-directional many-to-one association to WarehouseInventoryItem
-	@OneToMany(mappedBy="flavor")
-	private List<WarehouseInventoryItem> warehouseInventoryItems;
-
-	//bi-directional many-to-one association to WarehouseReceiveItem
-	@OneToMany(mappedBy="flavor")
-	private List<WarehouseReceiveItem> warehouseReceiveItems;
+    private String name;
 
 
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="update_at")
-	private Date updateAt;
+    //bi-directional many-to-one association to Category
+    @ManyToOne
+    @JoinColumn(name = "flavor_category_id")
+    private FlavorCategory flavorCategory;
 
-	@OneToOne
-	@JoinColumn(name="update_by")
-	private User updateBy;
+    @OneToMany(mappedBy = "flavor")
+    private List<WarehouseInventoryItem> warehouseInventoryItemList;
+
+    //bi-directional many-to-one association to Unit
+    @ManyToOne
+    private Unit unit;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "update_at")
+    private Date updateAt;
+
+    @OneToOne
+    @JoinColumn(name = "update_by")
+    private User updateBy;
 
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="create_at")
-	private Date createAt;
-	
-	@OneToOne
-	@JoinColumn(name="create_by")
-	private User createBy;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "create_at")
+    private Date createAt;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="delete_at")
-	private Date deleteAt;
+    @OneToOne
+    @JoinColumn(name = "create_by")
+    private User createBy;
 
-	@OneToOne
-	@JoinColumn(name="delete_by")
-	private User deleteBy;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "delete_at")
+    private Date deleteAt;
+
+    @OneToOne
+    @JoinColumn(name = "delete_by")
+    private User deleteBy;
 
 }

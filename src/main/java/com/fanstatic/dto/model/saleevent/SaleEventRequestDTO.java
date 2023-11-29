@@ -17,12 +17,16 @@ public class SaleEventRequestDTO extends ResponseDataDTO {
     @Min(value = 1 , message = "Min.saleevent.percent")
     private double percent;
 
+    private String name;
+
+    private String code;
+    
     private String description;
 
     private Date startAt;
 
     private Date endAt;
 
-    private boolean active;
+    private byte active;
 
 }

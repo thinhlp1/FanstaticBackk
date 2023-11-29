@@ -24,6 +24,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,67 +42,79 @@ public class RolePermissionService {
     @Lazy
     private RoleService roleService;
 
-    public ResponseDTO setRolePermission(RoleRequestDTO roleRequestDTO) {
+    public ResponseDTO setRolePermission(SetRolePermissionDTO setRolePermissionDTO) {
         TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
-        // kiem tra xem đang update hay create, neu update xoa các role permission cu
-        rolePermissionRepository.deleteByRoleId(roleRequestDTO.getId());
+        Role role = roleRepository.findByIdAndActiveIsTrue(setRolePermissionDTO.getRoleId()).orElse(null);
+        if (role == null) {
+            return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
+        }
+
+        List<Integer> featurePermissionIdsToAdd = setRolePermissionDTO.getFeaturePermissionsId();
+        RolePermissionDTO rolePermissionDTO = (RolePermissionDTO) (getRolePermisson(setRolePermissionDTO.getRoleId())
+                .getData());
+
+        List<Integer> featurePermissionIdsInRole = rolePermissionDTO.getFeaturePermissions().stream()
+                .map(FeaturePermissionDTO::getPermissions)
+                .flatMap(List::stream)
+                .map(PermissionDTO::getFeaturePermissionId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Integer> featurePermissionIdsToAddToDb = featurePermissionIdsToAdd.stream()
+                .filter(id -> !featurePermissionIdsInRole.contains(id))
+                .collect(Collectors.toList());
+
+        // Tạo danh sách cần xóa khỏi csdl
+        List<Integer> featurePermissionIdsToDeleteFromDb = featurePermissionIdsInRole.stream()
+                .filter(id -> !featurePermissionIdsToAdd.contains(id))
+                .collect(Collectors.toList());
+
+        // xoa quyen
+
+        try {
+
+            for (Integer featurePermissionId : featurePermissionIdsToDeleteFromDb) {
+                rolePermissionRepository.deleteByFeaturePermissionId(featurePermissionId,
+                        setRolePermissionDTO.getRoleId());
+            }
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+
+            e.printStackTrace();
+            return ResponseUtils.fail(500, "Gán quyền thất bại", null);
+        }
 
         // kiem tra va gan quyen
-        for (FeaturePermissonDTO featurePermissonDTO : roleRequestDTO.getFeaturePermissions()) {
+        for (Integer featurePermissionId : featurePermissionIdsToAddToDb) {
 
-            for (String permissionId : featurePermissonDTO.getPermissionIds()) {
-                RolePermission rolePermission = new RolePermission();
-                Role role = roleRepository.findByCodeAndActiveIsTrue(roleRequestDTO.getCode()).orElse(null);
+            RolePermission rolePermission = new RolePermission();
 
-                if (role == null) {
-                    transactionManager.rollback(transactionStatus);
+            FeaturePermission featurePermission = featurePermissionRepository
+                    .findById(featurePermissionId)
+                    .orElse(null);
+            if (featurePermission == null) {
+                transactionManager.rollback(transactionStatus);
 
-                    return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
+                return ResponseUtils.fail(404, "Quyền không tồn tại", null);
 
-                }
-
-                ManagerFeature managerFeature = managerFeatureRepository.findById(featurePermissonDTO.getFeatureId())
-                        .orElse(null);
-                if (managerFeature == null) {
-                    transactionManager.rollback(transactionStatus);
-
-                    return ResponseUtils.fail(404, "Chức năng không tồn tại", null);
-
-                }
-
-                Permission permission = permissionRepository.findById(permissionId).orElse(null);
-                if (permission == null) {
-                    transactionManager.rollback(transactionStatus);
-
-                    return ResponseUtils.fail(404, "Quyền này không tồn tại", null);
-
-                }
-                FeaturePermission featurePermission = featurePermissionRepository
-                        .findByManagerFeatureAndPermission(managerFeature, permission)
-                        .orElse(null);
-                if (featurePermission == null) {
-                    transactionManager.rollback(transactionStatus);
-
-                    return ResponseUtils.fail(404, "Quyền không tồn tại", null);
-
-                }
-
-                rolePermission.setFeaturePermission(featurePermission);
-                rolePermission.setCreateAt(new Date());
-                rolePermission.setCreateBy(systemService.getUserLogin());
-                rolePermission.setRole(role);
-
-                try {
-
-                    rolePermissionRepository.save(rolePermission);
-                } catch (Exception e) {
-                    transactionManager.rollback(transactionStatus);
-
-                    e.printStackTrace();
-                    return ResponseUtils.fail(500, "Gán quyền thất bại", null);
-                }
             }
+
+            rolePermission.setFeaturePermission(featurePermission);
+            rolePermission.setCreateAt(new Date());
+            rolePermission.setCreateBy(systemService.getUserLogin());
+            rolePermission.setRole(role);
+
+            try {
+
+                rolePermissionRepository.save(rolePermission);
+            } catch (Exception e) {
+                transactionManager.rollback(transactionStatus);
+
+                e.printStackTrace();
+                return ResponseUtils.fail(500, "Gán quyền thất bại", null);
+            }
+
         }
         transactionManager.commit(transactionStatus);
 
@@ -118,21 +131,21 @@ public class RolePermissionService {
             List<RolePermission> rolePermissions = role.getRolePermissions();
 
             // khoi tao reponse data
-            RolePermissonDTO rolePermissonDTO = new RolePermissonDTO();
+            RolePermissionDTO rolePermissonDTO = new RolePermissionDTO();
             RoleDTO roleDTO = modelMapper.map(role, RoleDTO.class);
             rolePermissonDTO.setRole(roleDTO);
             List<FeaturePermissionDTO> featurePermissionDTOs = new ArrayList<>();
 
             // kiem tra vong lap cac role permission
-            String addedFeatureId = "";
+            List<String> addedFeatureId = new ArrayList<>();
             for (RolePermission rolePermission : rolePermissions) {
                 FeaturePermission featurePermission = rolePermission.getFeaturePermission();
                 ManagerFeature managerFeature = featurePermission.getManagerFeature();
 
-                if (managerFeature.getId().equals(addedFeatureId)) {
+                if (addedFeatureId.contains(managerFeature.getId())) {
                     continue;
                 }
-                addedFeatureId = managerFeature.getId();
+                addedFeatureId.add(managerFeature.getId());
 
                 FeaturePermissionDTO featurePermissionDTO = new FeaturePermissionDTO();
                 ManageFeatureDTO manageFeatureDTO = modelMapper.map(managerFeature, ManageFeatureDTO.class);
@@ -174,25 +187,26 @@ public class RolePermissionService {
         List<RolePermission> rolePermissions = role.getRolePermissions();
 
         // khoi tao reponse data
-        RolePermissonDTO rolePermissonDTO = new RolePermissonDTO();
+        RolePermissionDTO rolePermissonDTO = new RolePermissionDTO();
         RoleDTO roleDTO = modelMapper.map(role, RoleDTO.class);
         rolePermissonDTO.setRole(roleDTO);
         List<FeaturePermissionDTO> featurePermissionDTOs = new ArrayList<>();
 
         // kiem tra vong lap cac role permission
-        String addedFeatureId = "";
+        List<String> addedFeatureId = new ArrayList<>();
+
         for (RolePermission rolePermission : rolePermissions) {
             FeaturePermission featurePermission = rolePermission.getFeaturePermission();
             ManagerFeature managerFeature = featurePermission.getManagerFeature();
-            
-            if (managerFeature == null){
+
+            if (managerFeature == null) {
                 continue;
             }
 
-            if (managerFeature.getId().equals(addedFeatureId)) {
+            if (addedFeatureId.contains(managerFeature.getId())) {
                 continue;
             }
-            addedFeatureId = managerFeature.getId();
+            addedFeatureId.add(managerFeature.getId());
 
             FeaturePermissionDTO featurePermissionDTO = new FeaturePermissionDTO();
             ManageFeatureDTO manageFeatureDTO = modelMapper.map(managerFeature, ManageFeatureDTO.class);
@@ -200,14 +214,24 @@ public class RolePermissionService {
             featurePermissionDTO.setManageFeature(manageFeatureDTO);
 
             // lay cac permission lien quan den feature
-            List<FeaturePermission> featurePermissions = featurePermissionRepository
-                    .findByManagerFeature(managerFeature);
+            // List<FeaturePermission> featurePermissions = featurePermissionRepository
+            // .findByManagerFeature(managerFeature);
+
+            List<FeaturePermission> featurePermissions = new ArrayList<>();
+            for (RolePermission rolePermission2 : rolePermissions) {
+                if (rolePermission2.getFeaturePermission().getManagerFeature().getId().equals(managerFeature.getId())) {
+                    featurePermissions.add(rolePermission2.getFeaturePermission());
+
+                }
+            }
 
             List<PermissionDTO> permissionDTOs = new ArrayList<>();
 
             for (FeaturePermission fePermission : featurePermissions) {
                 PermissionDTO permissionDTO = new PermissionDTO();
                 permissionDTO = modelMapper.map(fePermission.getPermission(), PermissionDTO.class);
+                permissionDTO.setFeaturePermissionId(fePermission.getId());
+
                 permissionDTOs.add(permissionDTO);
             }
             // featurePermissionDTO.setId(featurePermission.getId());
@@ -221,6 +245,7 @@ public class RolePermissionService {
 
     }
 
+   
     public ResponseDTO getFeaturePermission() {
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
 
@@ -229,14 +254,19 @@ public class RolePermissionService {
         List<ResponseDataDTO> featurePermissionDTOs = new ArrayList<>();
 
         // kiem tra vong lap cac role permission
-        String addedFeatureId = "";
+        List<String> addedFeatureId = new ArrayList<>();
+
         for (FeaturePermission featurePermission : featurePermissions) {
             ManagerFeature managerFeature = featurePermission.getManagerFeature();
 
-            if (managerFeature.getId().equals(addedFeatureId)) {
+            if (managerFeature == null) {
                 continue;
             }
-            addedFeatureId = managerFeature.getId();
+
+            if (addedFeatureId.contains(managerFeature.getId())) {
+                continue;
+            }
+            addedFeatureId.add(managerFeature.getId());
 
             FeaturePermissionDTO featurePermissionDTO = new FeaturePermissionDTO();
             ManageFeatureDTO manageFeatureDTO = modelMapper.map(managerFeature, ManageFeatureDTO.class);
@@ -252,6 +282,8 @@ public class RolePermissionService {
             for (FeaturePermission fePermission : featPermissions) {
                 PermissionDTO permissionDTO = new PermissionDTO();
                 permissionDTO = modelMapper.map(fePermission.getPermission(), PermissionDTO.class);
+                permissionDTO.setFeaturePermissionId(fePermission.getId());
+
                 permissionDTOs.add(permissionDTO);
             }
             // featurePermissionDTO.setId(featurePermission.getId());

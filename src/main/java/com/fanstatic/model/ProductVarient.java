@@ -34,7 +34,7 @@ public class ProductVarient {
 
 	private String code;
 
-	private BigInteger price;
+	private Long price;
 
 	// bi-directional many-to-one association to OrderItem
 	@OneToMany(mappedBy = "productVarient")
@@ -48,8 +48,13 @@ public class ProductVarient {
 	@ManyToOne
 	private Size size;
 
-	private byte active;
+	private Byte active;
 
+	@Column(name = "default_size")
+	private Byte defaultSize;
+
+	@Column(name = "out_of_stock")
+	private Byte outOfStock;
 
 	@OneToMany(mappedBy = "productVariant")
 	private List<ProductImage> productImages;
@@ -62,7 +67,7 @@ public class ProductVarient {
 	@Column(name = "update_at")
 	private Date updateAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "update_by")
 	private User updateBy;
 
@@ -70,7 +75,7 @@ public class ProductVarient {
 	@Column(name = "create_at")
 	private Date createAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "create_by")
 	private User createBy;
 
@@ -78,7 +83,7 @@ public class ProductVarient {
 	@Column(name = "delete_at")
 	private Date deleteAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "delete_by")
 	private User deleteBy;
 

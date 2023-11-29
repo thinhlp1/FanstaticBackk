@@ -92,11 +92,12 @@ public class AuthenticationService {
         sessionUtils.set("numberPhone", loginDTO.getNumberPhone());
         sessionUtils.set("accountExits", true);
 
-        return ResponseUtils.success(200, "Tài khoản có tồn tại", null);
+        return ResponseUtils.success(201, "Tài khoản có tồn tại", null);
 
     }
 
-    public ResponseDTO confirmOTP(@Valid ConfirmOtpDTO confirmOtpDTO) {
+
+    public ResponseDTO confirmOTP(ConfirmOtpDTO confirmOtpDTO) {
 
         if (sessionUtils.get("numberPhone") == null) {
             return ResponseUtils.fail(500, "Chưa đăng nhập", null);
@@ -148,7 +149,6 @@ public class AuthenticationService {
                 account.setRole(user.getRole());
                 account.setActive(DataConst.ACTIVE_TRUE);
                 account.setCreateAt(new Date());
-                // TODO thay user 1 thanh user dang dang nhap vao he thong
 
                 account = accountRepository.save(account);
                 Account accountSave = accountRepository.save(account);
@@ -180,9 +180,9 @@ public class AuthenticationService {
         return login(loginAccountDTO);
     }
 
-    public ResponseDTO forgetConfirmPassword(@Valid ConfirmPasswordDTO confirmPasswordDTO) {
+    public ResponseDTO forgetConfirmPassword( ConfirmPasswordDTO confirmPasswordDTO) {
         String numberPhone = sessionUtils.get("numberPhone");
-        if (sessionUtils.get("isConfirm") == null || numberPhone == null) {
+        if (sessionUtils.get("isConfirm") == null || numberPhone == null || sessionUtils.get("accountExits") == null ) {
             return ResponseUtils.fail(500, "Chưa đăng nhập", null);
         }
         User user = userRepository.findByNumberPhoneAndActiveIsTrue(numberPhone).orElse(null);
