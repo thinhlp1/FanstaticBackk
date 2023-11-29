@@ -729,6 +729,14 @@ public class OrderService {
             customer.setPoint(point);
             userRepository.save(customer);
 
+            List<OrderItem> orderItems = order.getOrderItems();
+            Status itemStatus = statusRepository.findById(ApplicationConst.OrderStatus.ITEM_COMPLETE).get();
+            for (OrderItem orderItem : orderItems) {
+                orderItem.setStatus(itemStatus);
+            }
+
+            orderItemRepository.saveAll(orderItems);
+
             OrderDTO orderDTO = convertOrderToDTO(order);
 
             return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
@@ -736,8 +744,11 @@ public class OrderService {
         } else if (paymentMethod.getId().equals(ApplicationConst.PaymentMethod.INTERNET_BANKING)) {
             Status status = statusRepository.findById(ApplicationConst.BillStatus.AWAIT_PAYMENT).get();
             bill.setStatus(status);
-
-            bill.setCheckoutUrl(generateOrderCheckoutUrl(order, bill.getTotal()));
+            String checkoutUrl = generateOrderCheckoutUrl(order, bill.getTotal());
+            if (checkoutUrl == null) {
+                return ResponseUtils.fail(200, "Xác nhận thanh toán không thành công", null);
+            }
+            bill.setCheckoutUrl(checkoutUrl);
             Bill billSaved = billRepository.saveAndFlush(bill);
             if (billSaved != null) {
 
@@ -785,6 +796,14 @@ public class OrderService {
         User customer = order.getCustomer();
         customer.setPoint(point);
         userRepository.save(customer);
+
+        List<OrderItem> orderItems = order.getOrderItems();
+        Status itemStatus = statusRepository.findById(ApplicationConst.OrderStatus.ITEM_COMPLETE).get();
+        for (OrderItem orderItem : orderItems) {
+            orderItem.setStatus(itemStatus);
+        }
+
+        orderItemRepository.saveAll(orderItems);
 
         OrderDTO orderDTO = convertOrderToDTO(order);
 
@@ -2290,14 +2309,23 @@ public class OrderService {
     private String generateOrderCheckoutUrl(Order order, Long total) {
         int orderCodePrefix = 100000;
         String checkoutUrl = null;
+        int countMax = 0;
+        ;
         while (true) {
+            if (countMax == 10) {
+                return null;
+            }
             int orderCode = Integer.valueOf(orderCodePrefix + String.valueOf(order.getOrderId()));
             checkoutUrl = payOSService.getCheckoutUrl(orderCode, total,
                     "Thanh toán hóa đơn");
 
-            if (checkoutUrl == null) {
-                System.out.println(orderCode);
+            if (checkoutUrl.equals("20")) {
+                return null;
+            }
+
+            if (checkoutUrl.equals("423")) {
                 orderCodePrefix++;
+                countMax++;
                 continue;
             }
             return checkoutUrl;

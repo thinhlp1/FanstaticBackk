@@ -96,8 +96,10 @@ public class PayOSService {
             System.out.println("URL: " + reponseCheckoutUrl);
 
             return reponseCheckoutUrl;
+        } else if (codeId.equals("20")) {
+            return "20";
         }
-        return null;
+        return "423";
     }
 
 }
