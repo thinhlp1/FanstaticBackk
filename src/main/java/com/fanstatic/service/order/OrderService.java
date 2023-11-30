@@ -675,7 +675,8 @@ public class OrderService {
             return ResponseUtils.fail(400, "Order đã được xác nhận thanh toán", null);
         }
 
-        if (!order.getStatus().getId().equals(ApplicationConst.OrderStatus.AWAIT_CHECKOUT)) {
+        if (!order.getStatus().getId().equals(ApplicationConst.OrderStatus.AWAIT_CHECKOUT)
+                || !order.getStatus().getId().equals(ApplicationConst.OrderStatus.PROCESSING)) {
             return ResponseUtils.fail(400, "Order không thể thanh toán", null);
 
         }
