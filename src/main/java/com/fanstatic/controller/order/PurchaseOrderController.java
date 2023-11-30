@@ -20,6 +20,7 @@ import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderItemUpdateDTO;
+import com.fanstatic.dto.model.order.edit.OrderNewItemDTO;
 import com.fanstatic.dto.model.order.edit.OrderUpdateDTO;
 import com.fanstatic.dto.model.order.request.CancelOrderrequestDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
@@ -116,6 +117,20 @@ public class PurchaseOrderController {
     public ResponseEntity<ResponseDTO> getPaymentMethod() {
         ResponseDTO responseDTO = orderService.getPaymentMethod();
         return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/api/purchase/order/update/new-item")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> addToOrder(@RequestBody @Valid OrderNewItemDTO orderNewItemDTO) {
+        ResponseDTO responseDTO = orderService.addToOrder(orderNewItemDTO);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderNewItemDTO.getOrderId());
+        }
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
     }
 
     @PutMapping("/api/purchase/order/update")
@@ -316,12 +331,9 @@ public class PurchaseOrderController {
     public ResponseEntity<ResponseDTO> updateOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO,
             @PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.reOrder(orderRequestDTO);
-
         if (responseDTO.isSuccess()) {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
-
         }
-
         return ResponseUtils.returnReponsetoClient(responseDTO);
 
     }
