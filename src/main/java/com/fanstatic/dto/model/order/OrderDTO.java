@@ -44,6 +44,8 @@ public class OrderDTO extends ResponseDataDTO {
 
     private Long voucherRedeem;
 
+    private Long receiMoney;
+
     private StatusDTO status;
 
     private VoucherDTO voucher;

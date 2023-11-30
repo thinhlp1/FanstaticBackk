@@ -654,6 +654,7 @@ public class OrderService {
         Status status = statusRepository.findById(ApplicationConst.OrderStatus.AWAIT_CHECKOUT).get();
         order.setStatus(status);
         order.setPaymentMethod(paymentMethod);
+        order.setReceiMoney(checkoutRequestDTO.getReceiveMoney());
         order.setUpdateAt(new Date());
         order.setUpdateBy(systemService.getUserLogin());
 
@@ -1669,6 +1670,7 @@ public class OrderService {
         orderDTO.setTotal(total(order));
         orderDTO.setPoint(order.getPoint());
         orderDTO.setPointRedeem(order.getRedeem());
+        orderDTO.setReceiMoney(order.getReceiMoney());
 
         orderDTO.setCustomer(modelMapper.map(order.getCustomer(),
                 CustomerDTO.class));
