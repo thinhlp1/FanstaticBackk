@@ -31,13 +31,17 @@ public class OptionGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "name")
     private String name;
 
-    private byte share;
+    @Column(name = "`share`")
+    private Byte share;
 
-    private byte multichoice;
+    @Column(name = "multichoice")
+    private Byte multichoice;
 
-    private byte require;
+    @Column(name = "`require`")
+    private Byte require;
 
     @OneToMany(mappedBy = "optionGroup")
     List<Option> options;
