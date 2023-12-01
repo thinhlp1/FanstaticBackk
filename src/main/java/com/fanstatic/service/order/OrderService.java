@@ -30,6 +30,7 @@ import com.fanstatic.dto.model.order.checkout.ApplyVoucherDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
+import com.fanstatic.dto.model.order.checkout.OrderSurchangeDTO;
 import com.fanstatic.dto.model.order.edit.CompleteOrderItemDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
@@ -60,6 +61,7 @@ import com.fanstatic.model.Order;
 import com.fanstatic.model.OrderExtraPortion;
 import com.fanstatic.model.OrderItem;
 import com.fanstatic.model.OrderItemOption;
+import com.fanstatic.model.OrderSurcharge;
 import com.fanstatic.model.OrderTable;
 import com.fanstatic.model.OrderType;
 import com.fanstatic.model.PaymentMethod;
@@ -80,6 +82,7 @@ import com.fanstatic.repository.OrderExtraPortionRepository;
 import com.fanstatic.repository.OrderItemOptionRepository;
 import com.fanstatic.repository.OrderItemRepository;
 import com.fanstatic.repository.OrderRepository;
+import com.fanstatic.repository.OrderSurchargeRepository;
 import com.fanstatic.repository.OrderTableRepository;
 import com.fanstatic.repository.OrderTypeRepository;
 import com.fanstatic.repository.PaymentMethodRepository;
@@ -136,6 +139,7 @@ public class OrderService {
     private final ProductCategoryRepository productCategoryRepository;
     private final OrderItemOptionRepository orderItemOptionRepository;
     private final UserVoucherRepository userVoucherRepository;
+    private final OrderSurchargeRepository orderSurchargeRepository;
 
     private final ProductRepository productRepository;
     private final ProductVarientRepository productVarientRepository;
@@ -224,6 +228,17 @@ public class OrderService {
     public ResponseDTO create(OrderRequestDTO orderRequestDTO) {
 
         TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+        if (orderRequestDTO.getTableId() == null) {
+            return ResponseUtils.fail(400, "Bàn chưa được chọn ", null);
+
+        }
+
+        Table table = tableRepository.findByIdAndActiveIsTrue(orderRequestDTO.getTableId()).orElse(null);
+        if (table == null) {
+            return ResponseUtils.fail(404, "Bàn không tồn tại", null);
+
+        }
 
         boolean isOpcciped = checkTalbeOccupied(orderRequestDTO.getTableId());
         if (isOpcciped) {
@@ -404,6 +419,7 @@ public class OrderService {
             }
             OrderDTO orderDTO;
             if (rootOrder != null) {
+                orderRepository.delete(order);
                 orderDTO = convertOrderToDTO(orderRepository.findById(rootOrder.getOrderId()).get());
             } else {
                 orderDTO = convertOrderToDTO(orderRepository.findById(order.getOrderId()).get());
@@ -524,6 +540,19 @@ public class OrderService {
 
         if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
             return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
+        }
+
+        OrderDTO orderDTO = convertOrderToDTO(order);
+
+        return ResponseUtils.success(200, "Chi tiết order", orderDTO);
+    }
+
+    public ResponseDTO detailInTable(Integer id) {
+        Date date = DateUtils.getDayBeforeTime(24);
+        Order order = orderTableRepository.findOrderOnTable(id, date).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
 
         }
 
@@ -676,8 +705,7 @@ public class OrderService {
             return ResponseUtils.fail(400, "Order đã được xác nhận thanh toán", null);
         }
 
-        if (!order.getStatus().getId().equals(ApplicationConst.OrderStatus.AWAIT_CHECKOUT)
-        ) {
+        if (!order.getStatus().getId().equals(ApplicationConst.OrderStatus.AWAIT_CHECKOUT)) {
             return ResponseUtils.fail(400, "Order không thể thanh toán", null);
 
         }
@@ -1109,7 +1137,6 @@ public class OrderService {
             ResponseDTO updateResponse = removeOrderItem(orderUpdateDTO.getOrderItemRemoves(),
                     order);
             if (!updateResponse.isSuccess()) {
-                System.out.println("AA");
                 transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
@@ -1120,12 +1147,24 @@ public class OrderService {
             ResponseDTO updateResponse = removeOrdeExtraPortion(orderUpdateDTO.getOrderExtraPortionRemoves(),
                     order);
             if (!updateResponse.isSuccess()) {
-                System.out.println("BB");
 
                 transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
+        }
+        if (orderUpdateDTO.getOrderSurchangesAdds() != null) {
+            ResponseDTO updateResponse = addOrderSurchange(orderUpdateDTO.getOrderSurchangesAdds(),
+                    order);
+        }
+
+        if (orderUpdateDTO.getOrderSurchangesUpdates() != null) {
+            ResponseDTO updateResponse = updateOrderSurchange(orderUpdateDTO.getOrderSurchangesUpdates(),
+                    order);
+        }
+
+        if (orderUpdateDTO.getOrderSurchargeRemoves() != null) {
+            ResponseDTO updateResponse = removeOrderSurchange(orderUpdateDTO.getOrderSurchargeRemoves());
         }
 
         // if (!transactionStatus.isCompleted()) {
@@ -1181,6 +1220,44 @@ public class OrderService {
         }
 
         return ResponseUtils.success(200, "Cập nhật thành công", null);
+    }
+
+    public ResponseDTO updateOrderSurchange(List<OrderSurchangeDTO> orderSurchangeDTOs, Order order) {
+        List<OrderSurcharge> orderSurcharges = new ArrayList<>();
+        for (OrderSurchangeDTO orderSurchangeDTO : orderSurchangeDTOs) {
+            OrderSurcharge orderSurcharge = orderSurchargeRepository.findById(orderSurchangeDTO.getId()).orElse(null);
+
+            if (orderSurcharge == null) {
+                return ResponseUtils.fail(404, "Phụ thu không tồn tại", null);
+
+            }
+
+            orderSurcharge.setContent(orderSurchangeDTO.getContent());
+            orderSurcharge.setPrice(orderSurchangeDTO.getPrice());
+            orderSurcharge.setUpdateAt(new Date());
+            orderSurcharge.setUpdateBy(systemService.getUserLogin());
+
+            orderSurcharge.setOrder(order);
+        }
+        List<OrderSurcharge> orderSurchargesSaved = orderSurchargeRepository.saveAllAndFlush(orderSurcharges);
+        order.setOrderSurcharges(orderSurchargesSaved);
+        return ResponseUtils.success(200, "Cập nhật phụ thu thành công", null);
+    }
+
+    public ResponseDTO addOrderSurchange(List<OrderSurchangeDTO> orderSurchangeDTOs, Order order) {
+        List<OrderSurcharge> orderSurcharges = new ArrayList<>();
+        for (OrderSurchangeDTO orderSurchangeDTO : orderSurchangeDTOs) {
+            OrderSurcharge orderSurcharge = new OrderSurcharge();
+            orderSurcharge.setContent(orderSurchangeDTO.getContent());
+            orderSurcharge.setPrice(orderSurchangeDTO.getPrice());
+            orderSurcharge.setCreateAt(new Date());
+            orderSurcharge.setCreateBy(systemService.getUserLogin());
+
+            orderSurcharge.setOrder(order);
+        }
+        List<OrderSurcharge> orderSurchargesSaved = orderSurchargeRepository.saveAllAndFlush(orderSurcharges);
+        order.setOrderSurcharges(orderSurchargesSaved);
+        return ResponseUtils.success(200, "Thêm phụ thu thành công", null);
     }
 
     public ResponseDTO removeOrderItem(List<Integer> orderItemRemoves, Order order) {
@@ -1263,6 +1340,11 @@ public class OrderService {
         order.setTotal(total(order));
         orderRepository.save(order);
         return ResponseUtils.success(200, "Remove thành công", convertOrderToDTO(order));
+    }
+
+    public ResponseDTO removeOrderSurchange(List<Integer> orderSurchanges) {
+        orderSurchargeRepository.deleteAllById(orderSurchanges);
+        return ResponseUtils.success(200, "Xóa thành công", null);
     }
 
     public ResponseDTO addNewOrderItem(List<OrderItemRequestDTO> orderItemRequestDTOs, Order order) {
@@ -1734,7 +1816,6 @@ public class OrderService {
                 orderDTO.setFinalTotal(orderDTO.getFinalTotal() - orderDTO.getVoucherRedeem());
 
             }
-
         }
 
         Bill bill = billRepository.findBillCheckouted(order.getOrderId()).orNull();
@@ -2133,6 +2214,14 @@ public class OrderService {
         }
 
         return orderTotal;
+    }
+
+    public long calculateOrderSurcharge(List<OrderSurcharge> orderSurcharges) {
+        long total = 0;
+        for (OrderSurcharge orderSurcharge : orderSurcharges) {
+            total += orderSurcharge.getPrice();
+        }
+        return 0L;
     }
 
     private long calculateItemTotal(OrderItemRequestDTO orderItemDTO) {

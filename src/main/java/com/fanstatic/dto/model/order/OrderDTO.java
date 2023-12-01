@@ -7,6 +7,7 @@ import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.bill.BillDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
+import com.fanstatic.dto.model.order.checkout.OrderSurchangeDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.payment.PaymentMethodDTO;
@@ -57,6 +58,8 @@ public class OrderDTO extends ResponseDataDTO {
     private List<OrderExtraPortionDTO> extraPortions;
 
     private List<TableDTO> tables;
+
+    private List<OrderSurchangeDTO> orderSurchanges;
 
     private Date createAt;
 
