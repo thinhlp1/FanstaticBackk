@@ -1,4 +1,6 @@
-package com.fanstatic.controller.order;
+package com.fanstatic.controller.publics;
+
+
 
 import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.dto.ResponseDTO;

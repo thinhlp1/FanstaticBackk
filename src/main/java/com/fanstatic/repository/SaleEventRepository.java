@@ -12,7 +12,11 @@ public interface SaleEventRepository extends JpaRepository<SaleEvent, Integer> {
 
     public Optional<List<SaleEvent>> findAllByActiveIsFalse();
 
+    //public Optional<List<SaleEvent>> findAllBySaleEventId(int id);
+
     public Optional<SaleEvent> findByIdAndActiveIsTrue(int id);
+
+     public Optional<SaleEvent> findById(int id);
 
     public Optional<SaleEvent> findByIdAndActiveIsFalse(int id);
 

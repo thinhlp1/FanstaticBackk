@@ -1,18 +1,18 @@
 package com.fanstatic.dto.model.voucher;
 
+import java.util.Date;
+
 import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.model.order.checkout.ApplyVoucherDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
-import java.util.Date;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VoucherDTO extends ResponseDataDTO {
+public class VourcherApplyOrderDTO extends ResponseDataDTO{
     private int id;
     private String voucherCode;
 
@@ -35,4 +35,6 @@ public class VoucherDTO extends ResponseDataDTO {
     private Date endAt;
 
     private boolean active;
+
+    private ApplyVoucherDTO applyVoucherDTO;
 }

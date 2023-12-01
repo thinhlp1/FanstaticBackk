@@ -31,4 +31,10 @@ public interface SaleProductRepository extends JpaRepository<SaleProduct, Intege
     public Optional<SaleProduct> findByIdAndActiveIsTrue(int id);
 
     public Optional<SaleProduct> findByIdAndActiveIsFalse(int id);
+
+    public Optional<SaleProduct> findByProductId(int id);
+     public Optional<SaleProduct> findByProductVarientId(int id);
+      public Optional<SaleProduct> findByComboProductId(int id);
+
+      public Optional<List<SaleProduct>> findBySaleEventId(int id);
 }
