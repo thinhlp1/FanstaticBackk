@@ -45,6 +45,8 @@ public class OrderDTO extends ResponseDataDTO {
 
     private Long voucherRedeem;
 
+    private Long totalSurchange;
+
     private Long receiMoney;
 
     private StatusDTO status;
@@ -59,7 +61,7 @@ public class OrderDTO extends ResponseDataDTO {
 
     private List<TableDTO> tables;
 
-    private List<OrderSurchangeDTO> orderSurchanges;
+    private List<OrderSurchangeDTO> orderSurcharges;
 
     private Date createAt;
 

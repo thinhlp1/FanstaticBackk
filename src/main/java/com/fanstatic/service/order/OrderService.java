@@ -738,6 +738,11 @@ public class OrderService {
             }
         }
 
+        if (order.getOrderSurcharges() != null) {
+            long total = calculateOrderSurcharge(order.getOrderSurcharges());
+            bill.setTotal(bill.getTotal() + total);
+        }
+
         if (paymentMethod.getId().equals(ApplicationConst.PaymentMethod.CASH)) {
             Long receiveMoney = confirmCheckoutRequestDTO.getReceiveMoney();
             bill.setReceiveMoney(receiveMoney);
@@ -1172,6 +1177,9 @@ public class OrderService {
         transactionManager.commit(transactionStatus);
         // }
         order = orderRepository.findById(orderUpdateDTO.getOrderId()).orElse(null);
+        List<OrderSurcharge> orderSurcharges = orderSurchargeRepository.findAllByOrder(order);
+        order.setOrderSurcharges(orderSurcharges);
+
         order.setTotal(total(order));
         order.setUpdateAt(new Date());
         order.setUpdateBy(systemService.getUserLogin());
@@ -1254,6 +1262,7 @@ public class OrderService {
             orderSurcharge.setCreateBy(systemService.getUserLogin());
 
             orderSurcharge.setOrder(order);
+            orderSurcharges.add(orderSurcharge);
         }
         List<OrderSurcharge> orderSurchargesSaved = orderSurchargeRepository.saveAllAndFlush(orderSurcharges);
         order.setOrderSurcharges(orderSurchargesSaved);
@@ -1750,6 +1759,7 @@ public class OrderService {
         orderDTO.setOrderType(order.getOrderType().getName());
         orderDTO.setPeople(order.getPeople());
         orderDTO.setTotal(total(order));
+        orderDTO.setFinalTotal(orderDTO.getTotal());
         orderDTO.setPoint(order.getPoint());
         orderDTO.setPointRedeem(order.getRedeem());
         orderDTO.setReceiMoney(order.getReceiMoney());
@@ -1776,6 +1786,10 @@ public class OrderService {
         if (order.getBill() != null) {
             orderDTO.setBill(modelMapper.map(order.getBill(), BillDTO.class));
 
+        }
+
+        if (order.getOrderSurcharges() != null) {
+            orderDTO.setOrderSurcharges(getOrderSurcharge(order.getOrderSurcharges()));
         }
 
         orderDTO.setCreateAt(order.getCreateAt());
@@ -1816,6 +1830,12 @@ public class OrderService {
                 orderDTO.setFinalTotal(orderDTO.getFinalTotal() - orderDTO.getVoucherRedeem());
 
             }
+        }
+
+        if (order.getOrderSurcharges() != null) {
+            long totalSurchange = calculateOrderSurcharge(order.getOrderSurcharges());
+            orderDTO.setTotalSurchange(totalSurchange);
+            orderDTO.setFinalTotal(orderDTO.getFinalTotal() + orderDTO.getTotalSurchange());
         }
 
         Bill bill = billRepository.findBillCheckouted(order.getOrderId()).orNull();
@@ -2221,7 +2241,7 @@ public class OrderService {
         for (OrderSurcharge orderSurcharge : orderSurcharges) {
             total += orderSurcharge.getPrice();
         }
-        return 0L;
+        return total;
     }
 
     private long calculateItemTotal(OrderItemRequestDTO orderItemDTO) {
@@ -2504,6 +2524,16 @@ public class OrderService {
         }
 
         return orderItemDTOs;
+    }
+
+    private List<OrderSurchangeDTO> getOrderSurcharge(List<OrderSurcharge> orderSurcharges) {
+        List<OrderSurchangeDTO> surchargeDTOS = new ArrayList<>();
+        for (OrderSurcharge orderSurcharge : orderSurcharges) {
+            OrderSurchangeDTO orderSurchangeDTO = modelMapper.map(orderSurcharge, OrderSurchangeDTO.class);
+            surchargeDTOS.add(orderSurchangeDTO);
+        }
+
+        return surchargeDTOS;
     }
 
     // private List<OrderItemDTO> getOrderItems(List<OrderItem> orderItems) {
