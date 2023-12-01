@@ -419,7 +419,7 @@ public class OrderService {
             }
             OrderDTO orderDTO;
             if (rootOrder != null) {
-                orderRepository.delete(order);
+//                orderRepository.delete(order);
                 orderDTO = convertOrderToDTO(orderRepository.findById(rootOrder.getOrderId()).get());
             } else {
                 orderDTO = convertOrderToDTO(orderRepository.findById(order.getOrderId()).get());
