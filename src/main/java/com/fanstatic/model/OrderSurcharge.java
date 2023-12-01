@@ -34,7 +34,7 @@ public class OrderSurcharge  {
 
 	private String content;
 
-	private BigInteger price;
+	private Long price;
 
 	// bi-directional many-to-one association to Order
 	@ManyToOne

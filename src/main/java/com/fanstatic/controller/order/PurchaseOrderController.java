@@ -98,6 +98,15 @@ public class PurchaseOrderController {
 
     }
 
+    @GetMapping("/api/purchase/order/detail/table/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> detailOnTable(@PathVariable Integer id) {
+        ResponseDTO responseDTO = orderService.detailInTable(id);
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
     @GetMapping("/api/purchase/order/create/order-voucher/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> getVoucherCanApply(@PathVariable Integer id) {
