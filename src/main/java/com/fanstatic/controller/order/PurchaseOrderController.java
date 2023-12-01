@@ -55,10 +55,6 @@ public class PurchaseOrderController {
     public ResponseEntity<ResponseDTO> check() {
         ResponseDTO responseDTO = orderService.checkUserHasOrder();
 
-        if (responseDTO.isSuccess()) {
-            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
-        }
-
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

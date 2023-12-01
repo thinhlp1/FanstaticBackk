@@ -419,9 +419,19 @@ public class OrderService {
             }
             OrderDTO orderDTO;
             if (rootOrder != null) {
-                orderRepository.delete(order);
+                rootOrder = orderRepository.findById(rootOrder.getOrderId()).get();
+                List<OrderItem> orderItems = orderItemRepository.findAllByOrder(rootOrder);
+                List<OrderExtraPortion> orderExtraPortions = orderExtraPortionRepository.findAllByOrder(rootOrder);
+                rootOrder.setOrderItems(orderItems);
+                rootOrder.setOrderExtraPortions(orderExtraPortions);
                 orderDTO = convertOrderToDTO(orderRepository.findById(rootOrder.getOrderId()).get());
+                orderRepository.delete(order);
+
             } else {
+                List<OrderItem> orderItems = orderItemRepository.findAllByOrder(order);
+                List<OrderExtraPortion> orderExtraPortions = orderExtraPortionRepository.findAllByOrder(order);
+                order.setOrderItems(orderItems);
+                order.setOrderExtraPortions(orderExtraPortions);
                 orderDTO = convertOrderToDTO(orderRepository.findById(order.getOrderId()).get());
             }
             return ResponseUtils.success(200, "Duyệt order thành công", orderDTO);
