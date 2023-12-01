@@ -55,10 +55,6 @@ public class PurchaseOrderController {
     public ResponseEntity<ResponseDTO> check() {
         ResponseDTO responseDTO = orderService.checkUserHasOrder();
 
-        if (responseDTO.isSuccess()) {
-            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_NEW);
-        }
-
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
@@ -394,8 +390,8 @@ public class PurchaseOrderController {
     public ResponseEntity<ResponseDTO> checkoutOrderRequest(@RequestBody @Valid CheckoutRequestDTO checkoutRequestDTO) {
         ResponseDTO responseDTO = orderService.checkoutRequest(checkoutRequestDTO);
         if (responseDTO.isSuccess()) {
-            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
-                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + checkoutRequestDTO.getOrderId());
+//            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+//                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + checkoutRequestDTO.getOrderId());
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_CHECKOUT_REQUEST);
 

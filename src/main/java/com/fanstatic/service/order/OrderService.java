@@ -419,9 +419,20 @@ public class OrderService {
             }
             OrderDTO orderDTO;
             if (rootOrder != null) {
-//                orderRepository.delete(order);
+
+                rootOrder = orderRepository.findById(rootOrder.getOrderId()).get();
+                List<OrderItem> orderItems = orderItemRepository.findAllByOrder(rootOrder);
+                List<OrderExtraPortion> orderExtraPortions = orderExtraPortionRepository.findAllByOrder(rootOrder);
+                rootOrder.setOrderItems(orderItems);
+                rootOrder.setOrderExtraPortions(orderExtraPortions);
                 orderDTO = convertOrderToDTO(orderRepository.findById(rootOrder.getOrderId()).get());
+                orderRepository.delete(order);
+
             } else {
+                List<OrderItem> orderItems = orderItemRepository.findAllByOrder(order);
+                List<OrderExtraPortion> orderExtraPortions = orderExtraPortionRepository.findAllByOrder(order);
+                order.setOrderItems(orderItems);
+                order.setOrderExtraPortions(orderExtraPortions);
                 orderDTO = convertOrderToDTO(orderRepository.findById(order.getOrderId()).get());
             }
             return ResponseUtils.success(200, "Duyệt order thành công", orderDTO);
@@ -790,7 +801,7 @@ public class OrderService {
 
                 OrderDTO orderDTO = convertOrderToDTO(order);
 
-                return ResponseUtils.success(200, "Xác nhận thanh toán thành công", orderDTO);
+                return ResponseUtils.success(201, "Xác nhận thanh toán thành công", orderDTO);
             }
 
         }
@@ -857,7 +868,7 @@ public class OrderService {
         Bill bill = billRepository.findBillByOrderIdAndStatus(orderId, ApplicationConst.BillStatus.AWAIT_PAYMENT)
                 .orNull();
         if (bill == null) {
-            return ResponseUtils.fail(400, "Không tìm thấy yêu cầu thanh toán", null);
+            return ResponseUtils.fail(404, "Không tìm thấy yêu cầu thanh toán", null);
         }
 
         Status status = statusRepository.findById(ApplicationConst.BillStatus.CANCELLED).get();
@@ -867,7 +878,7 @@ public class OrderService {
 
         OrderDTO orderDTO = convertOrderToDTO(order);
 
-        return ResponseUtils.success(200, "Thanh toán order đã bị hủy", orderDTO);
+        return ResponseUtils.success(400, "Thanh toán order đã bị hủy", orderDTO);
     }
 
     public ResponseDTO updateOrderItem(OrderItemUpdateDTO orderItemUpdateDTO) {
