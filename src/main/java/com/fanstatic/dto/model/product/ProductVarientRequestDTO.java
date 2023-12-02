@@ -15,11 +15,15 @@ import lombok.NoArgsConstructor;
 public class ProductVarientRequestDTO extends ResponseDataDTO {
     private int id;
 
+    private int productId;
+
     @NotNull
     @NotNull(message = "{NotNull.productVarient.price}")
-    private BigInteger price;
+    private Long price;
 
     @NotNull(message = "{NotNull.productVarient.size}")
     private int size;
+
+    private boolean defaultSize;
 
 }

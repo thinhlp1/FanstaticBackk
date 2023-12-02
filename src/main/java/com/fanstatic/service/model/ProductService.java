@@ -3,6 +3,7 @@ package com.fanstatic.service.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.config.constants.DataConst;
+import com.fanstatic.config.constants.ImageConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.config.exception.ValidationException;
@@ -22,18 +24,44 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.category.CategoryDTO;
+import com.fanstatic.dto.model.combo.ComboProductDTO;
+import com.fanstatic.dto.model.hotproduct.HotProductDTO;
+import com.fanstatic.dto.model.option.OptionGroupDTO;
+import com.fanstatic.dto.model.option.OptionGroupRequestDTO;
+import com.fanstatic.dto.model.option.OptionRequestDTO;
+import com.fanstatic.dto.model.order.OrderShowProductDTO;
 import com.fanstatic.dto.model.permissioin.RoleDTO;
+import com.fanstatic.dto.model.product.ProductChangeStockDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
+import com.fanstatic.dto.model.product.ProductImageDTO;
+import com.fanstatic.dto.model.product.ProductOptionRequestDTO;
 import com.fanstatic.dto.model.product.ProductRequestDTO;
 import com.fanstatic.dto.model.product.ProductVarientDTO;
+import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.model.Category;
+import com.fanstatic.model.ComboProduct;
+import com.fanstatic.model.File;
+import com.fanstatic.model.Option;
+import com.fanstatic.model.OptionGroup;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductCategory;
+import com.fanstatic.model.ProductImage;
+import com.fanstatic.model.ProductOption;
 import com.fanstatic.model.ProductVarient;
+import com.fanstatic.model.SaleEvent;
 import com.fanstatic.repository.CategoryRepository;
+import com.fanstatic.repository.ComboProductRepository;
+import com.fanstatic.repository.HotProductRepository;
+import com.fanstatic.repository.OptionGroupRepository;
+import com.fanstatic.repository.OptionRepository;
+import com.fanstatic.repository.OrderItemRepository;
 import com.fanstatic.repository.ProductCategoryRepository;
+import com.fanstatic.repository.ProductImageRepository;
+import com.fanstatic.repository.ProductOptionRepository;
 import com.fanstatic.repository.ProductRepository;
 import com.fanstatic.repository.ProductVarientRepository;
+import com.fanstatic.repository.SaleProductRepository;
+import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
 import lombok.RequiredArgsConstructor;
@@ -45,10 +73,20 @@ public class ProductService {
     private final PlatformTransactionManager transactionManager;
     private final ModelMapper modelMapper;
     private final SystemService systemService;
+    private final ComboProductService comboProductService;
 
     private final CategoryRepository categoryRepository;
+    private final OrderItemRepository orderItemRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductVarientRepository productVarientRepository;
+    private final ProductImageRepository productImageRepository;
+    private final SaleProductRepository saleProductRepository;
+    private final ProductOptionRepository productOptionRepository;
+    private final OptionRepository optionRepository;
+    private final OptionGroupRepository optionGroupRepository;
+    private final HotProductRepository hotProductRepository;
+    private final ComboProductRepository comboProductRepository;
+    private final FileService fileService;
 
     @Autowired
     @Lazy
@@ -62,6 +100,11 @@ public class ProductService {
         if (productRepository.findByCodeAndActiveIsTrue(productRequestDTO.getCode()).isPresent()) {
             errors.add(new FieldError("productRequestDTO", "code", "Code đã tồn tại"));
         }
+
+        if (productRequestDTO.getImageFiles().isEmpty() || productRequestDTO.getImageFiles() == null) {
+            errors.add(new FieldError("productRequestDTO", "image", "Vui lòng chọn ảnh"));
+        }
+
         // Nếu có lỗi, ném ra một lượt với danh sách lỗi
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
@@ -86,6 +129,12 @@ public class ProductService {
         product.setCreateAt(new Date());
         product.setCreateBy(systemService.getUserLogin());
 
+        if (productRequestDTO.getDescriptionFile() != null) {
+            File file = fileService.upload(productRequestDTO.getDescriptionFile(), ImageConst.PRODUCT_FOLDER);
+            product.setDescription(file);
+
+        }
+
         Product productSaved = productRepository.saveAndFlush(product);
 
         if (productSaved != null) {
@@ -108,6 +157,17 @@ public class ProductService {
                         null);
             }
 
+            // save product image
+            ResponseDTO productImageSaved = saveProductImage(productRequestDTO.getImageFiles(), productSaved);
+            if (!productImageSaved.isSuccess()) {
+                transactionManager.rollback(transactionStatus);
+                return ResponseUtils.fail(productImageSaved.getStatusCode(),
+                        productImageSaved.getMessage(),
+                        null);
+            }
+
+            // save product description
+
             systemService.writeSystemLog(product.getId(), product.getName(), null);
             transactionManager.commit(transactionStatus);
             return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
@@ -124,8 +184,6 @@ public class ProductService {
         // save product category
         try {
 
-            // delete cac danh muc cu va insert lai cac danh muc moi
-
             productCategoryRepository.deleteByProductId(product.getId());
 
             for (Category category : categories) {
@@ -139,6 +197,27 @@ public class ProductService {
             transactionManager.rollback(transactionStatus);
             return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
         }
+        return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
+    }
+
+    public ResponseDTO saveProductImage(List<MultipartFile> images, Product product) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        // save product category
+
+        try {
+
+            for (MultipartFile image : images) {
+                File file = fileService.upload(image, ImageConst.PRODUCT_FOLDER);
+                ProductImage productImage = new ProductImage();
+                productImage.setImage(file);
+                productImage.setProduct(product);
+                productImageRepository.saveAndFlush(productImage);
+            }
+        } catch (Exception e) {
+            transactionManager.rollback(transactionStatus);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
+        }
+
         return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
     }
 
@@ -187,16 +266,6 @@ public class ProductService {
                         null);
             }
 
-            // save product varient
-            // ResponseDTO productVarientSaved = productVarientService
-            // .updateProductVarient(productRequestDTO.getProductVarients(), productSaved);
-            // if (!productVarientSaved.isSuccess()) {
-            // transactionManager.rollback(transactionStatus);
-            // return ResponseUtils.fail(productVarientSaved.getStatusCode(),
-            // productVarientSaved.getMessage(),
-            // null);
-            // }
-
             systemService.writeSystemLog(product.getId(), product.getName(), null);
             transactionManager.commit(transactionStatus);
             return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
@@ -207,17 +276,225 @@ public class ProductService {
         return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
     }
 
-    public ResponseDTO updateImage(int id, List<MultipartFile> images) {
+    public ResponseDTO updateImage(int id, List<MultipartFile> newImage, List<Integer> removeImagesId) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
-        // check image
-        // if (image != null) {
-        // String fileName = image.getOriginalFilename();
-        // String contentType = image.getContentType();
-        // long fileSize = image.getSize();
-        // System.out.println(fileName);
-        // // save image to Fisebase and file table
-        // }
-        return ResponseUtils.fail(200, "Uploadimage", null);
+        Product product = productRepository.findByIdAndActiveIsTrue(id).orElse(null);
+
+        if (product == null) {
+            return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+        }
+
+        for (Integer imageId : removeImagesId) {
+            fileService.delete(imageId);
+            productImageRepository.deleteByImageId(imageId);
+        }
+
+        ResponseDTO productImageSaved = saveProductImage(newImage, product);
+        if (!productImageSaved.isSuccess()) {
+            transactionManager.rollback(transactionStatus);
+            return ResponseUtils.fail(productImageSaved.getStatusCode(),
+                    productImageSaved.getMessage(),
+                    null);
+        }
+
+        transactionManager.commit(transactionStatus);
+
+        return ResponseUtils.success(200, "Cập nhật hình ảnh thành công", null);
+
+    }
+
+    // public ResponseDTO saveProductOption(ProductOptionRequestDTO
+    // productOptionRequestDTO) {
+    // TransactionStatus transactionStatus = transactionManager.getTransaction(new
+    // DefaultTransactionDefinition());
+    // // save product category
+    // try {
+    // List<OptionGroupRequestDTO> optionGroupRequestDTOs =
+    // productOptionRequestDTO.getOptionGroups();
+    // Product product =
+    // productRepository.findByIdAndActiveIsTrue(productOptionRequestDTO.getProductId())
+    // .orElse(null);
+
+    // if (product == null) {
+    // return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+    // }
+
+    // } catch (Exception e) {
+    // transactionManager.rollback(transactionStatus);
+    // return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
+    // }
+    // return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
+    // }
+
+    public ResponseDTO saveProductOption(ProductOptionRequestDTO productOptionRequestDTO) {
+        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+        try {
+            List<OptionGroupRequestDTO> optionGroupRequestDTOs = productOptionRequestDTO.getOptionGroups();
+            Product product = productRepository.findByIdAndActiveIsTrue(productOptionRequestDTO.getProductId())
+                    .orElse(null);
+
+            if (product == null) {
+                return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+            }
+
+            List<ProductOption> existingProductOptions = product.getProductOptions();
+
+            System.out.println("LENG: " + existingProductOptions.size());
+            List<OptionGroupRequestDTO> optionsSaved = productOptionRequestDTO.getOptionGroups().stream()
+                    .map(OptionGroupRequestDTO::new) // Tạo một bản sao của mỗi đối tượng
+                    .collect(Collectors.toList());
+
+            // Thêm mới các OptionGroup từ request
+            for (OptionGroupRequestDTO optionGroupRequestDTO : optionGroupRequestDTOs) {
+
+                if (optionGroupRequestDTO.getId() == null) {
+
+                    ProductOption newProductOption = new ProductOption();
+
+                    OptionGroup optionGroup = new OptionGroup();
+                    optionGroup.setMultichoice(
+                            optionGroupRequestDTO.isMultichoice() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                    optionGroup.setShare(
+                            optionGroupRequestDTO.isShared() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                    optionGroup.setRequire(
+                            optionGroupRequestDTO.isRequired() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                    optionGroup.setName(optionGroupRequestDTO.getName());
+
+                    optionGroup = optionGroupRepository.saveAndFlush(optionGroup);
+
+                    newProductOption.setProduct(product);
+                    newProductOption.setOptionGroup(optionGroup);
+                    newProductOption.setActive(DataConst.ACTIVE_TRUE);
+
+                    productOptionRepository.save(newProductOption);
+                    System.out.println("SET NEW : " + 1);
+
+                    // Kiểm tra và thêm mới các Option
+                    for (OptionRequestDTO optionRequestDTO : optionGroupRequestDTO.getOptions()) {
+                        Option newOption = new Option();
+                        newOption.setName(optionRequestDTO.getName());
+                        newOption.setPrice(optionRequestDTO.getPrice());
+                        newOption.setOptionGroup(optionGroup);
+                        newOption.setActive(DataConst.ACTIVE_TRUE);
+                        optionRepository.save(newOption);
+                    }
+
+                    optionsSaved.remove(optionGroupRequestDTO);
+                }
+
+                // Nếu không tồn tại trong sản phẩm, thêm mới
+
+            }
+            System.out.println("LENG: " + existingProductOptions.size());
+
+            for (ProductOption existingProductOption : existingProductOptions) {
+                System.out.println("EXIT: " + existingProductOption.getId());
+                boolean existsInRequest = false;
+
+                for (OptionGroupRequestDTO optionGroupRequestDTO : optionsSaved) {
+                    if (existingProductOption.getOptionGroup().getId() == optionGroupRequestDTO.getId()) {
+                        existsInRequest = true;
+                        OptionGroup optionGroup = existingProductOption.getOptionGroup();
+                        optionGroup.setMultichoice(
+                                optionGroupRequestDTO.isMultichoice() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                        optionGroup.setShare(
+                                optionGroupRequestDTO.isShared() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                        optionGroup.setRequire(
+                                optionGroupRequestDTO.isRequired() ? DataConst.ACTIVE_TRUE : DataConst.ACTIVE_FALSE);
+                        optionGroup.setName(optionGroupRequestDTO.getName());
+                        optionGroup = optionGroupRepository.saveAndFlush(optionGroup);
+
+                        existingProductOption.setOptionGroup(optionGroup);
+                        productOptionRepository.save(existingProductOption);
+                        updateOptions(existingProductOption, optionGroupRequestDTO.getOptions());
+                        break;
+                    }
+                }
+
+                if (!existsInRequest) {
+                    // Nếu không tồn tại trong request, xóa bỏ
+                    System.out.println("SET FALSE: " + existingProductOption.getId());
+                    existingProductOption.setActive(DataConst.ACTIVE_FALSE);
+                    productOptionRepository.save(existingProductOption);
+                }
+            }
+
+            transactionManager.commit(transactionStatus);
+            return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
+        } catch (
+
+        Exception e) {
+            e.printStackTrace();
+            transactionManager.rollback(transactionStatus);
+            return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
+        }
+
+    }
+
+    private void updateOptions(ProductOption productOption, List<OptionRequestDTO> optionRequestDTOs) {
+        List<Option> existingOptions = productOption.getOptionGroup().getOptions();
+
+        List<OptionRequestDTO> optionsSaved = optionRequestDTOs.stream()
+                .map(OptionRequestDTO::new) // Tạo một bản sao của mỗi đối tượng OptionRequestDTO
+                .collect(Collectors.toList());
+
+        for (OptionRequestDTO optionRequestDTO : optionRequestDTOs) {
+            if (optionRequestDTO.getId() == null) {
+                Option newOption = new Option();
+                newOption.setName(optionRequestDTO.getName());
+                newOption.setPrice(optionRequestDTO.getPrice());
+                newOption.setOptionGroup(productOption.getOptionGroup());
+                newOption.setActive(DataConst.ACTIVE_TRUE);
+                optionRepository.save(newOption);
+                optionsSaved.remove(optionRequestDTO);
+
+            }
+        }
+        // check if option need to delete
+        for (Option existingOption : existingOptions) {
+            boolean isExits = false;
+
+            for (OptionRequestDTO optionRequestDTO : optionsSaved) {
+                if (existingOption.getId() == optionRequestDTO.getId()) {
+
+                    existingOption.setName(optionRequestDTO.getName());
+                    existingOption.setPrice(optionRequestDTO.getPrice());
+                    optionRepository.save(existingOption);
+                    isExits = true;
+                    break;
+                }
+            }
+
+            if (!isExits) {
+                existingOption.setActive(DataConst.ACTIVE_FALSE);
+                optionRepository.save(existingOption);
+            }
+        }
+
+    }
+
+    public ResponseDTO updateDescriptionProduct(Integer productId, MultipartFile fileDescription) {
+        Product product = productRepository.findByIdAndActiveIsTrue(productId).orElse(null);
+        if (product == null) {
+            return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+        }
+
+        File description = product.getDescription();
+
+        if (description != null) {
+            fileService.updateFile(fileDescription, ImageConst.PRODUCT_FOLDER, description);
+            product.setDescription(description);
+
+        } else {
+            File file = fileService.upload(fileDescription, ImageConst.PRODUCT_FOLDER);
+
+            product.setDescription(file);
+        }
+        productRepository.save(product);
+
+        return ResponseUtils.success(200, "Cập nhật mô tả thành công", null);
 
     }
 
@@ -284,7 +561,21 @@ public class ProductService {
         productDTO.setId(product.getId());
         productDTO.setName(product.getName());
         productDTO.setPrice(product.getPrice());
-        productDTO.setActive(product.getActive());
+        productDTO.setActive(product.getActive() == 0 ? false : true);
+        productDTO.setOutOfStock(product.getOutOfStock() == 0 ? false : true);
+        productDTO.setSoldQuantity(productRepository.countSoldQuantityByProductId(product.getId()));
+
+        SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orElse(null);
+        if (saleEvent != null) {
+            productDTO.setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
+        }
+
+        if (hotProductRepository.findByProduct(product).isPresent()) {
+            productDTO.setHotProduct(true);
+        } else {
+            productDTO.setHotProduct(false);
+
+        }
 
         List<ProductCategory> productCategories = productCategoryRepository.findByProduct(product);
         List<CategoryDTO> categoryDTOs = new ArrayList<>();
@@ -297,16 +588,82 @@ public class ProductService {
         List<ProductVarient> productVarients = productVarientRepository.findByProduct(product);
         List<ProductVarientDTO> productVarientDTOs = new ArrayList<>();
 
-        for (ProductVarient productVarient : productVarients){
+        for (ProductVarient productVarient : productVarients) {
             ProductVarientDTO productVarientDTO = modelMapper.map(productVarient, ProductVarientDTO.class);
+            SaleEvent saleEventVarient = saleProductRepository.findSaleByProductVarientId(productVarient.getId())
+                    .orElse(null);
+            if (saleEventVarient != null) {
+                productVarientDTO.setSaleEvent(modelMapper.map(saleEventVarient, SaleEventDTO.class));
+            }
+            productVarientDTO.setImageUrl(getProductVarientImage(productVarient));
+
+            if (productVarient.getDefaultSize() == 1) {
+                productDTO.setVarientPrice(productVarientDTO.getPrice());
+            }
+
             productVarientDTOs.add(productVarientDTO);
-            
+
+        }
+
+        List<ProductOption> productOptions = productOptionRepository.findByProduct(product);
+        List<OptionGroupDTO> optionGroupDTOs = new ArrayList<>();
+        for (ProductOption productOption : productOptions) {
+            OptionGroup optionGroup = productOption.getOptionGroup();
+            OptionGroupDTO optionGroupDTO = modelMapper.map(optionGroup, OptionGroupDTO.class);
+            optionGroupDTOs.add(optionGroupDTO);
         }
 
         productDTO.setCategories(categoryDTOs);
+        productDTO.setOptionGroups(optionGroupDTOs);
         productDTO.setProductVarients(productVarientDTOs);
+        productDTO.setImageUrl(getProductImage(product));
+
+        File description = product.getDescription();
+        if (description != null) {
+            productDTO.setDescriptionUrl(description.getLink());
+
+        }
+
         return ResponseUtils.success(200, "Chi tiết sản phẩm", productDTO);
 
+    }
+
+    public List<ProductImageDTO> getProductImage(Product product) {
+        List<ProductImage> productImages = productImageRepository.findByProduct(product);
+        List<ProductImageDTO> productImageDTOs = new ArrayList<>();
+        for (ProductImage productImage : productImages) {
+            ProductImageDTO productImageDTO = new ProductImageDTO();
+            File image = productImage.getImage();
+            if (image != null) {
+                productImageDTO.setId(image.getId());
+                productImageDTO.setImageUrl(image.getLink());
+                productImageDTOs.add(productImageDTO);
+
+            }
+            productImageDTOs.add(productImageDTO);
+
+        }
+
+        return productImageDTOs;
+    }
+
+    public List<ProductImageDTO> getProductVarientImage(ProductVarient productVarient) {
+        List<ProductImage> productImages = productImageRepository.findByProductVarient(productVarient);
+        List<ProductImageDTO> productImageDTOs = new ArrayList<>();
+        for (ProductImage productImage : productImages) {
+            ProductImageDTO productImageDTO = new ProductImageDTO();
+            File image = productImage.getImage();
+            if (image != null) {
+                productImageDTO.setId(image.getId());
+                productImageDTO.setImageUrl(image.getLink());
+                productImageDTOs.add(productImageDTO);
+
+            }
+            productImageDTOs.add(productImageDTO);
+
+        }
+
+        return productImageDTOs;
     }
 
     public ResponseDTO show(int active) {
@@ -337,4 +694,106 @@ public class ProductService {
         reponseListDataDTO.setNameList("Danh sách sản phẩm");
         return ResponseUtils.success(200, "Danh sách sản phẩm", reponseListDataDTO);
     }
+
+    public ResponseDTO getOptionShared() {
+        List<OptionGroup> optionGroups = optionGroupRepository.findAllByShareIsTrue().orElse(null);
+        List<ResponseDataDTO> optionGroupDTOs = new ArrayList<>();
+        for (OptionGroup optionGroup : optionGroups) {
+            OptionGroupDTO optionGroupDTO = modelMapper.map(optionGroup, OptionGroupDTO.class);
+            optionGroupDTOs.add(optionGroupDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(optionGroupDTOs);
+        return ResponseUtils.success(200, "Danh sách option group dùng chung", responseListDataDTO);
+
+    }
+
+    public ResponseDTO showByCategoryId(Integer categoryId) {
+
+        Category category = categoryRepository.findByIdAndActiveIsTrue(categoryId).orElse(null);
+        if (category == null) {
+            return ResponseUtils.fail(404, "Category không tồn tại", null);
+        }
+
+        List<Product> products = productRepository.findByProductCategoriesCategoryAndActiveIsTrue(category);
+        List<ProductDTO> productDTOS = new ArrayList<>();
+
+        for (Product product : products) {
+            ProductDTO productDTO = (ProductDTO) detail(product.getId()).getData();
+            productDTOS.add(productDTO);
+        }
+
+        List<ComboProduct> comboProducts = comboProductRepository.findByCategory(category);
+        List<ComboProductDTO> comboProductDTOs = new ArrayList<>();
+
+        for (ComboProduct comboProduct : comboProducts) {
+            ComboProductDTO comboProdutDTO = (ComboProductDTO) comboProductService.detail(comboProduct.getId())
+                    .getData();
+            comboProductDTOs.add(comboProdutDTO);
+        }
+
+        List<HotProductDTO> hotProductDTOs = new ArrayList<>();
+        for (ProductDTO productDTO : productDTOS) {
+            if (productDTO.isHotProduct()) {
+                HotProductDTO hotProductDTO = new HotProductDTO();
+                hotProductDTO.setProduct(productDTO);
+                hotProductDTOs.add(hotProductDTO);
+            }
+        }
+
+        for (ComboProductDTO comboProductDTO : comboProductDTOs) {
+            if (comboProductDTO.isHotProduct()) {
+                HotProductDTO hotProductDTO = new HotProductDTO();
+                hotProductDTO.setComboProduct(comboProductDTO);
+                hotProductDTOs.add(hotProductDTO);
+            }
+        }
+
+        OrderShowProductDTO orderShowProductDTO = new OrderShowProductDTO();
+        orderShowProductDTO.setComboProducts(comboProductDTOs);
+        orderShowProductDTO.setProducts(productDTOS);
+        orderShowProductDTO.setHotProductDTOs(hotProductDTOs);
+
+        return ResponseUtils.success(200, "Danh sách sản phẩm", orderShowProductDTO);
+    }
+
+    public ResponseDTO changeIsOutOfStock(ProductChangeStockDTO productChangeStockDTO) {
+        if (productChangeStockDTO.getProductId() != null) {
+            Product product = productRepository.findByIdAndActiveIsTrue(productChangeStockDTO.getProductId())
+                    .orElse(null);
+            if (product == null) {
+                return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+
+            }
+
+            product.setOutOfStock((byte) (productChangeStockDTO.isOutOfStack() == true ? 1 : 0));
+            productRepository.save(product);
+            return ResponseUtils.success(200, "Cập nhật thành công", detail(product.getId()).getData());
+
+        }
+        return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+
+    }
+
+    public ResponseDTO changeProductVarientIsOutOfStock(ProductChangeStockDTO productChangeStockDTO) {
+        if (productChangeStockDTO.getProductVariantId() != null) {
+            ProductVarient productVarient = productVarientRepository
+                    .findByIdAndActiveIsTrue(productChangeStockDTO.getProductVariantId())
+                    .orElse(null);
+            if (productVarient == null) {
+                return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+
+            }
+
+            productVarient.setOutOfStock((byte) (productChangeStockDTO.isOutOfStack() ? 1 : 0));
+            productVarientRepository.save(productVarient);
+
+            return ResponseUtils.success(200, "Cập nhật thành công", detail(productVarient.getId()).getData());
+
+        }
+        return ResponseUtils.fail(500, "Sản phẩm không tồn tại", null);
+
+    }
+
 }

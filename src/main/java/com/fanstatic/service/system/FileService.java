@@ -91,10 +91,10 @@ public class FileService {
         }
     }
 
-
     public void deleteFireStore(String name) {
         firebaseStorageService.removeRelativeFileImage(name);
     }
+
 
     public void delete(int id) {
         File file = fileRepository.findById(id).orElse(null);

@@ -34,14 +34,9 @@ public class PaymentMethod  {
 
 	private String name;
 
-	// bi-directional many-to-one association to Bill
-	@OneToMany(mappedBy = "paymentMethod")
-	private List<Bill> bills;
-
-	// bi-directional many-to-one association to File
 	@ManyToOne
-	@JoinColumn(name = "image_id")
-	private File image;
+    @JoinColumn(name = "image_id")
+    private File image;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")

@@ -24,4 +24,8 @@ public interface ExtraPortionRepository extends JpaRepository<ExtraPortion, Inte
 
     public Optional<ExtraPortion> findByNameAndActiveIsFalse(String name);
 
+    public Optional<ExtraPortion> findByExtraPortionIdAndActiveIsTrue(Integer id);
+
+    public Optional<ExtraPortion> findByExtraPortionIdAndActiveIsFalse(Integer id);
+
 }

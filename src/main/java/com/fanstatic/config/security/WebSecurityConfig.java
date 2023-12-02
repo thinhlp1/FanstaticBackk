@@ -28,6 +28,7 @@ public class WebSecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthorizationFilter authorizationFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final IpAddressFilter ipAddressFilter;
 
     /**
      * Filter chain to configure security.
@@ -50,7 +51,8 @@ public class WebSecurityConfig {
                         .anyRequest().permitAll())
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(authorizationFilter, JwtAuthenticationFilter.class);
+                .addFilterAfter(authorizationFilter, JwtAuthenticationFilter.class)
+                .addFilterAfter(ipAddressFilter, AuthorizationFilter.class);
         ;
 
         return http.build();

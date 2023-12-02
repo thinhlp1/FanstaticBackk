@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
@@ -12,8 +11,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
-
 /**
  * 
  * 
@@ -22,18 +19,17 @@ import lombok.NoArgsConstructor;
  * 
  */
 
-
 @Entity
 @Data
 @Builder
 @Table(name = "combo_product")
 @AllArgsConstructor
 @NoArgsConstructor
-public class ComboProduct  {
-	
+public class ComboProduct {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private Integer id;
 
 	private byte active;
 
@@ -47,7 +43,12 @@ public class ComboProduct  {
 
 	private String name;
 
-	private BigInteger price;
+	private String code;
+
+	private Long price;
+
+	@Column(name = "out_of_stock")
+	private byte outOfStock;
 
 	// bi-directional many-to-one association to Category
 	@ManyToOne
@@ -70,7 +71,7 @@ public class ComboProduct  {
 	@Column(name = "update_at")
 	private Date updateAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "update_by")
 	private User updateBy;
 
@@ -78,7 +79,7 @@ public class ComboProduct  {
 	@Column(name = "create_at")
 	private Date createAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "create_by")
 	private User createBy;
 
@@ -86,7 +87,7 @@ public class ComboProduct  {
 	@Column(name = "delete_at")
 	private Date deleteAt;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "delete_by")
 	private User deleteBy;
 }

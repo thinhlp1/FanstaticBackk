@@ -1,6 +1,5 @@
 package com.fanstatic.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
@@ -12,7 +11,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
-
 
 /**
  * /**
@@ -38,16 +36,19 @@ public class Voucher {
 
     private int percent;
 
+    // thịnh thêm thuộc tính quantity
+    private Integer quantity;
+
     private byte active;
 
     @Column(name = "price_condition")
-    private BigInteger priceCondition;
+    private Long priceCondition;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "start_at")
     private Date startAt;
 
-    private BigInteger value;
+    private Long value;
 
     @Column(name = "voucher_code")
     private String voucherCode;

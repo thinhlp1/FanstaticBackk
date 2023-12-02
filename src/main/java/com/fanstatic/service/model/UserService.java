@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fanstatic.config.constants.ApplicationConst;
 import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.ImageConst;
 import com.fanstatic.config.constants.MessageConst;
@@ -72,7 +73,7 @@ public class UserService {
         User user = modelMapper.map(userRequestDTO, User.class);
         MultipartFile image = userRequestDTO.getImage();
         if (image != null) {
-            File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+            File file = fileService.upload(image, ImageConst.USER_FOLDER);
             user.setImage(file);
             // save image to Fisebase and file table
         }
@@ -301,6 +302,19 @@ public class UserService {
         }
 
         return ResponseUtils.success(200, "Chi tiết người dùng", userDTO);
+    }
+
+    public ResponseDTO checkCustomerExits(String numberPhone) {
+        User user = userRepository.findByNumberPhoneAndActiveIsTrue(numberPhone).orElse(null);
+        if (user == null) {
+            return ResponseUtils.fail(404, "Khách hàng không tồn tại", null);
+
+        }
+        if (user.getRole().getId() == ApplicationConst.CUSTOMER_ROLE_ID) {
+            return ResponseUtils.success(200, "Khách hàng có tồn tại", null);
+        }
+        return ResponseUtils.fail(404, "Khách hàng không tồn tại", null);
+
     }
 
     public User getDTOById(int id) {

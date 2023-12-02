@@ -11,6 +11,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.validation.FieldError;
 
+import com.fanstatic.config.constants.ApplicationConst;
 import com.fanstatic.config.constants.DataConst;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.constants.RequestParamConst;
@@ -25,6 +26,7 @@ import com.fanstatic.repository.AccountRepository;
 import com.fanstatic.repository.RoleRepository;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
+import com.twilio.rest.api.v2010.account.Application;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +41,6 @@ public class RoleService {
     private final AccountRepository accountRepository;
 
     public ResponseDTO create(RoleRequestDTO roleRequestDTO) {
-        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
         List<FieldError> errors = new ArrayList<>();
         if (roleRepository.findByCodeAndActiveIsTrue(roleRequestDTO.getCode()).isPresent()) {
@@ -68,20 +69,9 @@ public class RoleService {
 
         if (roleSaved != null) {
 
-            ResponseDTO setiRolePermission = rolePermissionService.setRolePermission(roleRequestDTO);
-            if (setiRolePermission.isSuccess()) {
-                systemService.writeSystemLog(role.getId(), role.getName(), null);
+            systemService.writeSystemLog(role.getId(), role.getName(), null);
 
-                transactionManager.commit(transactionStatus);
-
-                return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
-
-            } else {
-                transactionManager.rollback(transactionStatus);
-
-                return ResponseUtils.fail(setiRolePermission.getStatusCode(), setiRolePermission.getMessage(), null);
-
-            }
+            return ResponseUtils.success(200, MessageConst.ADD_SUCCESS, null);
 
         }
         return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
@@ -89,7 +79,6 @@ public class RoleService {
     }
 
     public ResponseDTO update(RoleRequestDTO roleRequestDTO) {
-        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
         Role role = roleRepository.findById(roleRequestDTO.getId()).orElse(null);
 
@@ -124,20 +113,10 @@ public class RoleService {
         Role roleSaved = roleRepository.save(role);
 
         if (roleSaved != null) {
-            ResponseDTO setiRolePermission = rolePermissionService.setRolePermission(roleRequestDTO);
-            if (setiRolePermission.isSuccess()) {
-                systemService.writeSystemLog(role.getId(), role.getName(), null);
 
-                transactionManager.commit(transactionStatus);
+            systemService.writeSystemLog(role.getId(), role.getName(), null);
 
-                return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
-
-            } else {
-                transactionManager.rollback(transactionStatus);
-
-                return ResponseUtils.fail(setiRolePermission.getStatusCode(), setiRolePermission.getMessage(), null);
-
-            }
+            return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 
         }
         return ResponseUtils.fail(500, "Cập nhật thất bại", null);
@@ -147,6 +126,21 @@ public class RoleService {
         Role role = roleRepository.findByIdAndActiveIsTrue(id).orElse(null);
         if (role == null) {
             return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
+        }
+
+        switch (id) {
+            case ApplicationConst.CUSTOMER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là khách hàng. Không được xóa", null);
+            case ApplicationConst.CASHIER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là thu ngân. Không được xóa", null);
+            case ApplicationConst.ADNIN_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là admin. Không được xóa", null);
+            case ApplicationConst.MANAGER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là quản lý. Không được xóa", null);
+            case ApplicationConst.WAITER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là phục vụ. Không được xóa", null);
+            default:
+                break;
         }
 
         role.setActive(DataConst.ACTIVE_FALSE);

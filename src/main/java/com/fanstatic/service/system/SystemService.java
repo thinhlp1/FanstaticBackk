@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.fanstatic.config.constants.ApplicationConst;
 import com.fanstatic.model.Account;
 import com.fanstatic.model.Loginlog;
 import com.fanstatic.model.ManagerFeature;
@@ -55,7 +56,7 @@ public class SystemService {
         systemlog.setUser(user);
         systemlog.setActionAt(new Date());
 
-        systemlogRepository.save(systemlog);
+        systemlogRepository.saveAndFlush(systemlog);
 
     }
 
@@ -76,5 +77,35 @@ public class SystemService {
             return user;
         }
         return null;
+    }
+
+
+
+    public boolean checkUserResource(int userId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Account account = (Account) authentication.getPrincipal();
+            User user = account.getUser();
+            if (user.getId() == userId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkCustomerResource(int userId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Account account = (Account) authentication.getPrincipal();
+            User user = account.getUser();
+            if (user.getRole().getId() != (ApplicationConst.CUSTOMER_ROLE_ID)) {
+                return true;
+            }
+
+            if (user.getId() == userId) {
+                return true;
+            }
+        }
+        return false;
     }
 }

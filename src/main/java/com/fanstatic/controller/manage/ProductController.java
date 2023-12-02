@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.model.product.ProductOptionRequestDTO;
 import com.fanstatic.dto.model.product.ProductRequestDTO;
 import com.fanstatic.dto.model.product.ProductVarientRequestDTO;
 import com.fanstatic.service.model.ProductService;
@@ -36,10 +37,28 @@ public class ProductController {
     @PostMapping("/create")
     @ResponseBody
     public ResponseEntity<ResponseDTO> create(@RequestPart @Valid ProductRequestDTO data,
-            @RequestPart List<MultipartFile> imageFiles, @RequestPart MultipartFile descriptionFile) {
-        data.setImageFiles(imageFiles);
-        data.setDescriptionFile(descriptionFile);
+            @RequestPart List<MultipartFile> images, @RequestPart MultipartFile description) {
+        data.setImageFiles(images);
+        data.setDescriptionFile(description);
         ResponseDTO reponseDTO = productService.create(data);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @PostMapping("/create/product-variant")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> createProductVariant(
+            @RequestBody ProductVarientRequestDTO productVarientRequestDTO) {
+
+        ResponseDTO reponseDTO = productVarientService.saveProductVarient(productVarientRequestDTO);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @PostMapping("/create/product-option")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> createProductOption(
+            @RequestBody ProductOptionRequestDTO productOptionRequestDTO) {
+
+        ResponseDTO reponseDTO = productService.saveProductOption(productOptionRequestDTO);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
@@ -61,9 +80,19 @@ public class ProductController {
 
     @PutMapping("/update/image/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> updateImage(@RequestPart List<MultipartFile> images,
+    public ResponseEntity<ResponseDTO> updateImage(@RequestPart List<Integer> removeImages,
+            @RequestPart List<MultipartFile> newImages,
+
             @PathVariable("id") Integer id) {
-        ResponseDTO reponseDTO = productService.updateImage(id, images);
+        ResponseDTO reponseDTO = productService.updateImage(id, newImages, removeImages);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @PutMapping("/update/description/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateDescription(@RequestPart MultipartFile description,
+            @PathVariable("id") Integer id) {
+        ResponseDTO reponseDTO = productService.updateDescriptionProduct(id, description);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
@@ -99,6 +128,13 @@ public class ProductController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> show(@RequestParam(name = "active") int active) {
         ResponseDTO reponseDTO = productService.show(active);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @GetMapping("/show/option-group")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showOptionGroups() {
+        ResponseDTO reponseDTO = productService.getOptionShared();
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
