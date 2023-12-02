@@ -59,9 +59,6 @@ public class WarehouseReceiveService {
             errors.add(new FieldError("warehouseReceiveRequestDTO", "supplierId", "Nhà cung cấp không tồn tại"));
         }
 
-        if (warehouseReceiveRequestDTO.getImageFile().isEmpty() || warehouseReceiveRequestDTO.getImageFile() == null) {
-            errors.add(new FieldError("warehouseReceiveRequestDTO", "imageFile", "File không tồn tại"));
-        }
         //Bắt lỗi extra portion Code đã tồn tại
         if (warehouseReceiveRepository.findByDescriptionAndActiveIsTrue(warehouseReceiveRequestDTO.getDescription()).isPresent()) {
             errors.add(new FieldError("warehouseReceiveRequestDTO", "description", "Diễn giải đã tồn tại"));
@@ -72,12 +69,15 @@ public class WarehouseReceiveService {
             throw new ValidationException(errors);
         }
         WarehouseReceive warehouseReceive = modelMapper.map(warehouseReceiveRequestDTO, WarehouseReceive.class);
-        MultipartFile image = warehouseReceiveRequestDTO.getImageFile();
-        if (image != null) {
-            File file = fileService.upload(image, ImageConst.EXTRA_PORTION_FOLDER);
+        MultipartFile imageOptional = warehouseReceiveRequestDTO.getImageFile().orElse(null);
+
+        if (imageOptional != null) {
+            File file = fileService.upload(imageOptional, ImageConst.EXTRA_PORTION_FOLDER);
             warehouseReceive.setImageFile(file);
-            // save image to Fisebase and file table
+            // Tiếp tục lưu hình ảnh vào Firebase và bảng file
+            // save image to Firebase and file table
         }
+        
         warehouseReceive.setSupplier(supplier);
         warehouseReceive.setCancelReason("");
         warehouseReceive.setActive(DataConst.ACTIVE_TRUE);

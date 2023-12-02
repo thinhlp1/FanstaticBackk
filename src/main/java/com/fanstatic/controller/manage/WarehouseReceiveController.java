@@ -13,6 +13,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 @Controller
 @RequestMapping("/api/manage/warehousereceive")
 @AllArgsConstructor
@@ -33,7 +35,7 @@ public class WarehouseReceiveController {
 
     @PostMapping("/create")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> create(@RequestPart @Valid WarehouseReceiveRequestDTO data, @RequestPart MultipartFile imageFile) {
+    public ResponseEntity<ResponseDTO> create(@RequestPart @Valid WarehouseReceiveRequestDTO data, @RequestPart Optional<MultipartFile> imageFile) {
         data.setImageFile(imageFile);
         ResponseDTO responseDTO = warehouseReceiveService.create(data);
         return ResponseUtils.returnReponsetoClient(responseDTO);
@@ -54,7 +56,7 @@ public class WarehouseReceiveController {
 //        return ResponseUtils.returnReponsetoClient(responseDTO);
 //    }
 //
-    @DeleteMapping("/delete/{id}")
+    @PutMapping("/delete/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id, @RequestBody WarehouseReceiveRequestDeleteDTO warehouseReceiveRequestDeleteDTO) {
         ResponseDTO responseDTO = warehouseReceiveService.delete(id, warehouseReceiveRequestDeleteDTO);
