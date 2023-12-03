@@ -1,12 +1,7 @@
 package com.fanstatic.dto.model.saleEventProduct;
 
-import com.fanstatic.model.ComboProduct;
-import com.fanstatic.dto.ResponseDataDTO;
-import com.fanstatic.dto.model.comboProduct.ComboProductDTO;
-import com.fanstatic.dto.model.product.ProductDTO;
-import com.fanstatic.dto.model.product.ProductVarientDTO;
-import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,13 +11,14 @@ public class SaleProductRequestDTO {
     
     private int id;
 
-    private ProductDTO product;
+    private List<Integer> product;
 
-    private ProductVarientDTO productVarient;
+    private List<Integer>  productVarient;
 
-    private SaleEventDTO saleEvent;
+    private List<Integer> comboProduct;
 
-    private ComboProductDTO comboProduct;
+    private int saleEvent;
 
-    private byte active;
+   
+
 }

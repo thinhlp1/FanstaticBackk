@@ -79,6 +79,23 @@ public class PurchaseOrderController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
+    @GetMapping("/api/purchase/order/create/get-table")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> tables() {
+        ResponseDTO responseDTO = orderService.getListTable();
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/api/purchase/order/create/check-customer-exits")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> checkCustomer(
+            @RequestParam(name = "numberPhone", required = true) String numberPhone) {
+        ResponseDTO responseDTO = orderService.checkCustomerExits(numberPhone);
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
     @GetMapping("/api/purchase/order/detail/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> detail(@PathVariable Integer id) {
@@ -390,8 +407,8 @@ public class PurchaseOrderController {
     public ResponseEntity<ResponseDTO> checkoutOrderRequest(@RequestBody @Valid CheckoutRequestDTO checkoutRequestDTO) {
         ResponseDTO responseDTO = orderService.checkoutRequest(checkoutRequestDTO);
         if (responseDTO.isSuccess()) {
-//            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
-//                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + checkoutRequestDTO.getOrderId());
+            // wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+            // WebsocketConst.TOPIC_ORDER_DETAILS + "/" + checkoutRequestDTO.getOrderId());
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_CHECKOUT_REQUEST);
 

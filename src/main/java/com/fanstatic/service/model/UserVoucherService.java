@@ -1,22 +1,19 @@
 package com.fanstatic.service.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
-import com.fanstatic.model.Voucher;
 import com.fanstatic.repository.UserVoucherRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.util.ResponseUtils;
-
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +41,5 @@ public class UserVoucherService {
         return ResponseUtils.success(200, "Danh sách voucher", reponseListDataDTO);
     }
 
-    
-  
+
 }
