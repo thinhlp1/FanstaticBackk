@@ -50,6 +50,9 @@ public class Order {
 
 	private Long total;
 
+	@Column(name = "recei_money")
+	private Long receiMoney;
+
 	private Long point;
 
 	private Long redeem;
