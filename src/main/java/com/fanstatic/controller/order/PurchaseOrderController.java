@@ -87,6 +87,15 @@ public class PurchaseOrderController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
+    @GetMapping("/api/purchase/order/create/check-customer-exits")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> checkCustomer(
+            @RequestParam(name = "numberPhone", required = true) String numberPhone) {
+        ResponseDTO responseDTO = orderService.checkCustomerExits(numberPhone);
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
     @GetMapping("/api/purchase/order/detail/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> detail(@PathVariable Integer id) {

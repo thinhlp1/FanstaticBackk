@@ -49,6 +49,7 @@ import com.fanstatic.dto.model.status.StatusDTO;
 import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.table.TableTypeDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
+import com.fanstatic.dto.model.user.UserDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
 import com.fanstatic.dto.model.voucher.VourcherApplyOrderDTO;
 import com.fanstatic.model.Bill;
@@ -96,6 +97,7 @@ import com.fanstatic.repository.TableRepository;
 import com.fanstatic.repository.UserRepository;
 import com.fanstatic.repository.UserVoucherRepository;
 import com.fanstatic.repository.VoucherRepository;
+import com.fanstatic.service.model.CustomerService;
 import com.fanstatic.service.model.RolePermissionService;
 import com.fanstatic.service.payos.PayOSService;
 import com.fanstatic.service.system.PushNotificationService;
@@ -121,6 +123,7 @@ public class OrderService {
     private final RolePermissionService rolePermissionService;
     private final DateUtils dateUtils;
     private final SystemConfigService systemConfigService;
+    private final CustomerService customerService;
 
     private final ExtraPortionRepository extraPortionRepository;
     private final OrderItemRepository orderItemRepository;
@@ -224,6 +227,22 @@ public class OrderService {
         ordersDTO.setNameList("Danh sách order của khách hàng");
 
         return ResponseUtils.success(200, "Khách hàng có order ", ordersDTO);
+    }
+
+    public ResponseDTO checkCustomerExits(String numberPhone) {
+        User customer = userRepository.findByNumberPhoneAndActiveIsTrue(numberPhone).orElse(null);
+        if (customer == null) {
+            return ResponseUtils.fail(404, "Tài khoản không tồn tại", null);
+        }
+
+        CustomerDTO customerDTO = modelMapper.map(customer, CustomerDTO.class);
+        if (customer.getImage() != null) {
+            String imageUrl = customer.getImage().getLink();
+            customerDTO.setImageUrl(imageUrl);
+        }
+
+        return ResponseUtils.success(200, "Chi tiết khách hàng", customerDTO);
+
     }
 
     public ResponseDTO create(OrderRequestDTO orderRequestDTO) {
@@ -535,7 +554,7 @@ public class OrderService {
         if (isStaffCreateOrderAndConfirm()) {
             return confirm(orderSaved.getOrderId());
         } else {
-            
+
             pushNotificationOrder(order.getCustomer().getId(), orderSaved.getOrderId(),
                     "Order của bạn đã được gửi cho nhân viên");
         }
