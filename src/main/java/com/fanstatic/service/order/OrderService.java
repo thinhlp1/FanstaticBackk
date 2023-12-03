@@ -834,7 +834,12 @@ public class OrderService {
             }
 
             orderItemRepository.saveAll(orderItems);
+            notificationService.sendOrderCreate(order.getOrderId());
 
+            if (order.getCustomer() != null) {
+                notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+            }
             OrderDTO orderDTO = convertOrderToDTO(order);
 
             return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
@@ -904,7 +909,12 @@ public class OrderService {
         }
 
         orderItemRepository.saveAll(orderItems);
+        notificationService.sendOrderCreate(order.getOrderId());
 
+        if (order.getCustomer() != null) {
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+        }
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
@@ -1171,7 +1181,12 @@ public class OrderService {
         order.setUpdateAt(new Date());
         order.setUpdateBy(systemService.getUserLogin());
         orderRepository.save(order);
+        notificationService.sendOrderCreate(order.getOrderId());
 
+        if (order.getCustomer() != null) {
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+        }
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Thêm mới thành công", orderDTO);
@@ -1252,7 +1267,12 @@ public class OrderService {
         order.setUpdateAt(new Date());
         order.setUpdateBy(systemService.getUserLogin());
         orderRepository.save(order);
+        notificationService.sendOrderCreate(order.getOrderId());
 
+        if (order.getCustomer() != null) {
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+        }
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Cập nhật thành công", orderDTO);

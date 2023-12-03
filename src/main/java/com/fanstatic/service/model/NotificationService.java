@@ -78,7 +78,7 @@ public class NotificationService {
         List<User> users = userRepository
                 .findByRoleRolePermissionsFeaturePermissionManagerFeatureIdAndRoleRolePermissionsFeaturePermissionPermissionId(
                         ApplicationConst.Notification.RECEIVE_NOTIFICATION, ApplicationConst.Notification.NEWORDER);
-
+        // System.out.println("USERL: " + users.size());
         saveNotification(users, message, title, action);
         return true;
     }
@@ -154,24 +154,26 @@ public class NotificationService {
     public void saveNotification(List<User> users, String message, String title, String action) {
         List<String> topics = new ArrayList<>();
         List<Notification> notifications = new ArrayList<>();
-        Notification notification = new Notification();
-        notification.setAction(action);
-        notification.setContent(message);
-        notification.setSendAt(new Date());
-        notification.setTitle(title);
-        for (User user : users) {
 
+        for (User user : users) {
+            Notification notification = new Notification();
+            notification.setAction(action);
+            notification.setContent(message);
+            notification.setSendAt(new Date());
+            notification.setTitle(title);
             notification.setReceiver(user);
 
             topics.add(WebsocketConst.TOPPIC_NOTIFICATION + "/" + user.getId());
             notifications.add(notification);
         }
 
-        NotificationDTO notificationDTO = modelMapper.map(notification, NotificationDTO.class);
-        notificationDTO.setHasSeen(!(notification.getSeenAt() == null));
-
-        notificationRepository.saveAll(notifications);
-        wsPurcharseOrderController.sendWebSocketResponse(notificationDTO, topics);
+        List<Notification> notificationsSaved = notificationRepository.saveAllAndFlush(notifications);
+        for (Notification notification2 : notificationsSaved) {
+            NotificationDTO notificationDTO = modelMapper.map(notification2, NotificationDTO.class);
+            notificationDTO.setHasSeen(!(notification2.getSeenAt() == null));
+            wsPurcharseOrderController.sendWebSocketResponse(notificationDTO,
+                    WebsocketConst.TOPPIC_NOTIFICATION + "/" + notification2.getReceiver().getId());
+        }
     }
 
 }
