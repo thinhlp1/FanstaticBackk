@@ -1,16 +1,13 @@
 package com.fanstatic.repository;
 
-import java.util.Date;
-import java.util.List;
-
+import com.fanstatic.model.UserVoucher;
+import com.fanstatic.model.Voucher;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.fanstatic.dto.model.voucher.VoucherCountCollected;
-import com.fanstatic.dto.model.voucher.VoucherDTO;
-import com.fanstatic.model.UserVoucher;
-import com.fanstatic.model.Voucher;
+import java.util.Date;
+import java.util.List;
 
 public interface UserVoucherRepository extends JpaRepository<UserVoucher, Integer> {
     @Query("SELECT uv.voucher FROM UserVoucher uv " +
