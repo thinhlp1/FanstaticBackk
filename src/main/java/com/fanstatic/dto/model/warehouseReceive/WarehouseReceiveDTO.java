@@ -6,6 +6,7 @@ import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -16,10 +17,17 @@ public class WarehouseReceiveDTO extends ResponseDataDTO {
 
     private String imageFileUrl;
 
+    private String code;
+
+    private String checkOutBy;
+
     private String description;
 
 
     private boolean active;
+
+    private Date createAt;
+
 
     List<WarehouseReceiveItemDTO> warehouseReceiveItemDTOList;
 }

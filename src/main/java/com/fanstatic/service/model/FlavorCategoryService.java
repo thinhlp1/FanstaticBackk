@@ -210,6 +210,6 @@ public class FlavorCategoryService {
         Trong đối tượng response util chứa method success.
         Tại sao lại truyền responseListDataDTO vào?
          */
-        return ResponseUtils.success(200, "Danh sách voucher", reponseListDataDTO);
+        return ResponseUtils.success(200, "Danh sách kho nguyên liệu", reponseListDataDTO);
     }
 }
