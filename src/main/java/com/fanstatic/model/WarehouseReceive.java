@@ -33,6 +33,11 @@ public class WarehouseReceive {
 
     private String description;
 
+    private String code;
+
+    @Column(name = "check_out_by")
+    private String checkOutBy;
+
     @Column(name = "cancel_reason")
     private String cancelReason;
 

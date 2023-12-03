@@ -7,20 +7,25 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor
 public class WarehouseReceiveRequestDTO {
     private int id;
 
+    private String code;
+
     @NotNull(message = "{NotNull.warehouseReceive.supplierId}")
     private int supplierId;
 
-    private MultipartFile imageFile;
+    private Optional<MultipartFile> imageFile;
 
     private String description;
 
     private boolean active;
+
+    private String checkOutBy;
 
     List<WarehouseReceiveItemRequestDTO> warehouseReceiveItemRequestDTOList;
 }
