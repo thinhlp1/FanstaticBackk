@@ -47,6 +47,7 @@ import com.fanstatic.dto.model.payment.PaymentMethodDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.dto.model.status.StatusDTO;
 import com.fanstatic.dto.model.table.TableDTO;
+import com.fanstatic.dto.model.table.TableTypeDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
 import com.fanstatic.dto.model.voucher.VourcherApplyOrderDTO;
@@ -534,6 +535,7 @@ public class OrderService {
         if (isStaffCreateOrderAndConfirm()) {
             return confirm(orderSaved.getOrderId());
         } else {
+            
             pushNotificationOrder(order.getCustomer().getId(), orderSaved.getOrderId(),
                     "Order của bạn đã được gửi cho nhân viên");
         }
@@ -549,8 +551,11 @@ public class OrderService {
 
         }
 
-        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
-            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        if (order.getCustomer() != null) {
+            if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+                return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+            }
+        } else {
 
         }
 
@@ -579,8 +584,11 @@ public class OrderService {
 
         }
 
-        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
-            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        if (order.getCustomer() != null) {
+            if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+                return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+            }
+        } else {
 
         }
 
@@ -603,7 +611,10 @@ public class OrderService {
 
         orderRepository.save(order);
         systemService.writeSystemLog(order.getOrderId(), "", null);
-        pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Order của bạn đã được hủy");
+        if (order.getCustomer() != null) {
+            pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Order của bạn đã được hủy");
+
+        }
 
         return ResponseUtils.success(200, "Hủy thành công", null);
     }
@@ -620,8 +631,12 @@ public class OrderService {
 
         }
 
-        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
-            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        if (order.getCustomer() != null) {
+            if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+                return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+            }
+        } else {
+
         }
 
         Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
@@ -650,11 +665,14 @@ public class OrderService {
 
         }
 
-        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
-            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        if (order.getCustomer() != null) {
+            if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+                return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
+            }
+        } else {
 
         }
-
         if (!order.getStatus().getId().equals(ApplicationConst.OrderStatus.PROCESSING)) {
             return ResponseUtils.fail(500, "Order không thể thanh toán", null);
 
@@ -699,8 +717,11 @@ public class OrderService {
         order.setUpdateBy(systemService.getUserLogin());
 
         orderRepository.save(order);
-        pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Đã gửi yêu cầu thành toán");
 
+        if (order.getCustomer() != null) {
+            pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Đã gửi yêu cầu thành toán");
+
+        }
         return ResponseUtils.success(200, "Yêu cầu thanh toán thành công", convertOrderToDTO(order));
 
     }
@@ -772,9 +793,12 @@ public class OrderService {
             OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
                     .getData());
             Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
-            User customer = order.getCustomer();
-            customer.setPoint(point);
-            userRepository.save(customer);
+
+            if (order.getCustomer() != null) {
+                User customer = order.getCustomer();
+                customer.setPoint(point);
+                userRepository.save(customer);
+            }
 
             List<OrderItem> orderItems = order.getOrderItems();
             Status itemStatus = statusRepository.findById(ApplicationConst.OrderStatus.ITEM_COMPLETE).get();
@@ -840,9 +864,11 @@ public class OrderService {
 
         OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId()).getData());
         Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
-        User customer = order.getCustomer();
-        customer.setPoint(point);
-        userRepository.save(customer);
+        if (order.getCustomer() != null) {
+            User customer = order.getCustomer();
+            customer.setPoint(point);
+            userRepository.save(customer);
+        }
 
         List<OrderItem> orderItems = order.getOrderItems();
         Status itemStatus = statusRepository.findById(ApplicationConst.OrderStatus.ITEM_COMPLETE).get();
@@ -1077,8 +1103,12 @@ public class OrderService {
 
         }
 
-        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
-            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        if (order.getCustomer() != null) {
+            if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+                return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
+            }
+        } else {
 
         }
 
@@ -1763,6 +1793,20 @@ public class OrderService {
         return ResponseUtils.success(200, "Order theo thời gian", responseListDataDTO);
     }
 
+    public ResponseDTO getListTable() {
+        List<Table> tables = tableRepository.findTablesWithoutOrdersInLast24Hours(DateUtils.getDayBeforeTime(24));
+        List<ResponseDataDTO> tableDTOS = new ArrayList<>();
+
+        for (Table table : tables) {
+            TableDTO tableDTO = new TableDTO();
+            modelMapper.map(table, tableDTO);
+            tableDTOS.add(tableDTO);
+        }
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+        reponseListDataDTO.setDatas(tableDTOS);
+        return ResponseUtils.success(200, "Danh sách bàn", reponseListDataDTO);
+    }
+
     private OrderDTO convertOrderToDTO(Order order) {
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setId(order.getOrderId());
@@ -1775,8 +1819,10 @@ public class OrderService {
         orderDTO.setPointRedeem(order.getRedeem());
         orderDTO.setReceiMoney(order.getReceiMoney());
 
-        orderDTO.setCustomer(modelMapper.map(order.getCustomer(),
-                CustomerDTO.class));
+        if (order.getCustomer() != null) {
+            orderDTO.setCustomer(modelMapper.map(order.getCustomer(),
+                    CustomerDTO.class));
+        }
 
         if (order.getOrderExtraPortions() != null) {
             orderDTO.setExtraPortions(getOrderExtraPortions(order.getOrderExtraPortions()));
@@ -2041,8 +2087,12 @@ public class OrderService {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
         }
 
-        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
-            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        if (order.getCustomer() != null) {
+            if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+                return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
+            }
+        } else {
 
         }
 
@@ -2084,6 +2134,10 @@ public class OrderService {
 
         if (order == null) {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
+        }
+
+        if (order.getCustomer() == null) {
+            return ResponseUtils.fail(400, "Order không có khách hàng", null);
         }
 
         OrderPointResponseDTO orderPointResponseDTO = new OrderPointResponseDTO();
@@ -2138,8 +2192,16 @@ public class OrderService {
             return ResponseUtils.fail(404, "Order không tồn tại", null);
         }
 
-        if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
-            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        if (order.getCustomer() == null) {
+            return ResponseUtils.fail(400, "Order không có khách hàng", null);
+        }
+
+        if (order.getCustomer() != null) {
+            if (!systemService.checkCustomerResource(order.getCustomer().getId())) {
+                return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
+            }
+        } else {
 
         }
 
