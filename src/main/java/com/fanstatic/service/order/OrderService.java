@@ -98,6 +98,7 @@ import com.fanstatic.repository.UserRepository;
 import com.fanstatic.repository.UserVoucherRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.CustomerService;
+import com.fanstatic.service.model.NotificationService;
 import com.fanstatic.service.model.RolePermissionService;
 import com.fanstatic.service.payos.PayOSService;
 import com.fanstatic.service.system.PushNotificationService;
@@ -124,6 +125,7 @@ public class OrderService {
     private final DateUtils dateUtils;
     private final SystemConfigService systemConfigService;
     private final CustomerService customerService;
+    private final NotificationService notificationService;
 
     private final ExtraPortionRepository extraPortionRepository;
     private final OrderItemRepository orderItemRepository;
@@ -350,6 +352,12 @@ public class OrderService {
                     "Order của bạn đã được gửi cho nhân viên");
         }
 
+        notificationService.sendOrderCreate(order.getOrderId());
+
+        if (order.getCustomer() != null) {
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+        }
         OrderDTO orderDTO = convertOrderToDTO(orderSaved);
 
         return ResponseUtils.success(200, "Tạo order thành công", orderDTO);
@@ -2141,9 +2149,15 @@ public class OrderService {
         // ConvertRate convertRate = pointProgramConfig.getMoneyToPoint();
         // long point = (long) (total / (double) convertRate.getFrom());
 
-        long total = 100000;
+        // long total = 100000;
         // long point = convertPointToMoney(5000, new ConvertRate(1000L, 500L));
         // double money = point * (pointProgramConfig.getPointToMoney().get);
+
+        List<User> users = userRepository
+                .findByRoleRolePermissionsFeaturePermissionManagerFeatureIdAndRoleRolePermissionsFeaturePermissionPermissionId(
+                        "RECEIVE_NOTIFICATION", "NEWORDER");
+
+        System.out.println(users.size());
 
         return ResponseUtils.success(200, 100, null);
     }

@@ -34,4 +34,15 @@ public class ApplicationConst {
 
     }
 
+    public static class Notification {
+        public static final String RECEIVE_NOTIFICATION = "RECEIVE_NOTIFICATION";
+        public static final String CHECKOUTORDER = "CHECKOUTORDER";
+        public static final String NEWORDER = "NEWORDER";
+        public static final String OUTOFSTOCK = "OUTOFSTOCK";
+        public static final String UPDATEORDER = "UPDATEORDER";
+        public static final String COMPLETEORDER = "COMPLETEORDER";
+        public static final String CUSORDER = "CUSORDER";
+
+    }
+
 }

@@ -14,6 +14,7 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.auth.ChangePasswordDTO;
 import com.fanstatic.dto.auth.ConfirmOtpDTO;
 import com.fanstatic.dto.auth.LoginDTO;
+import com.fanstatic.service.model.NotificationService;
 import com.fanstatic.service.user.UserProfileService;
 import com.fanstatic.util.ResponseUtils;
 
@@ -26,11 +27,26 @@ import lombok.AllArgsConstructor;
 public class ProfileController {
 
     private final UserProfileService userProfileService;
+    private final NotificationService notificationService;
 
     @GetMapping("/user-profile")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showUserProfile() {
         ResponseDTO responseDTO = userProfileService.getUserProfile();
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/notification")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getNotification() {
+        ResponseDTO responseDTO = notificationService.getNotification();
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/seen/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> seen(@PathVariable("id") Integer id) {
+        ResponseDTO responseDTO = notificationService.seenNotification(id);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

@@ -33,4 +33,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.employeeCode LIKE %:employeeCode%")
     public Optional<Integer> countByEmployeeCodeLike(@Param("employeeCode") String employeeCode);
+
+    List<User> findByRoleRolePermissionsFeaturePermissionManagerFeatureIdAndRoleRolePermissionsFeaturePermissionPermissionId(
+            String featureId, String permissionId);
 }
