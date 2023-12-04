@@ -819,11 +819,11 @@ public class OrderService {
             order.setUpdateAt(new Date());
             orderRepository.save(order);
 
-            OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
-                    .getData());
-            Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
-
             if (order.getCustomer() != null) {
+                OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
+                        .getData());
+                Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
+
                 User customer = order.getCustomer();
                 customer.setPoint(point);
                 userRepository.save(customer);
