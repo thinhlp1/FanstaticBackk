@@ -100,6 +100,7 @@ import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.CustomerService;
 import com.fanstatic.service.model.NotificationService;
 import com.fanstatic.service.model.RolePermissionService;
+import com.fanstatic.service.model.ShiftHandoverService;
 import com.fanstatic.service.payos.PayOSService;
 import com.fanstatic.service.system.PushNotificationService;
 import com.fanstatic.service.system.SystemConfigService;
@@ -126,6 +127,7 @@ public class OrderService {
     private final SystemConfigService systemConfigService;
     private final CustomerService customerService;
     private final NotificationService notificationService;
+    private final ShiftHandoverService shiftHandoverService;
 
     private final ExtraPortionRepository extraPortionRepository;
     private final OrderItemRepository orderItemRepository;
@@ -2173,13 +2175,14 @@ public class OrderService {
         // long point = convertPointToMoney(5000, new ConvertRate(1000L, 500L));
         // double money = point * (pointProgramConfig.getPointToMoney().get);
 
-        List<User> users = userRepository
-                .findByRoleRolePermissionsFeaturePermissionManagerFeatureIdAndRoleRolePermissionsFeaturePermissionPermissionId(
-                        "RECEIVE_NOTIFICATION", "NEWORDER");
+        // List<User> users = userRepository
+        // .findByRoleRolePermissionsFeaturePermissionManagerFeatureIdAndRoleRolePermissionsFeaturePermissionPermissionId(
+        // "RECEIVE_NOTIFICATION", "NEWORDER");
 
-        System.out.println(users.size());
+        // System.out.println(users.size());
+        boolean c = shiftHandoverService.checkUserStartShift(systemService.getUserLogin());
 
-        return ResponseUtils.success(200, 100, null);
+        return ResponseUtils.success(200, c, null);
     }
 
     public ResponseDTO getPoint(Integer orderId) {
