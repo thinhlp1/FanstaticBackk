@@ -15,6 +15,7 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
+import com.fanstatic.dto.model.order.edit.ChangePaymentRequestDTO;
 import com.fanstatic.dto.model.order.edit.CompleteOrderItemDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
@@ -101,11 +102,11 @@ public class PurchaseOrderController {
     public ResponseEntity<ResponseDTO> detail(@PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.detail(id);
 
-//        if (responseDTO.isSuccess()) {
-//            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
-//                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
-//
-//        }
+        // if (responseDTO.isSuccess()) {
+        // wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+        // WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+
+        // }
 
         return ResponseUtils.returnReponsetoClient(responseDTO);
 
@@ -164,6 +165,21 @@ public class PurchaseOrderController {
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
                     WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderUpdateDTO.getOrderId());
+        }
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
+    @PutMapping("/api/purchase/order/update/payment-method")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updatePayment(
+            @RequestBody @Valid ChangePaymentRequestDTO changePaymentRequestDTO) {
+        ResponseDTO responseDTO = orderService.updatePaymentMethod(changePaymentRequestDTO);
+
+        if (responseDTO.isSuccess()) {
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
+            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + changePaymentRequestDTO.getOrderId());
         }
         return ResponseUtils.returnReponsetoClient(responseDTO);
 
@@ -325,6 +341,15 @@ public class PurchaseOrderController {
 
     }
 
+    @GetMapping("/api/purchase/order/show/table-order")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showTableOrder() {
+        ResponseDTO responseDTO = orderService.getListTableOrder();
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
     @GetMapping("/api/purchase/order/show/await-checkout")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showAwaitCheckout() {
@@ -450,9 +475,10 @@ public class PurchaseOrderController {
     @GetMapping("/handle-checkout")
     @ResponseBody
     public ResponseEntity<ResponseDTO> handleCheckout(@RequestParam("orderCode") Integer ordercode) {
-
+        System.out.println("ABV");
         ResponseDTO responseDTO = orderService.handleCheckout(ordercode);
         if (responseDTO.isSuccess()) {
+            System.out.println("sdfsd");
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
                     WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderService.getOrderIdFromOrderCode(ordercode));
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);

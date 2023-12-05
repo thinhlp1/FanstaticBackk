@@ -94,6 +94,7 @@ public class UserProfileService {
             return ResponseUtils.success(200, "Profile user", profileUserDTO);
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseUtils.fail(500, "Có lỗi xảy ra", null);
 
         }

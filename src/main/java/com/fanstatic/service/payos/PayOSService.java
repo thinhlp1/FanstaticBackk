@@ -102,6 +102,7 @@ public class PayOSService {
 
             return reponseCheckoutUrl;
         } else {
+            System.out.println(jsonObject.toString());
             return codeId;
         }
     }
