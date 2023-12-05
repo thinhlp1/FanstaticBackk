@@ -32,6 +32,7 @@ import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.ConfirmCheckoutRequestDTO;
 import com.fanstatic.dto.model.order.checkout.OrderSurchangeDTO;
+import com.fanstatic.dto.model.order.edit.ChangePaymentRequestDTO;
 import com.fanstatic.dto.model.order.edit.CompleteOrderItemDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionRemoveDTO;
 import com.fanstatic.dto.model.order.edit.OrderExtraPortionUpdateDTO;
@@ -1282,6 +1283,43 @@ public class OrderService {
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Cập nhật thành công", orderDTO);
+    }
+
+    public ResponseDTO updatePaymentMethod(ChangePaymentRequestDTO changePaymentRequestDTO) {
+        Order order = orderRepository.findById(changePaymentRequestDTO.getOrderId()).orElse(null);
+        if (order == null) {
+            return ResponseUtils.fail(404, "Order không tồn tại", null);
+
+        }
+
+        if (order.getStatus().getId().equals(ApplicationConst.OrderStatus.PROCESSING)
+                || order.getStatus().getId().equals(ApplicationConst.OrderStatus.CONFIRMING)
+                || order.getStatus().getId().equals(ApplicationConst.OrderStatus.COMPLETE)
+                || order.getStatus().getId().equals(ApplicationConst.OrderStatus.CANCEL)) {
+            return ResponseUtils.fail(400, "Order không thể thay đổi phương thức thanh toán", null);
+
+        }
+        Bill bill = billRepository.findBillCheckouted(order.getOrderId()).orNull();
+
+        if (bill != null) {
+            return ResponseUtils.fail(400, "Order không thể thay đổi phương thức thanh toán", null);
+
+        }
+
+        PaymentMethod paymentMethod = paymentMethodRepository.findById(changePaymentRequestDTO.getPaymentMethod())
+                .orElse(null);
+        if (paymentMethod == null) {
+            return ResponseUtils.fail(500, "Phương thức thanh toán không hợp lệ", null);
+
+        }
+
+        order.setPaymentMethod(paymentMethod);
+        order.setReceiMoney(changePaymentRequestDTO.getReceiveMoney());
+
+        orderRepository.saveAndFlush(order);
+        OrderDTO orderDTO = convertOrderToDTO(order);
+
+        return ResponseUtils.success(200, "Thay đổi phương thức thanh toán thành công", orderDTO);
     }
 
     public ResponseDTO updateOrderItem(List<OrderItemUpdateDTO> orderItemUpdateDTOs, Order order) {
