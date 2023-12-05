@@ -101,11 +101,11 @@ public class PurchaseOrderController {
     public ResponseEntity<ResponseDTO> detail(@PathVariable Integer id) {
         ResponseDTO responseDTO = orderService.detail(id);
 
-        if (responseDTO.isSuccess()) {
-            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
-                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
-
-        }
+//        if (responseDTO.isSuccess()) {
+//            wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
+//                    WebsocketConst.TOPIC_ORDER_DETAILS + "/" + id);
+//
+//        }
 
         return ResponseUtils.returnReponsetoClient(responseDTO);
 
