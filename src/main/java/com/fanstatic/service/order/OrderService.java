@@ -484,9 +484,12 @@ public class OrderService {
 
         }
 
-        if (!systemService.checkCustomerResource(rootOrder.getCustomer().getId())) {
-            return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+        if (rootOrder.getCustomer() != null) {
 
+            if (!systemService.checkCustomerResource(rootOrder.getCustomer().getId())) {
+                return ResponseUtils.fail(403, "Bạn không có quyền truy cập order này", null);
+
+            }
         }
 
         if (rootOrder.getStatus().getId().equals(ApplicationConst.OrderStatus.CONFIRMING)) {
@@ -1992,6 +1995,11 @@ public class OrderService {
             // bill.setStatus(null);
             orderDTO.setBill(modelMapper.map(bill, BillDTO.class));
             orderDTO.getBill().setStatus(modelMapper.map(bill.getStatus(), StatusDTO.class));
+        }
+
+        if (order.getRootOrder() != null) {
+            Order rootOrder = orderRepository.findById(order.getRootOrder()).orElse(null);
+            orderDTO.setRootOrder(convertOrderToDTO(rootOrder));
         }
 
         return orderDTO;
