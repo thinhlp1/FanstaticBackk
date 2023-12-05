@@ -98,7 +98,9 @@ import com.fanstatic.repository.UserRepository;
 import com.fanstatic.repository.UserVoucherRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.CustomerService;
+import com.fanstatic.service.model.NotificationService;
 import com.fanstatic.service.model.RolePermissionService;
+import com.fanstatic.service.model.ShiftHandoverService;
 import com.fanstatic.service.payos.PayOSService;
 import com.fanstatic.service.system.PushNotificationService;
 import com.fanstatic.service.system.SystemConfigService;
@@ -124,6 +126,8 @@ public class OrderService {
     private final DateUtils dateUtils;
     private final SystemConfigService systemConfigService;
     private final CustomerService customerService;
+    private final NotificationService notificationService;
+    private final ShiftHandoverService shiftHandoverService;
 
     private final ExtraPortionRepository extraPortionRepository;
     private final OrderItemRepository orderItemRepository;
@@ -350,6 +354,12 @@ public class OrderService {
                     "Order của bạn đã được gửi cho nhân viên");
         }
 
+        notificationService.sendOrderCreate(order.getOrderId());
+
+        if (order.getCustomer() != null) {
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+        }
         OrderDTO orderDTO = convertOrderToDTO(orderSaved);
 
         return ResponseUtils.success(200, "Tạo order thành công", orderDTO);
@@ -809,11 +819,11 @@ public class OrderService {
             order.setUpdateAt(new Date());
             orderRepository.save(order);
 
-            OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
-                    .getData());
-            Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
-
             if (order.getCustomer() != null) {
+                OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
+                        .getData());
+                Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
+
                 User customer = order.getCustomer();
                 customer.setPoint(point);
                 userRepository.save(customer);
@@ -826,7 +836,12 @@ public class OrderService {
             }
 
             orderItemRepository.saveAll(orderItems);
+            notificationService.sendOrderCreate(order.getOrderId());
 
+            if (order.getCustomer() != null) {
+                notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+            }
             OrderDTO orderDTO = convertOrderToDTO(order);
 
             return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
@@ -896,7 +911,12 @@ public class OrderService {
         }
 
         orderItemRepository.saveAll(orderItems);
+        notificationService.sendOrderCreate(order.getOrderId());
 
+        if (order.getCustomer() != null) {
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+        }
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
@@ -1163,7 +1183,12 @@ public class OrderService {
         order.setUpdateAt(new Date());
         order.setUpdateBy(systemService.getUserLogin());
         orderRepository.save(order);
+        notificationService.sendOrderCreate(order.getOrderId());
 
+        if (order.getCustomer() != null) {
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+        }
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Thêm mới thành công", orderDTO);
@@ -1244,7 +1269,12 @@ public class OrderService {
         order.setUpdateAt(new Date());
         order.setUpdateBy(systemService.getUserLogin());
         orderRepository.save(order);
+        notificationService.sendOrderCreate(order.getOrderId());
 
+        if (order.getCustomer() != null) {
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+        }
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Cập nhật thành công", orderDTO);
@@ -2141,11 +2171,18 @@ public class OrderService {
         // ConvertRate convertRate = pointProgramConfig.getMoneyToPoint();
         // long point = (long) (total / (double) convertRate.getFrom());
 
-        long total = 100000;
+        // long total = 100000;
         // long point = convertPointToMoney(5000, new ConvertRate(1000L, 500L));
         // double money = point * (pointProgramConfig.getPointToMoney().get);
 
-        return ResponseUtils.success(200, 100, null);
+        // List<User> users = userRepository
+        // .findByRoleRolePermissionsFeaturePermissionManagerFeatureIdAndRoleRolePermissionsFeaturePermissionPermissionId(
+        // "RECEIVE_NOTIFICATION", "NEWORDER");
+
+        // System.out.println(users.size());
+        boolean c = shiftHandoverService.checkUserStartShift(systemService.getUserLogin());
+
+        return ResponseUtils.success(200, c, null);
     }
 
     public ResponseDTO getPoint(Integer orderId) {

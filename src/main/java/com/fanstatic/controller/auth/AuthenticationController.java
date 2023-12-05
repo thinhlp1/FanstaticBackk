@@ -13,6 +13,8 @@ import com.fanstatic.dto.auth.LoginPasswordDTO;
 import com.fanstatic.service.authentication.AuthenticationService;
 import com.fanstatic.util.ResponseUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -67,8 +69,16 @@ public class AuthenticationController {
 
     @PostMapping("/forget/confirm-password")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> forgetConfirmPassword(@RequestBody @Valid ConfirmPasswordDTO confirmPasswordDTO) {
+    public ResponseEntity<ResponseDTO> forgetConfirmPassword(
+            @RequestBody @Valid ConfirmPasswordDTO confirmPasswordDTO) {
         ResponseDTO reponseDTO = authenticationService.forgetConfirmPassword(confirmPasswordDTO);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @GetMapping("/logout")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> logout(HttpServletRequest request, HttpServletResponse response) {
+        ResponseDTO reponseDTO = authenticationService.logout(request, response);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 }
