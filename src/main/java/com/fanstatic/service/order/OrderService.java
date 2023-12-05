@@ -26,6 +26,7 @@ import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.order.OrderExtraPortionDTO;
 import com.fanstatic.dto.model.order.OrderItemDTO;
 import com.fanstatic.dto.model.order.OrderPointResponseDTO;
+import com.fanstatic.dto.model.order.OrderTableDTO;
 import com.fanstatic.dto.model.order.checkout.ApplyVoucherDTO;
 import com.fanstatic.dto.model.order.checkout.CheckVoucherRequestDTO;
 import com.fanstatic.dto.model.order.checkout.CheckoutRequestDTO;
@@ -1756,6 +1757,48 @@ public class OrderService {
 
         ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
         responseListDataDTO.setDatas(orderDTOs);
+        responseListDataDTO.setNameList("Danh sách order hiện tại");
+        return ResponseUtils.success(200, "Danh sách order hiện tại", responseListDataDTO);
+
+    }
+
+    public ResponseDTO getListTableOrder() {
+        Date twentyFourHoursAgo = DateUtils.getDayBeforeTime(24);
+        List<Object[]> objectTable = tableRepository.findTablesAndOrdersCreatedWithin24Hours(twentyFourHoursAgo);
+        List<ResponseDataDTO> orderTableDTOs = new ArrayList<>();
+        for (Object[] object : objectTable) {
+            OrderTableDTO orderTableDTO = new OrderTableDTO();
+            TableDTO tableDTO = new TableDTO();
+            Table table = (Table) object[0];
+            Order order = (Order) object[1];
+
+            modelMapper.map(table, tableDTO);
+            String qrCodeUrl = table.getQrCode().getImage().getLink();
+
+            TableTypeDTO tableTypeDTO = modelMapper.map(table.getTableType(), TableTypeDTO.class);
+            File file = table.getTableType().getImage();
+            if (file != null) {
+                tableTypeDTO.setImageUrl(file.getLink());
+
+            }
+
+            tableDTO.setQrImageUrl(qrCodeUrl);
+            tableDTO.setTableTypeDTO(tableTypeDTO);
+
+            if (order != null) {
+                OrderDTO orderDTO = new OrderDTO();
+
+                orderDTO = convertOrderToDTO(order);
+                orderTableDTO.setOrderDTO(orderDTO);
+
+            }
+            orderTableDTO.setTableDTO(tableDTO);
+
+            orderTableDTOs.add(orderTableDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(orderTableDTOs);
         responseListDataDTO.setNameList("Danh sách order hiện tại");
         return ResponseUtils.success(200, "Danh sách order hiện tại", responseListDataDTO);
 

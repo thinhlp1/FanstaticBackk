@@ -325,6 +325,15 @@ public class PurchaseOrderController {
 
     }
 
+    @GetMapping("/api/purchase/order/show/table-order")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showTableOrder() {
+        ResponseDTO responseDTO = orderService.getListTableOrder();
+
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+
+    }
+
     @GetMapping("/api/purchase/order/show/await-checkout")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showAwaitCheckout() {
