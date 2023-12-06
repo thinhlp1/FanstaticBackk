@@ -46,6 +46,7 @@ import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderRequestDTO;
 import com.fanstatic.dto.model.order.request.SwitchOrderRequestDTO;
 import com.fanstatic.dto.model.payment.PaymentMethodDTO;
+import com.fanstatic.dto.model.product.ProductImageDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.dto.model.status.StatusDTO;
 import com.fanstatic.dto.model.table.TableDTO;
@@ -71,6 +72,7 @@ import com.fanstatic.model.OrderType;
 import com.fanstatic.model.PaymentMethod;
 import com.fanstatic.model.Product;
 import com.fanstatic.model.ProductCategory;
+import com.fanstatic.model.ProductImage;
 import com.fanstatic.model.ProductVarient;
 import com.fanstatic.model.SaleEvent;
 import com.fanstatic.model.Status;
@@ -101,6 +103,7 @@ import com.fanstatic.repository.UserVoucherRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.CustomerService;
 import com.fanstatic.service.model.NotificationService;
+import com.fanstatic.service.model.ProductService;
 import com.fanstatic.service.model.RolePermissionService;
 import com.fanstatic.service.model.ShiftHandoverService;
 import com.fanstatic.service.payos.PayOSService;
@@ -130,6 +133,7 @@ public class OrderService {
     private final CustomerService customerService;
     private final NotificationService notificationService;
     private final ShiftHandoverService shiftHandoverService;
+    private final ProductService productService;
 
     private final ExtraPortionRepository extraPortionRepository;
     private final OrderItemRepository orderItemRepository;
@@ -2708,6 +2712,9 @@ public class OrderService {
                     newOrderItemDTO.getProduct().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
 
                 }
+
+                List<ProductImageDTO> productImages = productService.getProductImage(product);
+
                 List<ProductCategory> productCategories = productCategoryRepository.findByProduct(product);
 
                 List<CategoryCompactDTO> categoryDTOs = new ArrayList<>();
@@ -2717,6 +2724,7 @@ public class OrderService {
                     categoryDTOs.add(categoryDTO);
                 }
                 newOrderItemDTO.getProduct().setCategories(categoryDTOs);
+                newOrderItemDTO.getProduct().setImageUrl(productImages);
 
             } else if (comboProduct != null) {
                 SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orElse(null);
