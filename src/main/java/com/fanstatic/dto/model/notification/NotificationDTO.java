@@ -22,6 +22,8 @@ public class NotificationDTO extends ResponseDataDTO{
 
     private Date seenAt;
 
+    private Date sendAt;
+
     private boolean hasSeen;
 
     private UserCompactDTO sender;
