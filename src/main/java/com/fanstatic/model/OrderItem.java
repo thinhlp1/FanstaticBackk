@@ -92,4 +92,13 @@ public class OrderItem {
 	@JoinColumn(name = "delete_by")
 	private User deleteBy;
 
+	@Override
+	public String toString() {
+		return "Not to String";
+	}
+
+	@Override
+	public int hashCode() {
+		return -1;
+	}
 }

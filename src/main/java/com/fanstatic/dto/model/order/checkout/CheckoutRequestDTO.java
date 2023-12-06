@@ -21,4 +21,7 @@ public class CheckoutRequestDTO {
     private Integer voucherId;
 
     private boolean redeem;
+
+    private Long receiveMoney;
+
 }

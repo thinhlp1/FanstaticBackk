@@ -1,5 +1,8 @@
 package com.fanstatic.repository;
 
+import com.fanstatic.model.UserVoucher;
+import com.fanstatic.model.Voucher;
+
 import java.util.Date;
 import java.util.List;
 

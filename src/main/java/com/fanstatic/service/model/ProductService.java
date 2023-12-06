@@ -112,12 +112,14 @@ public class ProductService {
 
         // check category exit
         List<Category> categories = new ArrayList<>();
-        for (int categoryId : productRequestDTO.getCategoriesId()) {
-            Category category = categoryRepository.findByIdAndActiveIsTrue(categoryId).orElse(null);
-            if (category != null) {
-                categories.add(category);
-            } else {
-                return ResponseUtils.fail(500, "Danh mục không tồn tại", null);
+        if (productRequestDTO.getCategoriesId() != null) {
+            for (int categoryId : productRequestDTO.getCategoriesId()) {
+                Category category = categoryRepository.findByIdAndActiveIsTrue(categoryId).orElse(null);
+                if (category != null) {
+                    categories.add(category);
+                } else {
+                    return ResponseUtils.fail(500, "Danh mục không tồn tại", null);
+                }
             }
         }
 
@@ -126,6 +128,7 @@ public class ProductService {
         product = modelMapper.map(productRequestDTO, Product.class);
 
         product.setActive(DataConst.ACTIVE_TRUE);
+        product.setOutOfStock(DataConst.ACTIVE_FALSE);
         product.setCreateAt(new Date());
         product.setCreateBy(systemService.getUserLogin());
 
@@ -148,13 +151,16 @@ public class ProductService {
             }
 
             // save product varient
-            ResponseDTO productVarientSaved = productVarientService
-                    .saveProductVarient(productRequestDTO.getProductVarients(), productSaved);
-            if (!productVarientSaved.isSuccess()) {
-                transactionManager.rollback(transactionStatus);
-                return ResponseUtils.fail(productVarientSaved.getStatusCode(),
-                        productVarientSaved.getMessage(),
-                        null);
+            if (productRequestDTO.getProductVarients() != null) {
+                ResponseDTO productVarientSaved = productVarientService
+                        .saveProductVarient(productRequestDTO.getProductVarients(), productSaved);
+                if (!productVarientSaved.isSuccess()) {
+                    transactionManager.rollback(transactionStatus);
+                    return ResponseUtils.fail(productVarientSaved.getStatusCode(),
+                            productVarientSaved.getMessage(),
+                            null);
+                }
+
             }
 
             // save product image
@@ -341,7 +347,6 @@ public class ProductService {
 
             List<ProductOption> existingProductOptions = product.getProductOptions();
 
-            System.out.println("LENG: " + existingProductOptions.size());
             List<OptionGroupRequestDTO> optionsSaved = productOptionRequestDTO.getOptionGroups().stream()
                     .map(OptionGroupRequestDTO::new) // Tạo một bản sao của mỗi đối tượng
                     .collect(Collectors.toList());
@@ -387,10 +392,8 @@ public class ProductService {
                 // Nếu không tồn tại trong sản phẩm, thêm mới
 
             }
-            System.out.println("LENG: " + existingProductOptions.size());
 
             for (ProductOption existingProductOption : existingProductOptions) {
-                System.out.println("EXIT: " + existingProductOption.getId());
                 boolean existsInRequest = false;
 
                 for (OptionGroupRequestDTO optionGroupRequestDTO : optionsSaved) {
@@ -415,7 +418,6 @@ public class ProductService {
 
                 if (!existsInRequest) {
                     // Nếu không tồn tại trong request, xóa bỏ
-                    System.out.println("SET FALSE: " + existingProductOption.getId());
                     existingProductOption.setActive(DataConst.ACTIVE_FALSE);
                     productOptionRepository.save(existingProductOption);
                 }
@@ -640,7 +642,6 @@ public class ProductService {
                 productImageDTOs.add(productImageDTO);
 
             }
-            productImageDTOs.add(productImageDTO);
 
         }
 

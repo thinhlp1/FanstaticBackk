@@ -4,6 +4,7 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDTO;
 import com.fanstatic.dto.model.warehouseReceive.WarehouseReceiveRequestDeleteDTO;
 import com.fanstatic.service.model.WarehouseReceiveService;
+import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -12,15 +13,29 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 @Controller
 @RequestMapping("/api/manage/warehousereceive")
 @AllArgsConstructor
 public class WarehouseReceiveController {
     private final WarehouseReceiveService warehouseReceiveService;
 
+    private final SystemService systemService;
+    /*
+        systemService
+        userService -> user = systemService.getUserLogin
+     */
+
+    @GetMapping("/create/getUser")
+    public ResponseEntity<ResponseDTO> getUser() {
+        ResponseDTO responseDTO = warehouseReceiveService.getUser(systemService.getUserLogin().getId());
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
     @PostMapping("/create")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> create(@RequestPart @Valid WarehouseReceiveRequestDTO data, @RequestPart MultipartFile imageFile) {
+    public ResponseEntity<ResponseDTO> create(@RequestPart @Valid WarehouseReceiveRequestDTO data, @RequestPart Optional<MultipartFile> imageFile) {
         data.setImageFile(imageFile);
         ResponseDTO responseDTO = warehouseReceiveService.create(data);
         return ResponseUtils.returnReponsetoClient(responseDTO);
@@ -41,7 +56,7 @@ public class WarehouseReceiveController {
 //        return ResponseUtils.returnReponsetoClient(responseDTO);
 //    }
 //
-    @DeleteMapping("/delete/{id}")
+    @PutMapping("/delete/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id, @RequestBody WarehouseReceiveRequestDeleteDTO warehouseReceiveRequestDeleteDTO) {
         ResponseDTO responseDTO = warehouseReceiveService.delete(id, warehouseReceiveRequestDeleteDTO);
