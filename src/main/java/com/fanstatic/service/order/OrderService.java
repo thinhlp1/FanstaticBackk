@@ -901,9 +901,11 @@ public class OrderService {
         order.setUpdateAt(new Date());
         orderRepository.save(order);
 
-        OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId()).getData());
-        Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
         if (order.getCustomer() != null) {
+            OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
+                    .getData());
+            Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
+
             User customer = order.getCustomer();
             customer.setPoint(point);
             userRepository.save(customer);
@@ -2299,6 +2301,10 @@ public class OrderService {
                 Long moneyLeft = moneyRedeem - order.getTotal();
                 Long pointLeft = calculatePointLeft(moneyLeft);
                 moneyRedeem = order.getTotal();
+                System.out.println("POINT LEF" + pointLeft);
+                if (pointLeft == null){
+                    pointLeft = 0L;
+                }
                 orderPointResponseDTO.setPointLeft(pointLeft);
             } else {
                 orderPointResponseDTO.setPointLeft(0L);
@@ -2306,6 +2312,7 @@ public class OrderService {
 
             orderPointResponseDTO.setMoneyCanReem(moneyRedeem);
         }
+        orderPointResponseDTO.setPointLeft(0L);
         orderPointResponseDTO.setMinPrice(pointProgramConfig.getMinPoint());
         orderPointResponseDTO.setPoint(customerPoint);
         return ResponseUtils.success(200, "Điểm của người dùng", orderPointResponseDTO);
@@ -2962,13 +2969,10 @@ public class OrderService {
     private String generateOrderCheckoutUrl(Order order, Long total) {
         int orderCodePrefix = 100000;
         String checkoutUrl = null;
-        int countMax = 0;
-        ;
         while (true) {
-            if (countMax == 10) {
-                return null;
-            }
+
             int orderCode = Integer.valueOf(orderCodePrefix + String.valueOf(order.getOrderId()));
+            System.out.println("CC " + orderCode);
             checkoutUrl = payOSService.getCheckoutUrl(orderCode, total,
                     "Thanh toán hóa đơn");
 
@@ -2978,14 +2982,16 @@ public class OrderService {
 
             if (checkoutUrl.equals("423")) {
                 orderCodePrefix++;
-                countMax++;
+                continue;
+            }
+            if (checkoutUrl.equals("231")) {
+                orderCodePrefix++;
+
                 continue;
             }
 
-            if (checkoutUrl.equals("00")) {
                 return checkoutUrl;
 
-            }
         }
     }
 

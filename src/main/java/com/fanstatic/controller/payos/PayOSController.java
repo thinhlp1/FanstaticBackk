@@ -14,7 +14,7 @@ public class PayOSController {
 
     @PostMapping("auth/payos/checkout")
     public String checkout() {
-        return payOS.getCheckoutUrl(100008123, Long.valueOf(1000), "test");
+        return payOS.getCheckoutUrl(100001317, Long.valueOf(1000), "test");
     }
 
     @PostMapping("auth/payos/checkout11")

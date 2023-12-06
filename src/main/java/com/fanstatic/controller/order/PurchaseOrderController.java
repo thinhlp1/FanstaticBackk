@@ -475,9 +475,10 @@ public class PurchaseOrderController {
     @GetMapping("/handle-checkout")
     @ResponseBody
     public ResponseEntity<ResponseDTO> handleCheckout(@RequestParam("orderCode") Integer ordercode) {
-
+        System.out.println("ABV");
         ResponseDTO responseDTO = orderService.handleCheckout(ordercode);
         if (responseDTO.isSuccess()) {
+            System.out.println("sdfsd");
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO,
                     WebsocketConst.TOPIC_ORDER_DETAILS + "/" + orderService.getOrderIdFromOrderCode(ordercode));
             wsPurcharseOrderController.sendWebSocketResponse(responseDTO, WebsocketConst.TOPIC_ORDER_UPDATE);
