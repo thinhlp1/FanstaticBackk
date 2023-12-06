@@ -1973,10 +1973,10 @@ public class OrderService {
 
         }
 
-        if (order.getBill() != null) {
-            orderDTO.setBill(modelMapper.map(order.getBill(), BillDTO.class));
+        // if (order.getBill() != null) {
+        // orderDTO.setBill(modelMapper.map(order.getBill(), BillDTO.class));
 
-        }
+        // }
 
         if (order.getOrderSurcharges() != null) {
             orderDTO.setOrderSurcharges(getOrderSurcharge(order.getOrderSurcharges()));
@@ -2981,7 +2981,11 @@ public class OrderService {
                 countMax++;
                 continue;
             }
-            return checkoutUrl;
+
+            if (checkoutUrl.equals("00")) {
+                return checkoutUrl;
+
+            }
         }
     }
 
