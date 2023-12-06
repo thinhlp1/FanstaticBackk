@@ -36,6 +36,10 @@ public class RequestStaffNotification {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @ManyToOne
+    @JoinColumn(name = "table_id")
+    private com.fanstatic.model.Table table;
+
     @JoinColumn(name = "customer_id")
     @ManyToOne
     private User customer;
