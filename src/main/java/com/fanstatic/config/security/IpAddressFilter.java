@@ -43,6 +43,7 @@ public class IpAddressFilter extends OncePerRequestFilter {
         }
 
         String remoteAddr = request.getRemoteAddr();
+        System.out.println("REMOTE ADDR: " + remoteAddr);
         if (remoteAddr != null) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated()) {
