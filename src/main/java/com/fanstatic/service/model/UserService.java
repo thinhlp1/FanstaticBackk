@@ -24,6 +24,7 @@ import com.fanstatic.dto.model.account.AccountRequestDTO;
 import com.fanstatic.dto.model.user.UserDTO;
 import com.fanstatic.dto.model.user.UserRequestDTO;
 import com.fanstatic.model.User;
+import com.fanstatic.model.Account;
 import com.fanstatic.model.File;
 import com.fanstatic.model.User;
 import com.fanstatic.repository.UserRepository;

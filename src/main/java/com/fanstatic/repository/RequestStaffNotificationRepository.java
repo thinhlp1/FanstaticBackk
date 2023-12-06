@@ -16,9 +16,10 @@ public interface RequestStaffNotificationRepository extends JpaRepository<Reques
     @Query("SELECT r FROM RequestStaffNotification r WHERE r.createAt >= :time AND r.employeeConfirm IS NOT NULL")
     List<RequestStaffNotification> findConfirmedNotificationsIn24Hours(@Param("time") Date time);
 
-    @Query("SELECT r FROM RequestStaffNotification r WHERE r.createAt >= :time ")
+    @Query("SELECT r FROM RequestStaffNotification r WHERE r.createAt >= :time ORDER BY r.createAt DESC")
     List<RequestStaffNotification> findAllInTime(@Param("time") Date time);
 
-    
+     @Query("SELECT r FROM RequestStaffNotification r ORDER BY r.createAt DESC")
+    List<RequestStaffNotification> findAllOrderCreateAtDesc();
 
 }

@@ -14,6 +14,8 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.notification.NotificationDTO;
+import com.fanstatic.dto.model.user.UserCompactDTO;
+import com.fanstatic.model.File;
 import com.fanstatic.model.Notification;
 import com.fanstatic.model.User;
 import com.fanstatic.repository.NotificationRepository;
@@ -55,10 +57,16 @@ public class NotificationService {
 
     public ResponseDTO getNotification() {
         User user = systemService.getUserLogin();
-        List<Notification> notifications = notificationRepository.findByReceiver(user);
+        List<Notification> notifications = notificationRepository.findByReceiverOrderBySendAtDesc(user);
         List<ResponseDataDTO> notificationDTOs = new ArrayList<>();
         for (Notification notification : notifications) {
             NotificationDTO notificationDTO = modelMapper.map(notification, NotificationDTO.class);
+            if (notification.getSender() != null) {
+                File file = notification.getSender().getImage();
+                if (file != null) {
+                    notificationDTO.getSender().setImageUrl(file.getLink());
+                }
+            }
             notificationDTO.setHasSeen(!(notification.getSeenAt() == null));
             notificationDTOs.add(notificationDTO);
         }
@@ -94,6 +102,14 @@ public class NotificationService {
         notification.setSendAt(new Date());
         notification.setTitle(title);
         notification.setReceiver(customer);
+
+        User seender = notification.getSender();
+        if (seender != null) {
+            UserCompactDTO userCompactDTO = modelMapper.map(seender, UserCompactDTO.class);
+            if (seender.getImage() != null) {
+                userCompactDTO.setImageUrl(seender.getImage().getLink());
+            }
+        }
 
         Notification notificationSaved = notificationRepository.saveAndFlush(notification);
 
@@ -157,6 +173,7 @@ public class NotificationService {
 
         for (User user : users) {
             Notification notification = new Notification();
+            notification.setSender(systemService.getUserLogin());
             notification.setAction(action);
             notification.setContent(message);
             notification.setSendAt(new Date());
@@ -170,6 +187,12 @@ public class NotificationService {
         List<Notification> notificationsSaved = notificationRepository.saveAllAndFlush(notifications);
         for (Notification notification2 : notificationsSaved) {
             NotificationDTO notificationDTO = modelMapper.map(notification2, NotificationDTO.class);
+            if (notification2.getSender() != null) {
+                File file = notification2.getSender().getImage();
+                if (file != null) {
+                    notificationDTO.getSender().setImageUrl(file.getLink());
+                }
+            }
             notificationDTO.setHasSeen(!(notification2.getSeenAt() == null));
             wsPurcharseOrderController.sendWebSocketResponse(notificationDTO,
                     WebsocketConst.TOPPIC_NOTIFICATION + "/" + notification2.getReceiver().getId());

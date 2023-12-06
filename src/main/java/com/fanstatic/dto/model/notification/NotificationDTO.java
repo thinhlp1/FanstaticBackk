@@ -3,6 +3,8 @@ package com.fanstatic.dto.model.notification;
 import java.util.Date;
 
 import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.model.user.UserCompactDTO;
+import com.fanstatic.dto.model.user.UserDTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,5 +23,7 @@ public class NotificationDTO extends ResponseDataDTO{
     private Date seenAt;
 
     private boolean hasSeen;
+
+    private UserCompactDTO sender;
 
 }

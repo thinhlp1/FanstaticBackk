@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.auth.ChangePasswordDTO;
@@ -34,6 +36,13 @@ public class ProfileController {
     public ResponseEntity<ResponseDTO> showUserProfile() {
         ResponseDTO responseDTO = userProfileService.getUserProfile();
         return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/update/image")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile image) {
+        ResponseDTO reponseDTO = userProfileService.updateImage( image);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @GetMapping("/notification")

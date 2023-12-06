@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fanstatic.config.constants.ImageConst;
+import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
@@ -27,6 +30,7 @@ import com.fanstatic.dto.model.profile.ProfileUserDTO;
 import com.fanstatic.dto.model.user.UserDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
 import com.fanstatic.model.Account;
+import com.fanstatic.model.File;
 import com.fanstatic.model.User;
 import com.fanstatic.model.UserVoucher;
 import com.fanstatic.model.Voucher;
@@ -36,6 +40,7 @@ import com.fanstatic.repository.UserVoucherRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.CustomerService;
 import com.fanstatic.service.order.OrderService;
+import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.OTPService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.CookieUtils;
@@ -55,6 +60,7 @@ public class UserProfileService {
     private final UserRepository userRepository;
     private final UserVoucherRepository userVoucherRepository;
     private final VoucherRepository voucherRepository;
+    private final FileService fileService;
 
     private final SessionUtils sessionUtils;
     private final OTPService otpService;
@@ -98,6 +104,37 @@ public class UserProfileService {
             return ResponseUtils.fail(500, "Có lỗi xảy ra", null);
 
         }
+    }
+
+    public ResponseDTO updateImage(MultipartFile image) {
+        User user = systemService.getUserLogin();
+
+        // check image
+        if (image != null) {
+            if (user.getImage() != null) {
+                fileService.deleteFireStore(user.getImage().getName());
+
+                fileService.updateFile(image, ImageConst.CATEGORY_FOLDER, user.getImage());
+
+            } else {
+                File file = fileService.upload(image, ImageConst.CATEGORY_FOLDER);
+                user.setImage(file);
+
+            }
+            User userSaved = userRepository.save(user);
+            if (userSaved != null) {
+
+                systemService.writeSystemLog(userSaved.getId(), userSaved.getName(), null);
+                return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
+
+            } else {
+                return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
+
+            }
+
+        }
+        return ResponseUtils.fail(200, "Uploadimage", null);
+
     }
 
     public ResponseDTO changeNumberPhone(LoginDTO loginDTO) {
