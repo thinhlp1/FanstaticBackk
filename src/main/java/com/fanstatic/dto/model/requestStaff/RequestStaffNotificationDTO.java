@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class RequestStaffNotificationDTO extends ResponseDataDTO{
+
+    private Integer id;
+
     private CustomerDTO customer;
 
     private UserCompactDTO employeeConfirm;
