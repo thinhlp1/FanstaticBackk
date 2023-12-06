@@ -50,7 +50,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
         // khong tim thay token o jwt filter
         if (!jwtFilterValided || jwtFilterValided == null) {
-
+            System.out.println("jwtFilterValided: " + jwtFilterValided);
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
