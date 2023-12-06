@@ -42,38 +42,38 @@ public class IpAddressFilter extends OncePerRequestFilter {
             ipConfigs = systemConfigService.getListIpConfig();
         }
 
-        String remoteAddr = request.getRemoteAddr();
-        System.out.println("REMOTE ADDR: " + remoteAddr);
-        if (remoteAddr != null) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated()) {
-                Account account = (Account) authentication.getPrincipal();
-                Integer roleId = account.getRole().getId();
-                // CUSTOMER DONT NEED CHECK IP
-                if (roleId == (ApplicationConst.CUSTOMER_ROLE_ID)) {
-                    filterChain.doFilter(request, response);
-                    return;
-                    //MANAGE AND ADMIN DONT NEED CHECK IP
-                } else if (roleId == ApplicationConst.ADNIN_ROLE_ID || roleId == ApplicationConst.MANAGER_ROLE_ID) {
-                    filterChain.doFilter(request, response);
-                    return;
-                } else {
-                    for (IpConfig ipConfig : ipConfigs) {
-                        System.out.println("IPCONFIG: " + ipConfig.getIpAddress());
-                        System.out.println("REMOTE ADDR: " + remoteAddr);
-                        if (ipConfig.getIpAddress().equals(remoteAddr) || remoteAddr.equals("0:0:0:0:0:0:0:1")) {
-                            filterChain.doFilter(request, response);    
-                            return;
-                        }
-                    }
+        // String remoteAddr = request.getRemoteAddr();
+        // System.out.println("REMOTE ADDR: " + remoteAddr);
+        // if (remoteAddr != null) {
+        //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        //     if (authentication != null && authentication.isAuthenticated()) {
+        //         Account account = (Account) authentication.getPrincipal();
+        //         Integer roleId = account.getRole().getId();
+        //         // CUSTOMER DONT NEED CHECK IP
+        //         if (roleId == (ApplicationConst.CUSTOMER_ROLE_ID)) {
+        //             filterChain.doFilter(request, response);
+        //             return;
+        //             //MANAGE AND ADMIN DONT NEED CHECK IP
+        //         } else if (roleId == ApplicationConst.ADNIN_ROLE_ID || roleId == ApplicationConst.MANAGER_ROLE_ID) {
+        //             filterChain.doFilter(request, response);
+        //             return;
+        //         } else {
+        //             for (IpConfig ipConfig : ipConfigs) {
+        //                 System.out.println("IPCONFIG: " + ipConfig.getIpAddress());
+        //                 System.out.println("REMOTE ADDR: " + remoteAddr);
+        //                 if (ipConfig.getIpAddress().equals(remoteAddr) || remoteAddr.equals("0:0:0:0:0:0:0:1")) {
+        //                     filterChain.doFilter(request, response);    
+        //                     return;
+        //                 }
+        //             }
 
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                }
-            }
+        //             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        //             response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        //             return;
+        //         }
+        //     }
 
-        }
+        // }
 
         filterChain.doFilter(request, response);
         return;
