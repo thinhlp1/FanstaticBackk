@@ -14,7 +14,8 @@
   "ipConfigs": [
     { "ipAddress": "192.168.1.254" },
     { "ipAddress": "192.168.1.251" },
-    { "ipAddress": "171.246.82.133" }
+    { "ipAddress": "171.246.82.133" },
+    { "ipAddress": "27.64.216.164"}
   ],
   "openingTimes": {
     "from": "00:00:00",
