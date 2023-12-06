@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.fanstatic.dto.model.voucher.VoucherCountCollected;
+// import com.fanstatic.dto.model.voucher.VoucherCountCollected;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
 import com.fanstatic.model.UserVoucher;
 import com.fanstatic.model.Voucher;

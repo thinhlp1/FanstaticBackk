@@ -24,13 +24,6 @@ public class StatisticalController {
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
-     @GetMapping("/show/revenueby")
-    @ResponseBody
-    public ResponseEntity<ResponseDTO> GetRevenueByDayAndMonth(@RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month) {
-        ResponseDTO reponseDTO = statisticalService.calculateRevenueByMonths(year);
-        return ResponseUtils.returnReponsetoClient(reponseDTO);
-    }
-
     @GetMapping("/show/order")
     @ResponseBody
     public ResponseEntity<ResponseDTO> GetOder(@RequestParam(required = false) Integer year) {

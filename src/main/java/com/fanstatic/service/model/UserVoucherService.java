@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
-import com.fanstatic.dto.model.voucher.VoucherCountCollected;
+// import com.fanstatic.dto.model.voucher.VoucherCountCollected;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
 import com.fanstatic.model.Voucher;
 import com.fanstatic.repository.UserVoucherRepository;

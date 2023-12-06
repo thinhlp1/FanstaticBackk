@@ -14,6 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class VoucherDTO extends ResponseDataDTO {
     private int id;
+    
     private String voucherCode;
 
     private String name;
