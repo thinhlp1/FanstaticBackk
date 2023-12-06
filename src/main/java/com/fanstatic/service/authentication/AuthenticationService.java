@@ -65,13 +65,14 @@ public class AuthenticationService {
 
     public ResponseDTO login(LoginAccountDTO loginDTO) {
         AuthenReponse authenReponse = new AuthenReponse();
-
+        System.out.println(loginDTO.toString());
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginDTO.getUsername(),
                             loginDTO.getPassword()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseUtils.fail(401, "Sai tên tài khoản hoặc mật khẩu", null);
         }
 
