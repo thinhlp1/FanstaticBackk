@@ -24,11 +24,11 @@ public class GlobalExceptionHandler {
         return ResponseUtils.returnReponsetoClient(ResponseUtils.fail(500, "Có lỗi SQl xảy ra", null));
     }
 
-    // @ExceptionHandler(Exception.class)
-    // public ResponseEntity<ResponseDTO> handleException(Exception e) {
-    //     e.printStackTrace();
-    //     return ResponseUtils.returnReponsetoClient(ResponseUtils.fail(500, "Có lỗi hệ thống xảy ra", null));
-    // }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResponseDTO> handleException(Exception e) {
+        e.printStackTrace();
+        return ResponseUtils.returnReponsetoClient(ResponseUtils.fail(500, "Có lỗi hệ thống xảy ra", null));
+    }
 
     @ExceptionHandler(ValidationException.class)
     protected ResponseEntity<Object> handleMethodArgumentNotValid(ValidationException ex) {
