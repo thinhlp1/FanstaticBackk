@@ -50,5 +50,5 @@ public class Notification {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "seen_at")
-    private Date SeenAt;
+    private Date seenAt;
 }
