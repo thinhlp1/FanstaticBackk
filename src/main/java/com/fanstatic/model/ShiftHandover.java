@@ -1,9 +1,8 @@
 package com.fanstatic.model;
 
 
-import java.math.BigInteger;
-import java.sql.Time;
 import java.util.Date;
+
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 
@@ -14,14 +13,6 @@ import lombok.NoArgsConstructor;
 
 
 
-/**
- * 
- * 
- * /**
- * The persistent class for the shift_handover database table.
- * 
- */
-
 @Table(name = "shift_handover")
 @Entity
 @Data
@@ -31,30 +22,32 @@ import lombok.NoArgsConstructor;
 public class ShiftHandover  {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	@Column(name = "cash_handover")
-	private BigInteger cashHandover;
+	private Long cashHandover;
 
 	@Column(name = "end_shift_cash")
-	private BigInteger endShiftCash;
+	private Long endShiftCash;
 
 	@Column(name = "end_shift_time")
-	private Time endShiftTime;
+	private Date endShiftTime;
 
 	@Lob
 	private String note;
 
 	@Column(name = "start_shift_cash")
-	private BigInteger startShiftCash;
+	private Long startShiftCash;
 
 	@Column(name = "start_shift_time")
-	private Time startShiftTime;
+	private Date startShiftTime;
 
 	// bi-directional many-to-one association to RegisterShift
-	@ManyToOne
-	@JoinColumn(name = "register_id")
-	private RegisterShift registerShift;
+	// @ManyToOne
+	// @JoinColumn(name = "register_id")
+	// private RegisterShift registerShift;
+
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")

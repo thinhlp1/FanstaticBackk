@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "loginlog")
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -38,6 +37,10 @@ public class Loginlog {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "action_at")
 	private Date actionAt;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "logoutAt")
+	private Date logoutAt;
 
 	private String description;
 

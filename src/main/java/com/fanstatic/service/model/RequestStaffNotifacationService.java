@@ -13,14 +13,20 @@ import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.requestStaff.CreateRequestStaffNotificationDTO;
 import com.fanstatic.dto.model.requestStaff.RequestStaffNotificationDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
+import com.fanstatic.model.File;
+import com.fanstatic.model.Order;
 import com.fanstatic.model.RequestStaffNotification;
 import com.fanstatic.model.User;
+import com.fanstatic.repository.OrderRepository;
 import com.fanstatic.repository.RequestStaffNotificationRepository;
+import com.fanstatic.service.order.OrderService;
 import com.fanstatic.service.system.PushNotificationService;
 import com.fanstatic.service.system.SystemService;
+import com.fanstatic.util.DateUtils;
 import com.fanstatic.util.ResponseUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +37,8 @@ public class RequestStaffNotifacationService {
         private final RequestStaffNotificationRepository requestStaffNotificationRepository;
         private final SystemService systemService;
         private final PushNotificationService pushNotificationService;
+        private final OrderService orderService;
+        private final OrderRepository orderRepository;
 
         private final ModelMapper modelMapper;
 
@@ -38,15 +46,23 @@ public class RequestStaffNotifacationService {
                 RequestStaffNotification requestStaffNotification = new RequestStaffNotification();
                 User customer = systemService.getUserLogin();
 
+                Order order = orderRepository.findById(createRequestStaffNotificationDTO.getOrderId()).orElse(null);
+                if (order == null) {
+                        return ResponseUtils.fail(404, "Order không tồn tại", null);
+
+                }
+
                 requestStaffNotification.setCustomer(customer);
                 requestStaffNotification.setContent(createRequestStaffNotificationDTO.getContent());
                 requestStaffNotification.setCreateAt(new Date());
-
+                requestStaffNotification.setOrder(order);
                 RequestStaffNotification requestStaffNotificationSaved = requestStaffNotificationRepository
                                 .saveAndFlush(requestStaffNotification);
 
                 RequestStaffNotificationDTO requestStaffNotificationDTO = modelMapper.map(requestStaffNotificationSaved,
                                 RequestStaffNotificationDTO.class);
+                requestStaffNotificationDTO.setOrderDTO((OrderDTO) orderService
+                                .detail(createRequestStaffNotificationDTO.getOrderId()).getData());
 
                 return ResponseUtils.success(200, "Yêu cầu thành công", requestStaffNotificationDTO);
         }
@@ -109,19 +125,31 @@ public class RequestStaffNotifacationService {
         public RequestStaffNotificationDTO details(RequestStaffNotification requestStaffNotification) {
                 RequestStaffNotificationDTO requestStaffNotificationDTO = modelMapper.map(requestStaffNotification,
                                 RequestStaffNotificationDTO.class);
+
+                File file = requestStaffNotification.getCustomer().getImage();
+                if (file != null) {
+                        requestStaffNotificationDTO.getCustomer().setImageUrl(file.getLink());
+                }
+
+                Order order = requestStaffNotification.getOrder();
+
+                if (order != null) {
+                        requestStaffNotificationDTO.setOrderDTO((OrderDTO) orderService
+                                        .detail(order.getOrderId()).getData());
+                }
                 if (requestStaffNotification.getDenyAt() != null) {
-                        requestStaffNotificationDTO.setStatus("denied");
+                        requestStaffNotificationDTO.setStatus("DENIED");
                 } else if (requestStaffNotification.getConfirmAt() != null) {
-                        requestStaffNotificationDTO.setStatus("confirm");
+                        requestStaffNotificationDTO.setStatus("CONFIRM");
                 } else {
-                        requestStaffNotificationDTO.setStatus("wait");
+                        requestStaffNotificationDTO.setStatus("WAIT");
                 }
                 return requestStaffNotificationDTO;
         }
 
         public ResponseDTO showToDay() {
-                Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời
-                                                                                                        // điểm 24 giờ
+                Date twentyFourHoursAgo = DateUtils.getDayBeforeTime(24); // Tính thời
+                                                                          // điểm 24 giờ
 
                 List<RequestStaffNotification> requestStaffNotifications = requestStaffNotificationRepository
                                 .findAllInTime(twentyFourHoursAgo);
@@ -143,7 +171,7 @@ public class RequestStaffNotifacationService {
         public ResponseDTO show() {
 
                 List<RequestStaffNotification> requestStaffNotifications = requestStaffNotificationRepository
-                                .findAll();
+                                .findAllOrderCreateAtDesc();
                 List<ResponseDataDTO> requestStaffNotificationDTOs = new ArrayList<>();
 
                 for (RequestStaffNotification requestStaffNotification : requestStaffNotifications) {

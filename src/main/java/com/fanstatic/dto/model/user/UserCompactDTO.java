@@ -22,4 +22,7 @@ public class UserCompactDTO extends ResponseDataDTO {
 
 	// private RoleDTO role;
 
+	private String imageUrl;
+	
+
 }
