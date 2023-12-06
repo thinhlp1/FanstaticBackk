@@ -37,7 +37,7 @@ public class NotificationService {
 
     private final ModelMapper modelMapper;
 
-    private final String DETAIL_TO_ORDER = "";
+    private final String DETAIL_TO_ORDER = "/manage-order?id=";
 
     public ResponseDTO seenNotification(Integer id) {
         Notification notification = notificationRepository.findById(id).orElse(null);
@@ -79,7 +79,7 @@ public class NotificationService {
 
     public boolean sendOrderCreate(Integer orderId) {
         String message = "Order mới được tạo. Mã order: " + orderId;
-        String action = ApplicationConst.CLIENT_HOST + "/" + DETAIL_TO_ORDER + "/" + orderId;
+        String action = DETAIL_TO_ORDER + orderId;
         String title = "Order mới";
 
         // get user who receive notication
@@ -93,7 +93,7 @@ public class NotificationService {
 
     public boolean sendCustomerOrder(Integer orderId, User customer) {
         String message = "Order mới được tạo. Mã order: " + orderId;
-        String action = ApplicationConst.CLIENT_HOST + "/" + DETAIL_TO_ORDER + "/" + orderId;
+        String action = DETAIL_TO_ORDER + orderId;
         String title = "Order mới";
 
         Notification notification = new Notification();
@@ -124,7 +124,7 @@ public class NotificationService {
 
     public boolean sendOrderCheckout(Integer orderId) {
         String message = "Order " + orderId + " đang yêu cầu thanh toán";
-        String action = ApplicationConst.CLIENT_HOST + "/" + DETAIL_TO_ORDER + "/" + orderId;
+        String action = DETAIL_TO_ORDER + orderId;
         String title = "Order cần thánh toán";
 
         // get user who receive notication
@@ -139,7 +139,7 @@ public class NotificationService {
 
     public boolean sendOrderComplete(Integer orderId) {
         String message = "Order " + orderId + " đã hoàn thành";
-        String action = ApplicationConst.CLIENT_HOST + "/" + DETAIL_TO_ORDER + "/" + orderId;
+        String action = DETAIL_TO_ORDER + orderId;
         String title = "Order đã hoàn thành";
 
         // get user who receive notication
@@ -154,7 +154,7 @@ public class NotificationService {
 
     public boolean sendOrderupdate(Integer orderId) {
         String message = "Order " + orderId + " đã được cập nhật";
-        String action = ApplicationConst.CLIENT_HOST + "/" + DETAIL_TO_ORDER + "/" + orderId;
+        String action = DETAIL_TO_ORDER + orderId;
         String title = "Order đã được cập nhật";
 
         // get user who receive notication
