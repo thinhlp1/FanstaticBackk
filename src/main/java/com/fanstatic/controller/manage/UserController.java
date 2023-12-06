@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.model.extraportion.ExtraPortionRequestDTO;
 import com.fanstatic.dto.model.user.UserRequestDTO;
+import com.fanstatic.dto.model.user.UserUpdateRequestDTO;
 import com.fanstatic.service.model.UserService;
 import com.fanstatic.util.ResponseUtils;
 
@@ -28,18 +30,20 @@ import lombok.AllArgsConstructor;
 public class UserController {
     private final UserService userService;
 
+    
+
     @PostMapping("/create")
     @ResponseBody
     public ResponseEntity<ResponseDTO> create(@RequestPart @Valid UserRequestDTO data,
-            @RequestPart MultipartFile image) {
-        data.setImage(image);
+            @RequestPart MultipartFile imageFile) {
+        data.setImage(imageFile);
         ResponseDTO reponseDTO = userService.create(data);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @PutMapping("/update/{id}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid UserRequestDTO data,
+    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid UserUpdateRequestDTO data,
             @PathVariable("id") Integer id) {
         ResponseDTO reponseDTO = userService.update(data);
         return ResponseUtils.returnReponsetoClient(reponseDTO);

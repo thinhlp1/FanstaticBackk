@@ -14,6 +14,7 @@ import com.fanstatic.dto.model.user.UserDTO;
 import com.fanstatic.dto.model.customer.CustomerRequestDTO;
 import com.fanstatic.model.Account;
 import com.fanstatic.model.File;
+import com.fanstatic.model.Shift;
 import com.fanstatic.model.User;
 import com.fanstatic.repository.CustomerRepository;
 import com.fanstatic.service.system.FileService;
@@ -204,16 +205,16 @@ public class CustomerService {
 
         switch (active) {
             case RequestParamConst.ACTIVE_ALL:
-                users = customerRepository.findAll();
+                users = customerRepository.findAllByRoleId(3).orElse(users);
                 break;
             case RequestParamConst.ACTIVE_FALSE:
-                users = customerRepository.findAllByActiveIsTrue().orElse(users);
+                users = customerRepository.findAllByRoleIdAndActiveIsTrue(3).orElse(users);
                 break;
             case RequestParamConst.ACTIVE_TRUE:
-                users = customerRepository.findAllByActiveIsFalse().orElse(users);
+                users = customerRepository.findAllByRoleIdAndActiveIsTrue(3).orElse(users);
                 break;
             default:
-                users = customerRepository.findAll();
+                users = customerRepository.findAllByRoleId(3).orElse(users);
                 break;
         }
 
@@ -230,6 +231,19 @@ public class CustomerService {
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
         reponseListDataDTO.setDatas(userDTOs);
         return ResponseUtils.success(200, "Danh sách người dùng", reponseListDataDTO);
+    }
+
+      public ResponseDTO restore(int id) {
+        User user = customerRepository.findByIdAndActiveIsFalse(id).orElse(null);
+        if (user == null) {
+            return ResponseUtils.fail(401, "User không tồn tại", null);
+        }
+        user.setActive(DataConst.ACTIVE_TRUE);
+        user.setUpdateAt(new Date());
+        user.setUpdateBy(systemService.getUserLogin());
+        User userSaved = customerRepository.save(user);
+        systemService.writeSystemLog(userSaved.getId(), null, null);
+        return ResponseUtils.success(200, MessageConst.RESTORE_SUCCESS, null);
     }
 
     public ResponseDTO resetPassword(Integer id) {
