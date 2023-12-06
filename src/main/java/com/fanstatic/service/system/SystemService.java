@@ -1,6 +1,7 @@
 package com.fanstatic.service.system;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,9 @@ import com.fanstatic.repository.LoginlogRepository;
 import com.fanstatic.repository.ManagerFeatureRepository;
 import com.fanstatic.repository.PermissionRepository;
 import com.fanstatic.repository.SystemlogRepository;
+import com.fanstatic.repository.UserRepository;
+import com.fanstatic.util.CookieUtils;
+import com.fanstatic.util.DateUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +36,8 @@ public class SystemService {
     private final ManagerFeatureRepository managerFeatureRepository;
     private final PermissionRepository permissionRepository;
     private final LoginlogRepository loginlogRepository;
+    private final UserRepository userRepository;
+    private final CookieUtils cookieUtils;
 
     public void writeSystemLog(Object objectId, String objectName, String description) {
 
@@ -56,7 +62,7 @@ public class SystemService {
         systemlog.setUser(user);
         systemlog.setActionAt(new Date());
 
-        systemlogRepository.save(systemlog);
+        systemlogRepository.saveAndFlush(systemlog);
 
     }
 
@@ -69,6 +75,14 @@ public class SystemService {
         loginlogRepository.save(loginlog);
     }
 
+    public void writeLogoutLog() {
+        String token = cookieUtils.getValue("token");
+
+        Loginlog loginlog = loginlogRepository.findByToken(token).orElse(null);
+        loginlog.setLogoutAt(new Date());
+        loginlogRepository.save(loginlog);
+    }
+
     public User getUserLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
@@ -78,8 +92,6 @@ public class SystemService {
         }
         return null;
     }
-
-
 
     public boolean checkUserResource(int userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -107,5 +119,25 @@ public class SystemService {
             }
         }
         return false;
+    }
+
+    public boolean checkUserLogout(String token) {
+        Loginlog loginlog = loginlogRepository.findByToken(token).orElse(null);
+        if (loginlog == null) {
+            return true;
+        }
+        if (loginlog.getLogoutAt() != null) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean checkCashierLogin(User user) {
+        List<User> users = userRepository.findByRoleId(ApplicationConst.CASHIER_ROLE_ID);
+        boolean isLogin = loginlogRepository
+                .findLoginLogsWithin24HoursForUsers(users, user, DateUtils.getDayBeforeTime(24))
+                .isEmpty();
+        System.out.println("Is_LOGIN " + isLogin);
+        return !isLogin;
     }
 }

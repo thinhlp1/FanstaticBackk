@@ -22,13 +22,15 @@ import lombok.Builder;
 public class SaleProductDTO extends ResponseDataDTO {
      private int id;
 
-    private ProductForSaleDTO product;
+    // private ProductForSaleDTO product;
 
-    private ProductVarientDTO productVarient;
+    // private ProductVarientDTO productVarient;
 
-    private SaleEventDTO saleEvent;
+    //  private SaleEventDTO saleEvent;
 
-    private ComboProductDTO comboProduct;
+    // private ComboProductDTO comboProduct;
+
+    private ObjectSaleDTO objectSale;
 
     private byte active;
 }

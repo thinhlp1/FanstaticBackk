@@ -82,7 +82,7 @@ public class RequestStaffController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @GetMapping("/api/manage/notification/show-today")
+    @GetMapping("/api/manage/notification/show/today")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showToday() {
 

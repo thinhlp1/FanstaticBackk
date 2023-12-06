@@ -7,6 +7,7 @@ import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.bill.BillDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
+import com.fanstatic.dto.model.order.checkout.OrderSurchangeDTO;
 import com.fanstatic.dto.model.order.request.ExtraPortionOrderRequestDTO;
 import com.fanstatic.dto.model.order.request.OrderItemRequestDTO;
 import com.fanstatic.dto.model.payment.PaymentMethodDTO;
@@ -44,6 +45,10 @@ public class OrderDTO extends ResponseDataDTO {
 
     private Long voucherRedeem;
 
+    private Long totalSurchange;
+
+    private Long receiMoney;
+
     private StatusDTO status;
 
     private VoucherDTO voucher;
@@ -56,6 +61,8 @@ public class OrderDTO extends ResponseDataDTO {
 
     private List<TableDTO> tables;
 
+    private List<OrderSurchangeDTO> orderSurcharges;
+
     private Date createAt;
 
     private Date updateAt;
@@ -67,4 +74,7 @@ public class OrderDTO extends ResponseDataDTO {
     private UserCompactDTO canceler;
 
     private BillDTO bill;
+
+    private OrderDTO rootOrder;
+
 }

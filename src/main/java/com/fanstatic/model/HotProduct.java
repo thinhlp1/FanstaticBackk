@@ -35,7 +35,7 @@ public class HotProduct  {
 	@Column(name = "end_at")
 	private Date endAt;
 
-	private int serial;
+	private Integer serial;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "start_at")

@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.CookieUtils;
 import com.fanstatic.util.JwtUtil;
 import com.fanstatic.util.ResponseUtils;
@@ -28,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final SessionUtils sessionUtils;
     private final CookieUtils cookieUtils;
+    private final SystemService systemService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -41,7 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         /*
          * username == number Phone trong co so du lieu va model
          */
-
 
         String token = cookieUtils.getValue("token");
         String jwt;
@@ -77,6 +78,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             try {
+
+                if (systemService.checkUserLogout(token)) {
+                    System.out.println(token);
+                    System.out.println("HRERE");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
+                }
+
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,

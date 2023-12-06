@@ -23,7 +23,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     private final SessionUtils sessionUtils;
 
     String[] allowedPaths = { "home", "auth", "u", "handle-checkout", "cancel-checkout" };
-    String[] pathsForUser = { "profile", "request-staff" };
+    String[] pathsForUser = { "profile", "request-staff" , "notifications" };
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

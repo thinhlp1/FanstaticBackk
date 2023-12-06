@@ -9,13 +9,11 @@ import java.util.List;
 import org.apache.commons.codec.digest.HmacUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class PayOSService {
@@ -81,23 +79,32 @@ public class PayOSService {
 
     public String getCheckoutUrl(int orderCode, Long amount, String description) {
         String url = checkoutUrl + "/v2/payment-requests";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-api-key", xApiKey);
-        headers.set("x-client-id", xClientId);
-        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        WebClient client = WebClient.builder()
+                .baseUrl(url)
+                .defaultHeader("x-api-key", xApiKey)
+                .defaultHeader("x-client-id", xClientId)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+
         JSONObject data = transaction(orderCode, amount, description);
-        HttpEntity<String> entity = new HttpEntity<>(data.toString(), headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-        JSONObject jsonObject = new JSONObject(response.getBody());
+
+        String response = client.post()
+                .body(BodyInserters.fromValue(data.toString()))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        JSONObject jsonObject = new JSONObject(response);
         String codeId = jsonObject.getString("code");
         if (codeId.equals("00")) {
             String reponseCheckoutUrl = jsonObject.getJSONObject("data").getString("checkoutUrl").toString();
             System.out.println("URL: " + reponseCheckoutUrl);
 
             return reponseCheckoutUrl;
+        } else {
+            System.out.println(jsonObject.toString());
+            return codeId;
         }
-        return null;
     }
 
 }

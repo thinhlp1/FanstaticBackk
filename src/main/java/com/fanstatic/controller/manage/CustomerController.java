@@ -42,6 +42,13 @@ public class CustomerController {
         ResponseDTO reponseDTO = customerService.updateImage(id, image);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
+    @PutMapping("/restore/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> restore(@PathVariable("id") int id) {
+        ResponseDTO reponseDTO = customerService.restore(id);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
 
     @DeleteMapping("/delete/{id}")
     @ResponseBody
