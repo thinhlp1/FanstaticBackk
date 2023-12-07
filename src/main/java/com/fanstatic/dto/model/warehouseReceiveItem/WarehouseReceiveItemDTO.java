@@ -22,4 +22,5 @@ public class WarehouseReceiveItemDTO extends ResponseDataDTO {
 
     private Date expiredAt;
 
+    private Date createAt;
 }
