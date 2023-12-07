@@ -3,6 +3,10 @@ package com.fanstatic.service.model;
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.exception.ValidationException;
 import com.fanstatic.dto.ResponseDTO;
+import com.fanstatic.dto.ResponseDataDTO;
+import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.model.flavor.FlavorDTO;
+import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemDTO;
 import com.fanstatic.dto.model.warehouseReceiveItem.WarehouseReceiveItemRequestDTO;
 import com.fanstatic.model.Flavor;
 import com.fanstatic.model.WarehouseReceive;
@@ -87,5 +91,72 @@ public class WarehouseReceiveItemService {
         }
         //Mã 500 là lỗi internal server
         return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
+    }
+
+    public ResponseDTO show() {//truyền tham số active vào để show list voucher dựa vào trạng thái
+        //Tạo 1 list voucher mới chưa có dữ liệu
+        List<WarehouseReceiveItem> warehouseReceiveItems = warehouseReceiveItemRepository.findAll();
+
+
+//        Bắt đầu từ đoạn này chủ yếu để cấu hình cho json trả về theo dạng nào
+        List<ResponseDataDTO> warehouseReceiveItemsDTOs = new ArrayList<>();
+
+        // Lập qua vòng for này để map dữ liệu voucher vào voucherDTO
+        for (WarehouseReceiveItem warehouseReceiveItem : warehouseReceiveItems) {
+            WarehouseReceiveItemDTO warehouseReceiveItemDTO = new WarehouseReceiveItemDTO();
+            FlavorDTO flavorDTO = modelMapper.map(warehouseReceiveItem.getFlavor(), FlavorDTO.class);
+            warehouseReceiveItemDTO.setFlavorDTO(flavorDTO);
+            modelMapper.map(warehouseReceiveItem, warehouseReceiveItemDTO);
+            warehouseReceiveItemsDTOs.add(warehouseReceiveItemDTO);
+        }
+        //Tạo 1 đối tượng respones list data mới
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+
+        /*Trong đối tượng response list data sẽ có thuộc tính "datas"
+        -> nên ta set cho nó bằng list voucherDtos vừa có lúc nãy
+         */
+        reponseListDataDTO.setDatas(warehouseReceiveItemsDTOs);
+
+        /*
+        Trong đối tượng response util chứa method success.
+        Tại sao lại truyền responseListDataDTO vào?
+         */
+        return ResponseUtils.success(200, "Danh sách nguyên liệu trong kho", reponseListDataDTO);
+    }
+
+    public ResponseDTO showByFlavorId(int flavorId) {//truyền tham số active vào để show list voucher dựa vào trạng thái
+        //Tạo 1 list voucher mới chưa có dữ liệu
+        List<WarehouseReceiveItem> warehouseReceiveItems = warehouseReceiveItemRepository.findAllByFlavorId(flavorId).orElse(null);
+
+
+//        Bắt đầu từ đoạn này chủ yếu để cấu hình cho json trả về theo dạng nào
+        List<ResponseDataDTO> warehouseReceiveItemsDTOs = new ArrayList<>();
+
+        // Lập qua vòng for này để map dữ liệu voucher vào voucherDTO
+        for (WarehouseReceiveItem warehouseReceiveItem : warehouseReceiveItems) {
+            WarehouseReceiveItemDTO warehouseReceiveItemDTO = new WarehouseReceiveItemDTO();
+            FlavorDTO flavorDTO = modelMapper.map(warehouseReceiveItem.getFlavor(), FlavorDTO.class);
+            warehouseReceiveItemDTO.setFlavorDTO(flavorDTO);
+            modelMapper.map(warehouseReceiveItem, warehouseReceiveItemDTO);
+            warehouseReceiveItemsDTOs.add(warehouseReceiveItemDTO);
+        }
+        //Tạo 1 đối tượng respones list data mới
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+
+        /*Trong đối tượng response list data sẽ có thuộc tính "datas"
+        -> nên ta set cho nó bằng list voucherDtos vừa có lúc nãy
+         */
+        reponseListDataDTO.setDatas(warehouseReceiveItemsDTOs);
+
+        /*
+        Trong đối tượng response util chứa method success.
+        Tại sao lại truyền responseListDataDTO vào?
+         */
+        return ResponseUtils.success(200, "Danh sách nguyên liệu trong kho", reponseListDataDTO);
+    }
+
+    public int countByFlavorId(int flavorId) {
+        int counts = warehouseReceiveItemRepository.countByFlavorId(flavorId);
+        return counts;
     }
 }
