@@ -46,23 +46,31 @@ public class RequestStaffNotifacationService {
                 RequestStaffNotification requestStaffNotification = new RequestStaffNotification();
                 User customer = systemService.getUserLogin();
 
-                Order order = orderRepository.findById(createRequestStaffNotificationDTO.getOrderId()).orElse(null);
-                if (order == null) {
-                        return ResponseUtils.fail(404, "Order không tồn tại", null);
+               if(createRequestStaffNotificationDTO.getOrderId() != null){
+                       Order order = orderRepository.findById(createRequestStaffNotificationDTO.getOrderId()).orElse(null);
+                       if (order == null) {
+                               return ResponseUtils.fail(404, "Order không tồn tại", null);
 
-                }
+                       }
+                requestStaffNotification.setOrder(order);
+               }
 
                 requestStaffNotification.setCustomer(customer);
                 requestStaffNotification.setContent(createRequestStaffNotificationDTO.getContent());
                 requestStaffNotification.setCreateAt(new Date());
-                requestStaffNotification.setOrder(order);
                 RequestStaffNotification requestStaffNotificationSaved = requestStaffNotificationRepository
                                 .saveAndFlush(requestStaffNotification);
 
                 RequestStaffNotificationDTO requestStaffNotificationDTO = modelMapper.map(requestStaffNotificationSaved,
                                 RequestStaffNotificationDTO.class);
-                requestStaffNotificationDTO.setOrderDTO((OrderDTO) orderService
+                if(createRequestStaffNotificationDTO.getOrderId() != null) {
+
+                        requestStaffNotificationDTO.setOrderDTO((OrderDTO) orderService
                                 .detail(createRequestStaffNotificationDTO.getOrderId()).getData());
+                }
+
+
+                        requestStaffNotificationDTO.setStatus("WAIT");
 
                 return ResponseUtils.success(200, "Yêu cầu thành công", requestStaffNotificationDTO);
         }
