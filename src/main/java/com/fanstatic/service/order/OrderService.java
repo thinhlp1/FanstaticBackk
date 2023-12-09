@@ -78,6 +78,7 @@ import com.fanstatic.model.SaleEvent;
 import com.fanstatic.model.Status;
 import com.fanstatic.model.Table;
 import com.fanstatic.model.User;
+import com.fanstatic.model.UserVoucher;
 import com.fanstatic.model.Voucher;
 import com.fanstatic.repository.BillRepository;
 import com.fanstatic.repository.CancelReasonRepository;
@@ -851,6 +852,11 @@ public class OrderService {
                 notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
 
             }
+
+            if (order.getVoucher() != null && order.getCustomer() != null) {
+                userVoucherRepository.deleteByUserIdAndVoucherId(order.getCustomer().getId(),
+                        order.getVoucher().getId());
+            }
             OrderDTO orderDTO = convertOrderToDTO(order);
 
             return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
@@ -867,6 +873,10 @@ public class OrderService {
             if (billSaved != null) {
 
                 OrderDTO orderDTO = convertOrderToDTO(order);
+                if (order.getVoucher() != null && order.getCustomer() != null) {
+                    userVoucherRepository.deleteByUserIdAndVoucherId(order.getCustomer().getId(),
+                            order.getVoucher().getId());
+                }
 
                 return ResponseUtils.success(201, "Xác nhận thanh toán thành công", orderDTO);
             }
@@ -2306,7 +2316,7 @@ public class OrderService {
                 Long pointLeft = calculatePointLeft(moneyLeft);
                 moneyRedeem = order.getTotal();
                 System.out.println("POINT LEF" + pointLeft);
-                if (pointLeft == null){
+                if (pointLeft == null) {
                     pointLeft = 0L;
                 }
                 orderPointResponseDTO.setPointLeft(pointLeft);
@@ -2364,7 +2374,14 @@ public class OrderService {
         List<Voucher> vouchers = userVoucherRepository.findActiveVouchersForUser(order.getCustomer().getId(),
                 new Date());
         List<VoucherDTO> voucherDTOs = new ArrayList<>();
+        int customerId = order.getCustomer().getId();
         for (Voucher voucher : vouchers) {
+
+            // if (orderRepository.findOrderCustomerIdAndVoucher(customerId,
+            // voucher.getId()) != null) {
+
+            // }
+
             VoucherDTO voucherDTO = modelMapper.map(voucher, VoucherDTO.class);
             voucherDTOs.add(voucherDTO);
         }
@@ -2998,7 +3015,7 @@ public class OrderService {
                 continue;
             }
 
-                return checkoutUrl;
+            return checkoutUrl;
 
         }
     }
