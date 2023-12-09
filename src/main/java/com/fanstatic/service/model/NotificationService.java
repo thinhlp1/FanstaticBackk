@@ -38,6 +38,7 @@ public class NotificationService {
     private final ModelMapper modelMapper;
 
     private final String DETAIL_TO_ORDER = "/manage-order?id=";
+    private final String DETAILS_TO_MY_ORDER = "/myorder?id=";
 
     public ResponseDTO seenNotification(Integer id) {
         Notification notification = notificationRepository.findById(id).orElse(null);
@@ -77,6 +78,20 @@ public class NotificationService {
         return ResponseUtils.success(200, "Danh sách thông báo", responseListDataDTO);
     }
 
+    public boolean sendSwitchTable(Integer orderId, int tableNumber) {
+        String message = "Order" + orderId + " đã được chuyển sang bàn số" + tableNumber;
+        String action = DETAIL_TO_ORDER + orderId;
+        String title = "Khách hàng chuyển bàn";
+
+        // get user who receive notication
+        List<User> users = userRepository
+                .findByRoleRolePermissionsFeaturePermissionManagerFeatureIdAndRoleRolePermissionsFeaturePermissionPermissionId(
+                        ApplicationConst.Notification.RECEIVE_NOTIFICATION, ApplicationConst.Notification.UPDATEORDER);
+        // System.out.println("USERL: " + users.size());
+        saveNotification(users, message, title, action);
+        return true;
+    }
+
     public boolean sendOrderCreate(Integer orderId) {
         String message = "Order mới được tạo. Mã order: " + orderId;
         String action = DETAIL_TO_ORDER + orderId;
@@ -91,10 +106,10 @@ public class NotificationService {
         return true;
     }
 
-    public boolean sendCustomerOrder(Integer orderId, User customer) {
-        String message = "Order mới được tạo. Mã order: " + orderId;
-        String action = DETAIL_TO_ORDER + orderId;
-        String title = "Order mới";
+    public boolean sendCustomerOrder(Integer orderId, User customer, String message, String title) {
+        // String message = "Order mới được tạo. Mã order: " + orderId;
+        String action = DETAILS_TO_MY_ORDER + orderId;
+        // String title = "Order mới";
 
         Notification notification = new Notification();
         notification.setAction(action);
@@ -154,6 +169,21 @@ public class NotificationService {
 
     public boolean sendOrderupdate(Integer orderId) {
         String message = "Order " + orderId + " đã được cập nhật";
+        String action = DETAIL_TO_ORDER + orderId;
+        String title = "Order đã được cập nhật";
+
+        // get user who receive notication
+        List<User> users = userRepository
+                .findByRoleRolePermissionsFeaturePermissionManagerFeatureIdAndRoleRolePermissionsFeaturePermissionPermissionId(
+                        ApplicationConst.Notification.RECEIVE_NOTIFICATION,
+                        ApplicationConst.Notification.UPDATEORDER);
+
+        saveNotification(users, message, title, action);
+        return true;
+    }
+
+    public boolean sendOrderCancel(Integer orderId) {
+        String message = "Order " + orderId + " đã bị hủy ";
         String action = DETAIL_TO_ORDER + orderId;
         String title = "Order đã được cập nhật";
 

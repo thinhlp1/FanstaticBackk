@@ -364,7 +364,8 @@ public class OrderService {
         notificationService.sendOrderCreate(order.getOrderId());
 
         if (order.getCustomer() != null) {
-            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
+                    "Order của bạn đã được gửi cho nhân viên", "Orer sẽ được nhân viên tiếp nhận");
 
         }
         OrderDTO orderDTO = convertOrderToDTO(orderSaved);
@@ -450,10 +451,6 @@ public class OrderService {
 
             transactionManager.commit(transactionStatus);
 
-            if (order.getCustomer() != null) {
-                pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(),
-                        "Order của bạn đã được nhân viên tiếp nhận");
-            }
             OrderDTO orderDTO;
             if (rootOrder != null) {
 
@@ -464,6 +461,12 @@ public class OrderService {
                 rootOrder.setOrderExtraPortions(orderExtraPortions);
                 orderDTO = convertOrderToDTO(orderRepository.findById(rootOrder.getOrderId()).get());
                 orderRepository.delete(order);
+                if (rootOrder.getCustomer() != null) {
+                    pushNotificationOrder(order.getCustomer().getId(), rootOrder.getOrderId(),
+                            "Order của bạn đã được nhân viên tiếp nhận");
+                    notificationService.sendCustomerOrder(rootOrder.getOrderId(), rootOrder.getCustomer(),
+                            "Order của bạn đã được nhân viên tiếp nhận", "Order của bạn");
+                }
 
             } else {
                 List<OrderItem> orderItems = orderItemRepository.findAllByOrder(order);
@@ -471,7 +474,14 @@ public class OrderService {
                 order.setOrderItems(orderItems);
                 order.setOrderExtraPortions(orderExtraPortions);
                 orderDTO = convertOrderToDTO(orderRepository.findById(order.getOrderId()).get());
+
+                pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(),
+                        "Order của bạn đã được nhân viên tiếp nhận");
+                notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
+                        "Order của bạn đã được nhân viên tiếp nhận", "Order của bạn");
+
             }
+
             return ResponseUtils.success(200, "Duyệt order thành công", orderDTO);
         } else {
             return ResponseUtils.fail(500, "Trạng thái order không hợp lệ", null);
@@ -654,6 +664,7 @@ public class OrderService {
             pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Order của bạn đã được hủy");
 
         }
+        notificationService.sendOrderCancel(order.getOrderId());
 
         return ResponseUtils.success(200, "Hủy thành công", null);
     }
@@ -678,9 +689,8 @@ public class OrderService {
 
         }
 
-        Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
         int isOpcciped = orderTableRepository.checkTalbeOccupied(switchOrderRequestDTO.getDestinationTable(),
-                twentyFourHoursAgo);
+                DateUtils.getDayBeforeTime(24));
         if (isOpcciped > 0) {
             return ResponseUtils.fail(201, "Bàn đã được đặt", null);
 
@@ -689,6 +699,7 @@ public class OrderService {
         ResponseDTO switchResposne = switchOrderTable(order.getOrderTables(), table);
         if (switchResposne.isSuccess()) {
             systemService.writeSystemLog(order.getOrderId(), "", null);
+            notificationService.sendSwitchTable(order.getOrderId(), table.getNumberTable());
             return ResponseUtils.success(200, "Đổi thành công", null);
 
         }
@@ -761,6 +772,7 @@ public class OrderService {
             pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Đã gửi yêu cầu thành toán");
 
         }
+        notificationService.sendOrderCheckout(order.getOrderId());
         return ResponseUtils.success(200, "Yêu cầu thanh toán thành công", convertOrderToDTO(order));
 
     }
@@ -848,15 +860,17 @@ public class OrderService {
             orderItemRepository.saveAll(orderItems);
             notificationService.sendOrderCreate(order.getOrderId());
 
-            if (order.getCustomer() != null) {
-                notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
-
-            }
-
             if (order.getVoucher() != null && order.getCustomer() != null) {
                 userVoucherRepository.deleteByUserIdAndVoucherId(order.getCustomer().getId(),
                         order.getVoucher().getId());
             }
+            if (order.getCustomer() != null) {
+                pushNotificationOrder(order.getCustomer().getId(),
+                        order.getOrderId(), "Đơn hàng của bạn đã thanh toán thành công");
+
+            }
+            notificationService.sendOrderComplete(order.getOrderId());
+
             OrderDTO orderDTO = convertOrderToDTO(order);
 
             return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
@@ -876,6 +890,11 @@ public class OrderService {
                 if (order.getVoucher() != null && order.getCustomer() != null) {
                     userVoucherRepository.deleteByUserIdAndVoucherId(order.getCustomer().getId(),
                             order.getVoucher().getId());
+                }
+                if (order.getCustomer() != null) {
+                    pushNotificationOrder(order.getCustomer().getId(),
+                            order.getOrderId(), "Đơn hàng của bạn đã được xác nhận thanh toán");
+
                 }
 
                 return ResponseUtils.success(201, "Xác nhận thanh toán thành công", orderDTO);
@@ -935,9 +954,15 @@ public class OrderService {
         notificationService.sendOrderCreate(order.getOrderId());
 
         if (order.getCustomer() != null) {
-            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+
+            pushNotificationOrder(order.getCustomer().getId(),
+                    order.getOrderId(), "Đơn hàng của bạn đã được thanh toán");
+
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
+                    "Đơn hàng của bạn đã thanh toán thành công", "Thanh toán thành công");
 
         }
+        notificationService.sendOrderComplete(order.getOrderId());
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Thanh toán order thành công", orderDTO);
@@ -962,6 +987,16 @@ public class OrderService {
         bill.setUpdateAt(new Date());
         billRepository.save(bill);
 
+        if (order.getCustomer() != null) {
+
+            pushNotificationOrder(order.getCustomer().getId(),
+                    order.getOrderId(), "Thanh toán bị hủy");
+
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
+                    "Thanh toán bị hủy", "Thanh toán bị hủy");
+
+        }
+        notificationService.sendOrderComplete(order.getOrderId());
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(400, "Thanh toán order đã bị hủy", orderDTO);
@@ -1207,9 +1242,12 @@ public class OrderService {
         notificationService.sendOrderCreate(order.getOrderId());
 
         if (order.getCustomer() != null) {
-            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
+                    "Order của bạn đã được cập nhật", "Order của bạn");
 
         }
+        notificationService.sendOrderupdate(order.getOrderId());
+
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Thêm mới thành công", orderDTO);
@@ -1293,9 +1331,12 @@ public class OrderService {
         notificationService.sendOrderCreate(order.getOrderId());
 
         if (order.getCustomer() != null) {
-            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer());
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
+                    "Order của bạn đã được cập nhật", "Order của bạn");
 
         }
+        notificationService.sendOrderupdate(order.getOrderId());
+
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(200, "Cập nhật thành công", orderDTO);
