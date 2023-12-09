@@ -62,7 +62,7 @@ public class WebSecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://fantastic-ui-five.vercel.app"));
+        configuration.setAllowedOrigins(List.of("https://fantastic-ui-five.vercel.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PUT", "OPTIONS", "PATCH", "DELETE"));
         configuration.setAllowCredentials(true);
         configuration.addAllowedHeader("*"); // Thêm dòng này
