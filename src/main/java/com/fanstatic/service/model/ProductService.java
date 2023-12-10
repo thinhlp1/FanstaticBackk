@@ -696,6 +696,20 @@ public class ProductService {
         return ResponseUtils.success(200, "Danh sách sản phẩm", reponseListDataDTO);
     }
 
+    public ResponseDTO showProductOrder() {
+        List<Product> products = productRepository.findAllSortedByCreateDateDescWithActiveCategories();
+        List<ResponseDataDTO> productDTOS = new ArrayList<>();
+
+        for (Product product : products) {
+            ProductDTO productDTO = (ProductDTO) detail(product.getId()).getData();
+            productDTOS.add(productDTO);
+        }
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+        reponseListDataDTO.setDatas(productDTOS);
+        reponseListDataDTO.setNameList("Danh sách sản phẩm");
+        return ResponseUtils.success(200, "Danh sách sản phẩm", reponseListDataDTO);
+    }
+
     public ResponseDTO getOptionShared() {
         List<OptionGroup> optionGroups = optionGroupRepository.findAllByShareIsTrue().orElse(null);
         List<ResponseDataDTO> optionGroupDTOs = new ArrayList<>();

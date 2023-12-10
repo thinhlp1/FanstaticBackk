@@ -80,12 +80,24 @@ public class RoleService {
 
     public ResponseDTO update(RoleRequestDTO roleRequestDTO) {
 
-        Role role = roleRepository.findById(roleRequestDTO.getId()).orElse(null);
-
+        Role role = roleRepository.findByIdAndActiveIsTrue(roleRequestDTO.getId()).orElse(null);
         if (role == null) {
-
             return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
+        }
 
+        switch (role.getId()) {
+            case ApplicationConst.CUSTOMER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là khách hàng. Không được chỉnh sửa", null);
+            case ApplicationConst.CASHIER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là thu ngân. Không được chỉnh sửa", null);
+            case ApplicationConst.ADNIN_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là admin. Không được chỉnh sửa", null);
+            case ApplicationConst.MANAGER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là quản lý. Không được chỉnh sửa", null);
+            case ApplicationConst.WAITER_ROLE_ID:
+                return ResponseUtils.fail(500, "Vai trò này là phục vụ. Không được chỉnh sửa", null);
+            default:
+                break;
         }
 
         List<FieldError> errors = new ArrayList<>();
@@ -217,6 +229,11 @@ public class RoleService {
         List<ResponseDataDTO> roleDTOS = new ArrayList<>();
 
         for (Role role : roles) {
+
+            if (role.getId() == ApplicationConst.CUSTOMER_ROLE_ID) {
+                continue;
+            }
+
             RoleDTO roleDTO = new RoleDTO();
             modelMapper.map(role, roleDTO);
 

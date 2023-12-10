@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 public class AuthenReponse extends ResponseDataDTO {
     private String token;
 
+    private String tokenPermission;
+
     private boolean needStartShift;
 
     private RoleDTO roleDTO;

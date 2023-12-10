@@ -1,6 +1,7 @@
 package com.fanstatic.service.authentication;
 
 import java.util.Date;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import com.fanstatic.dto.auth.ConfirmPasswordDTO;
 import com.fanstatic.dto.auth.LoginAccountDTO;
 import com.fanstatic.dto.auth.LoginDTO;
 import com.fanstatic.dto.auth.LoginPasswordDTO;
+import com.fanstatic.dto.model.permissioin.FeaturePermissionDTO;
 import com.fanstatic.dto.model.permissioin.RoleDTO;
 import com.fanstatic.model.Account;
 import com.fanstatic.model.User;
@@ -97,15 +99,21 @@ public class AuthenticationService {
             }
 
             String jwtToken = jwtUtil.generateToken(account);
+            String tokenData = rolePermissionService.getDataTokenRolePermisson(account.getRole().getId());
+            String tokenPermission = jwtUtil.generatePublicToken(tokenData);
+
             authenReponse.setToken(jwtToken);
+            authenReponse.setTokenPermission(tokenPermission);
             authenReponse.setRoleDTO(modelMapper.map(account.getRole(), RoleDTO.class));
             cookieUtils.set("token", jwtToken, 24);
+            // cookieUtils.set("tokenPermission", tokenPermission, 24);
             cookieUtils.set("needStartShift", authenReponse.isNeedStartShift() ? "true" : "false", 24);
             systemService.writeLoginLog(jwtToken, account.getUser());
             // return authenReponse;
             return ResponseUtils.success(200, "Đăng nhập thành công", authenReponse);
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseUtils.fail(500, "Có lỗi xảy ra khi đăng nhập", null);
 
         }
