@@ -30,14 +30,14 @@ public class WarehouseReceiveItemController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @GetMapping("/showbyflavorid")
+    @GetMapping("/show/byflavorid")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showByFlavor(@RequestParam(name = "flavorId") int flavorId) {
         ResponseDTO responseDTO = warehouseReceiveItemService.showByFlavorId(flavorId);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @GetMapping("/countbyflavorid")
+    @GetMapping("/show/countbyflavorid")
     @ResponseBody
     public int countByFlavorId(@RequestParam(name = "flavorId") int flavorId) {
         int flavorQuantity = warehouseReceiveItemService.countByFlavorId(flavorId);
