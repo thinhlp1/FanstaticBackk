@@ -7,4 +7,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateRequestStaffNotificationDTO {
     private String content;
+
+    private Integer orderId;
+
+    private Integer tableId;
+
 }

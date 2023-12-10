@@ -12,6 +12,10 @@ public interface CustomerRepository extends JpaRepository<User, Integer> {
 
     public Optional<List<User>> findAllByActiveIsTrue();
 
+    public Optional<List<User>> findAllByRoleIdAndActiveIsTrue(Integer id);
+    
+    public Optional<List<User>> findAllByRoleId(Integer id);
+
     public Optional<List<User>> findAllByActiveIsFalse();
 
     public Optional<User> findByIdAndActiveIsTrue(Integer id);

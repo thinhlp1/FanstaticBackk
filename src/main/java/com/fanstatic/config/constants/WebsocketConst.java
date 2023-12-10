@@ -71,4 +71,10 @@ public class WebsocketConst {
      */
     public static final String TOPIC_REQUEST_STAFF_DETAIL = TOPIC + "/request-staff/detail";
 
+    /*
+     * lắng nghe sự kiện khi có thông báo mới
+     * data : dữ liệu notification vừa tạo
+     */
+    public static final String TOPPIC_NOTIFICATION = TOPIC + "/notification";
+
 }

@@ -8,12 +8,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.auth.ChangePasswordDTO;
 import com.fanstatic.dto.auth.ConfirmOtpDTO;
 import com.fanstatic.dto.auth.LoginDTO;
+import com.fanstatic.service.model.NotificationService;
 import com.fanstatic.service.user.UserProfileService;
 import com.fanstatic.util.ResponseUtils;
 
@@ -26,11 +29,33 @@ import lombok.AllArgsConstructor;
 public class ProfileController {
 
     private final UserProfileService userProfileService;
+    private final NotificationService notificationService;
 
     @GetMapping("/user-profile")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showUserProfile() {
         ResponseDTO responseDTO = userProfileService.getUserProfile();
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/update/image")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile image) {
+        ResponseDTO reponseDTO = userProfileService.updateImage( image);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+    @GetMapping("/notification")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getNotification() {
+        ResponseDTO responseDTO = notificationService.getNotification();
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PutMapping("/seen/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> seen(@PathVariable("id") Integer id) {
+        ResponseDTO responseDTO = notificationService.seenNotification(id);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

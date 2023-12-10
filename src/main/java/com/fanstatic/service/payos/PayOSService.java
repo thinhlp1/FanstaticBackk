@@ -77,7 +77,7 @@ public class PayOSService {
         return data;
     }
 
-   public String getCheckoutUrl(int orderCode, Long amount, String description) {
+    public String getCheckoutUrl(int orderCode, Long amount, String description) {
         String url = checkoutUrl + "/v2/payment-requests";
 
         WebClient client = WebClient.builder()
@@ -94,8 +94,17 @@ public class PayOSService {
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
+        JSONObject jsonObject = new JSONObject(response);
+        String codeId = jsonObject.getString("code");
+        if (codeId.equals("00")) {
+            String reponseCheckoutUrl = jsonObject.getJSONObject("data").getString("checkoutUrl").toString();
+            System.out.println("URL: " + reponseCheckoutUrl);
 
-        return response;
+            return reponseCheckoutUrl;
+        } else {
+            System.out.println(jsonObject.toString());
+            return codeId;
+        }
     }
 
 }

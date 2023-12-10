@@ -39,6 +39,6 @@ public class Option {
 	@JoinColumn(name = "option_group_id")
 	private OptionGroup optionGroup;
 
-	private byte active;
+	private Byte active;
 
 }

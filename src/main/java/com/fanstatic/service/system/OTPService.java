@@ -20,8 +20,10 @@ public class OTPService {
 
     public boolean sendOTP() {
         String otp = OtpGenerator.generateOtp("otp");
-        String phone = "+84" +sessionUtils.get("numberPhone").toString().substring(1);
+        String phone = "+84" + sessionUtils.get("numberPhone").toString().substring(1);
         smsService.sendSMS( phone, "Mã xác nhận của bạn là: " + otp);
+        System.out.println("PHONE: " + phone);
+        System.out.println("OTP: " + otp);
         setOTP(otp);
         return true;
 
@@ -36,7 +38,7 @@ public class OTPService {
 
         OtpDTO otpDTO = new OtpDTO();
 
-        long expirationTimeMillis = new Date().getTime() + 60 * 1000;
+        long expirationTimeMillis = new Date().getTime() + 180 * 1000;
 
         otpDTO.setOtp(otp);
         otpDTO.setPhoneNumber(numberPhone);

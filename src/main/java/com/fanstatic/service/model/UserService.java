@@ -23,9 +23,12 @@ import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.account.AccountRequestDTO;
 import com.fanstatic.dto.model.user.UserDTO;
 import com.fanstatic.dto.model.user.UserRequestDTO;
+import com.fanstatic.dto.model.user.UserUpdateRequestDTO;
 import com.fanstatic.model.User;
+import com.fanstatic.model.Account;
 import com.fanstatic.model.File;
 import com.fanstatic.model.User;
+import com.fanstatic.repository.AccountRepository;
 import com.fanstatic.repository.UserRepository;
 import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.SystemService;
@@ -40,6 +43,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final SystemService systemService;
     private final FileService fileService;
+    private final AccountRepository accountRepository;
 
     @Autowired
     @Lazy
@@ -107,10 +111,12 @@ public class UserService {
         }
     }
 
-    public ResponseDTO update(UserRequestDTO userRequestDTO) {
+    public ResponseDTO update(UserUpdateRequestDTO userRequestDTO) {
         List<FieldError> errors = new ArrayList<>();
 
         User user = userRepository.findByIdAndActiveIsTrue(userRequestDTO.getId()).orElse(null);
+        Account account = accountRepository.findByUserId(userRequestDTO.getId()).orElse(null);
+      
         if (user == null) {
             return ResponseUtils.fail(500, "User không tồn tại", null);
 
@@ -138,9 +144,8 @@ public class UserService {
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }
-
+    
         modelMapper.map(userRequestDTO, user);
-
         user.setRole(roleService.getById(userRequestDTO.getRoleId()));
         user.setActive(DataConst.ACTIVE_TRUE);
         user.setUpdateAt(new Date());
@@ -148,9 +153,8 @@ public class UserService {
 
         User userSaved = userRepository.save(user);
         if (userSaved != null) {
-
             ResponseDTO accountReponse = accountService
-                    .update(new AccountRequestDTO(user.getNumberPhone(), userRequestDTO.getPassword(),
+                    .update(new AccountRequestDTO(user.getNumberPhone(), account.getPassword(),
                             userRequestDTO.getRoleId(), user.getId()));
             if (accountReponse.isSuccess()) {
                 systemService.writeSystemLog(user.getId(), userSaved.getName(), null);
@@ -159,7 +163,7 @@ public class UserService {
                 return ResponseUtils.fail(accountReponse.getStatusCode(), accountReponse.getMessage(), null);
 
             }
-
+           
         } else {
             return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
 

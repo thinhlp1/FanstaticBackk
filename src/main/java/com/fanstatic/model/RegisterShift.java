@@ -48,8 +48,8 @@ public class RegisterShift  {
 	private Shift shift;
 
 	// bi-directional many-to-one association to ShiftHandover
-	@OneToMany(mappedBy = "registerShift")
-	private List<ShiftHandover> shiftHandovers;
+	// @OneToMany(mappedBy = "registerShift")
+	// private List<ShiftHandover> shiftHandovers;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "update_at")
