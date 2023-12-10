@@ -46,6 +46,8 @@ public class WarehouseReceiveService {
 
     private final WarehouseReceiveItemService warehouseReceiveItemService;
 
+    private final WarehouseService warehouseService;
+
     private final SystemService systemService;
     private final UserRepository userRepository;
 
@@ -77,7 +79,7 @@ public class WarehouseReceiveService {
             // Tiếp tục lưu hình ảnh vào Firebase và bảng file
             // save image to Firebase and file table
         }
-        
+
         warehouseReceive.setSupplier(supplier);
         warehouseReceive.setCancelReason("");
         warehouseReceive.setActive(DataConst.ACTIVE_TRUE);
@@ -106,70 +108,6 @@ public class WarehouseReceiveService {
         return ResponseUtils.fail(500, MessageConst.ADD_FAIL, null);
     }
 
-//    public ResponseDTO update(WarehouseReceiveRequestDTO warehouseReceiveRequestDTO) {
-//        //Chúng ta đã có id của extra portion -> tìm extra portion bằng id đó
-//        WarehouseReceive warehouseReceive = warehouseReceiveRepository.findByIdAndActiveIsTrue(warehouseReceiveRequestDTO.getId()).orElse(null);
-//        Supplier supplier = supplierRepository.findByIdAndActiveIsTrue(warehouseReceiveRequestDTO.getSupplierId()).orElse(null);
-////        File fileImage = fileRepository.findByIdAndActiveIsTrue(extraPortionRequestDTO.getImageId()).orNull();
-//        //Nếu warehouseReceive không tồn tại thì nó sẽ lỗi 401
-//        if (warehouseReceive == null) {
-//            return ResponseUtils.fail(401, "Phiếu nhập hàng không tồn tại", null);
-//        }
-//
-//        //Tạo 1 list để lưu trữ lỗi, khi thông báo lỗi thì truyền nó lên -> mục đích để thông báo lỗi 1 lượt
-//        List<FieldError> errors = new ArrayList<>();
-//
-//        //Bắt lỗi extra portion Code đã tồn tại
-//        if (warehouseReceiveRepository.findByDescriptionAndActiveIsTrue(warehouseReceiveRequestDTO.getDescription()).isPresent()) {
-//            errors.add(new FieldError("warehouseReceiveRequestDTO", "description", "Diễn giải đã tồn tại"));
-//        }
-//
-//        // Nếu có lỗi, ném ra một lượt với danh sách lỗi
-//        if (!errors.isEmpty()) {
-//            throw new ValidationException(errors);
-//        }
-//
-//        modelMapper.map(warehouseReceiveRequestDTO, warehouseReceive);
-//        warehouseReceive.setSupplier(supplier);
-//        warehouseReceive.setActive(DataConst.ACTIVE_TRUE);
-//        warehouseReceive.setUpdateAt(new Date());
-//        warehouseReceive.setUpdateBy(systemService.getUserLogin());
-//        WarehouseReceive warehouseReceiveSaved = warehouseReceiveRepository.save(warehouseReceive);
-//
-//        if (warehouseReceiveSaved != null) {
-//            systemService.writeSystemLog(warehouseReceiveSaved.getId(), warehouseReceiveSaved.getDescription(), null);
-//            //Mã 200 là thêm thành công (Khi success thì không truyền data nào để return cho json cả mà chỉ thông báo thành công)
-//            return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
-//        }
-//        return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
-//    }
-//
-//    public ResponseDTO updateImage(int id, MultipartFile imageFile) {
-//        WarehouseReceive warehouseReceive = warehouseReceiveRepository.findByIdAndActiveIsTrue(id).orElse(null);
-//        if (warehouseReceive == null) {
-//            return ResponseUtils.fail(404, "Phiếu nhập hàng không tồn tại", null);
-//        }
-//        // check image
-//        if (imageFile != null) {
-//            if (warehouseReceive.getImageFile() != null) {
-//
-//                fileService.deleteFireStore(warehouseReceive.getImageFile().getName());
-//                fileService.updateFile(imageFile, ImageConst.EXTRA_PORTION_FOLDER, warehouseReceive.getImageFile());
-//            } else {
-//                File file = fileService.upload(imageFile, ImageConst.EXTRA_PORTION_FOLDER);
-//                warehouseReceive.setImageFile(file);
-//            }
-//            System.out.println(warehouseReceive.getImageFile());
-//            WarehouseReceive warehouseReceiveSaved = warehouseReceiveRepository.save(warehouseReceive);
-//            if (warehouseReceiveSaved != null) {
-//                systemService.writeSystemLog(warehouseReceiveSaved.getId(), warehouseReceiveSaved.getDescription(), null);
-//                return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
-//            } else {
-//                return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
-//            }
-//        }
-//        return ResponseUtils.fail(200, "UploadImage", null);
-//    }
 
     public ResponseDTO delete(int id, WarehouseReceiveRequestDeleteDTO warehouseReceiveRequestDeleteDTO) {
 
