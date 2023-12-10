@@ -105,7 +105,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // ResponseUtils.setResponseDTOToHttpResponse(response,
                 // ResponseUtils.fail(498, "Token không hơp lệ", null));
                 e.printStackTrace();
-                System.out.println("sdfsd");
 
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
