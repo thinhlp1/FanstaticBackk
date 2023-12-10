@@ -24,7 +24,7 @@ public class WarehouseDeliverController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @PutMapping("/delete/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id, @RequestBody WarehouseDeliverRequestDeleteDTO warehouseDeliverRequestDeleteDTO) {
         ResponseDTO responseDTO = warehouseDeliverService.delete(id, warehouseDeliverRequestDeleteDTO);
@@ -49,6 +49,20 @@ public class WarehouseDeliverController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> detail(@PathVariable("id") int id) {
         ResponseDTO responseDTO = warehouseDeliverService.detail(id);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/show/reason")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showReason(@RequestParam(name = "active") int active) {
+        ResponseDTO responseDTO = warehouseDeliverService.showReason(active);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/show/solution")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showSolution(@RequestParam(name = "active") int active) {
+        ResponseDTO responseDTO = warehouseDeliverService.showSolution(active);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 }

@@ -221,4 +221,94 @@ public class WarehouseDeliverService {
         }
         return ResponseUtils.success(200, "Chi tiết phiếu nhập hàng", warehouseDeliverDTO);
     }
+
+    public ResponseDTO showReason(int active) {//truyền tham số active vào để show list voucher dựa vào trạng thái
+        //Tạo 1 list voucher mới chưa có dữ liệu
+        List<WarehouseDeliverReason> warehouseDeliverReasonList = new ArrayList<>();
+
+        //Dựa vào biến active mà sẽ cho hiển thị list voucher mong muốn
+        switch (active) {
+            case RequestParamConst.ACTIVE_ALL:
+                warehouseDeliverReasonList = warehouseDeliverReasonRepository.findAll();
+                break;
+            case RequestParamConst.ACTIVE_FALSE:
+                warehouseDeliverReasonList = warehouseDeliverReasonRepository.findAllByActiveIsFalse().orElse(warehouseDeliverReasonList);
+                break;
+            case RequestParamConst.ACTIVE_TRUE:
+                warehouseDeliverReasonList = warehouseDeliverReasonRepository.findAllByActiveIsTrue().orElse(warehouseDeliverReasonList);
+                break;
+            default:
+                warehouseDeliverReasonList = warehouseDeliverReasonRepository.findAll();
+                break;
+        }
+//        Bắt đầu từ đoạn này chủ yếu để cấu hình cho json trả về theo dạng nào
+        //Tạo 1 list voucher dto chưa có dữ liệu
+        List<ResponseDataDTO> warehouseDeliverReasonDTOList = new ArrayList<>();
+
+        //Lập qua vòng for này để map dữ liệu voucher vào voucherDTO
+        for (WarehouseDeliverReason warehouseDeliverReason : warehouseDeliverReasonList) {
+            WarehouseDeliverReasonDTO warehouseDeliverReasonDTO = new WarehouseDeliverReasonDTO();
+            modelMapper.map(warehouseDeliverReason, warehouseDeliverReasonDTO);
+            warehouseDeliverReasonDTOList.add(warehouseDeliverReasonDTO);
+        }
+
+        //Tạo 1 đối tượng respones list data mới
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+
+        /*Trong đối tượng response list data sẽ có thuộc tính "datas"
+        -> nên ta set cho nó bằng list voucherDtos vừa có lúc nãy
+         */
+        reponseListDataDTO.setDatas(warehouseDeliverReasonDTOList);
+
+        /*
+        Trong đối tượng response util chứa method success.
+        Tại sao lại truyền responseListDataDTO vào?
+         */
+        return ResponseUtils.success(200, "Danh sách lý do xuất kho", reponseListDataDTO);
+    }
+
+    public ResponseDTO showSolution(int active) {//truyền tham số active vào để show list voucher dựa vào trạng thái
+        //Tạo 1 list voucher mới chưa có dữ liệu
+        List<WarehouseDeliverSolution> warehouseDeliverSolutionList = new ArrayList<>();
+
+        //Dựa vào biến active mà sẽ cho hiển thị list voucher mong muốn
+        switch (active) {
+            case RequestParamConst.ACTIVE_ALL:
+                warehouseDeliverSolutionList = warehouseDeliverSolutionRepository.findAll();
+                break;
+            case RequestParamConst.ACTIVE_FALSE:
+                warehouseDeliverSolutionList = warehouseDeliverSolutionRepository.findAllByActiveIsFalse().orElse(warehouseDeliverSolutionList);
+                break;
+            case RequestParamConst.ACTIVE_TRUE:
+                warehouseDeliverSolutionList = warehouseDeliverSolutionRepository.findAllByActiveIsTrue().orElse(warehouseDeliverSolutionList);
+                break;
+            default:
+                warehouseDeliverSolutionList = warehouseDeliverSolutionRepository.findAll();
+                break;
+        }
+//        Bắt đầu từ đoạn này chủ yếu để cấu hình cho json trả về theo dạng nào
+        //Tạo 1 list voucher dto chưa có dữ liệu
+        List<ResponseDataDTO> warehouseDeliverSolutionDTOList = new ArrayList<>();
+
+        //Lập qua vòng for này để map dữ liệu voucher vào voucherDTO
+        for (WarehouseDeliverSolution warehouseDeliverSolution : warehouseDeliverSolutionList) {
+            WarehouseDeliverSolutionDTO warehouseDeliverSolutionDTO = new WarehouseDeliverSolutionDTO();
+            modelMapper.map(warehouseDeliverSolution, warehouseDeliverSolutionDTO);
+            warehouseDeliverSolutionDTOList.add(warehouseDeliverSolutionDTO);
+        }
+
+        //Tạo 1 đối tượng respones list data mới
+        ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
+
+        /*Trong đối tượng response list data sẽ có thuộc tính "datas"
+        -> nên ta set cho nó bằng list voucherDtos vừa có lúc nãy
+         */
+        reponseListDataDTO.setDatas(warehouseDeliverSolutionDTOList);
+
+        /*
+        Trong đối tượng response util chứa method success.
+        Tại sao lại truyền responseListDataDTO vào?
+         */
+        return ResponseUtils.success(200, "Danh sách giải pháp xuất kho", reponseListDataDTO);
+    }
 }
