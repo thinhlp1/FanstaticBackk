@@ -24,7 +24,7 @@ public class WarehouseInventoryController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @PutMapping("/delete/{id}")
     @ResponseBody
     public ResponseEntity<ResponseDTO> delete(@PathVariable("id") int id, @RequestBody WarehouseInventoryRequestDeleteDTO warehouseInventoryRequestDeleteDTO) {
         ResponseDTO responseDTO = warehouseInventoryService.delete(id, warehouseInventoryRequestDeleteDTO);

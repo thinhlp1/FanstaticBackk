@@ -13,7 +13,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class WarehouseInventoryRequestDTO {
-    private int id;
 
     @NotNull(message = "{NotNull.warehouseInventory.flavorCategoryId}")
     private int flavorCategoryId;
@@ -24,7 +23,5 @@ public class WarehouseInventoryRequestDTO {
     @Future(message = "{Future.warehouseInventory.toDate}")
     private Date toDate;
 
-    private boolean active;
-    
     List<WarehouseInventoryItemRequestDTO> warehouseInventoryItemRequestDTOList;
 }
