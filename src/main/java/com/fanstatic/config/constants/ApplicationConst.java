@@ -10,6 +10,11 @@ public class ApplicationConst {
     public static final int MANAGER_ROLE_ID = 4;
     public static final int WAITER_ROLE_ID = 5;
 
+    public static final String ADMIN_ROUTE = "/admin";
+    public static final String CASHIER_ROUTE = "/cashier";
+    public static final String WAITER_ROUTE = "/waiter";
+    public static final String CUSTOMER_ROUTE = "/customer";
+
     public static class PaymentMethod {
         public static final String CASH = "CASH";
         public static final String INTERNET_BANKING = "INTERNET_BANKING";

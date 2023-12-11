@@ -37,8 +37,8 @@ public class NotificationService {
 
     private final ModelMapper modelMapper;
 
-    private final String DETAIL_TO_ORDER = "/manage-order?id=";
-    private final String DETAILS_TO_MY_ORDER = "/myorder?id=";
+    private final String DETAIL_TO_ORDER = "/staff/manage-order?id=";
+    private final String DETAILS_TO_MY_ORDER = "customer/myorder?id=";
 
     public ResponseDTO seenNotification(Integer id) {
         Notification notification = notificationRepository.findById(id).orElse(null);
