@@ -51,4 +51,10 @@ public class Notification {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "seen_at")
     private Date seenAt;
+
+    private String type;
+
+    @Column(name = "object_id")
+    private String objectId;
+
 }

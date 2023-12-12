@@ -62,6 +62,11 @@ public class RolePermissionService {
             return ResponseUtils.fail(404, "Vai trò không tồn tại", null);
         }
 
+        if (role.getId() == ApplicationConst.CUSTOMER_ROLE_ID || role.getId() == ApplicationConst.ADNIN_ROLE_ID) {
+            return ResponseUtils.fail(500, "Vai trò này không được thay đổi", null);
+
+        }
+
         List<Integer> featurePermissionIdsToAdd = setRolePermissionDTO.getFeaturePermissionsId();
         RolePermissionDTO rolePermissionDTO = (RolePermissionDTO) (getRolePermisson(setRolePermissionDTO.getRoleId())
                 .getData());

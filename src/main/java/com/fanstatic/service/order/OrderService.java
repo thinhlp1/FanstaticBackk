@@ -198,10 +198,9 @@ public class OrderService {
     }
 
     public ResponseDTO checkUserHasOrder() {
-        Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)); // Tính thời điểm 24 giờ
 
         User customer = systemService.getUserLogin();
-        List<Order> orders = orderRepository.findOrderUser(customer.getId(), twentyFourHoursAgo).orNull();
+        List<Order> orders = orderRepository.findOrderUser(customer.getId(), DateUtils.getDayBeforeTime(24)).orNull();
 
         if (orders == null || orders.isEmpty()) {
             return ResponseUtils.fail(202, "Không có order", null);
@@ -252,7 +251,37 @@ public class OrderService {
             customerDTO.setImageUrl(imageUrl);
         }
 
-        return ResponseUtils.success(200, "Chi tiết khách hàng", customerDTO);
+        List<Order> orders = orderRepository.findOrderUser(customer.getId(), DateUtils.getDayBeforeTime(24)).orNull();
+
+        if (orders == null || orders.isEmpty()) {
+            return ResponseUtils.success(200, "Chi tiết khách hàng", customerDTO);
+
+        }
+
+        List<ResponseDataDTO> orderDTOs = new ArrayList<>();
+        for (Order order : orders) {
+
+            if (order.getRootOrder() != null) {
+                if ((order.getStatus().getId().equals(ApplicationConst.OrderStatus.CONFIRMING)
+                        || order.getStatus().getId().equals(ApplicationConst.OrderStatus.CANCEL))) {
+
+                    OrderDTO orderDTO = convertOrderToDTO(order);
+                    orderDTOs.add(orderDTO);
+                }
+
+            } else {
+
+                OrderDTO orderDTO = convertOrderToDTO(order);
+                orderDTOs.add(orderDTO);
+            }
+
+        }
+
+        ResponseListDataDTO ordersDTO = new ResponseListDataDTO();
+        ordersDTO.setDatas(orderDTOs);
+        ordersDTO.setNameList("Danh sách order của khách hàng");
+
+        return ResponseUtils.success(201, "Khách hàng có order ", ordersDTO);
 
     }
 
@@ -306,8 +335,18 @@ public class OrderService {
             }
 
         } else {
-            order.setCustomer(systemService.getUserLogin());
+            if (systemService.getUserLogin().getRole().getId() == ApplicationConst.CUSTOMER_ROLE_ID) {
+                order.setCustomer(systemService.getUserLogin());
 
+            }
+
+            if (orderRequestDTO.getCustomerId() != null) {
+                User user = userRepository.findByIdAndActiveIsTrue(orderRequestDTO.getCustomerId()).orElse(null);
+                if (user == null) {
+                    return ResponseUtils.fail(500, "Customer không tồn tại", null);
+                }
+                order.setCustomer(user);
+            }
         }
         order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.CONFIRMING).get());
         order.setTotal(total(orderRequestDTO));
@@ -357,8 +396,10 @@ public class OrderService {
         if (isStaffCreateOrderAndConfirm()) {
             confirm(orderSaved.getOrderId());
         } else {
-            pushNotificationOrder(order.getCustomer().getId(), orderSaved.getOrderId(),
-                    "Order của bạn đã được gửi cho nhân viên");
+            if (order.getCustomer() != null) {
+                pushNotificationOrder(order.getCustomer().getId(), orderSaved.getOrderId(),
+                        "Order của bạn đã được gửi cho nhân viên");
+            }
         }
 
         notificationService.sendOrderCreate(order.getOrderId());
@@ -475,10 +516,12 @@ public class OrderService {
                 order.setOrderExtraPortions(orderExtraPortions);
                 orderDTO = convertOrderToDTO(orderRepository.findById(order.getOrderId()).get());
 
-                pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(),
-                        "Order của bạn đã được nhân viên tiếp nhận");
-                notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
-                        "Order của bạn đã được nhân viên tiếp nhận", "Order của bạn");
+                if (order.getCustomer() != null) {
+                    pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(),
+                            "Order của bạn đã được nhân viên tiếp nhận");
+                    notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
+                            "Order của bạn đã được nhân viên tiếp nhận", "Order của bạn");
+                }
 
             }
 
@@ -2204,6 +2247,9 @@ public class OrderService {
             if (orderItemDTO.getOptionsId() != null) {
                 for (Integer optionId : orderItemDTO.getOptionsId()) {
                     OrderItemOption orderItemOption = new OrderItemOption();
+                    if (optionId == null){
+                        continue;
+                    }
                     Option option = optionRepository.findById(optionId).orElse(null);
                     if (option == null) {
                         return ResponseUtils.fail(500, "Option không tồn tại", null);
@@ -2597,9 +2643,11 @@ public class OrderService {
         long totalOption = 0;
         if (orderItemDTO.getOptionsId() != null) {
             for (Integer optionId : orderItemDTO.getOptionsId()) {
-                Option option = optionRepository.findById(optionId).get();
+                if (optionId != null) {
+                    Option option = optionRepository.findById(optionId).get();
 
-                totalOption += option.getPrice();
+                    totalOption += option.getPrice();
+                }
             }
 
         }
@@ -3234,6 +3282,10 @@ public class OrderService {
 
     public boolean isStaffCreateOrderAndConfirm() {
         User user = systemService.getUserLogin();
+        if (user.getRole().getId() == ApplicationConst.CUSTOMER_ROLE_ID) {
+            return false;
+        }
+
         boolean hasPermission = rolePermissionService.checkUserRolePermission(user.getRole().getId(), "PURCHASE_ORDER",
                 "CONFIRM");
         return hasPermission;

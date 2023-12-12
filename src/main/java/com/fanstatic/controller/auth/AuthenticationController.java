@@ -25,6 +25,13 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
+    @GetMapping
+    @ResponseBody
+     public ResponseEntity<ResponseDTO> checkRolePerssion(@RequestBody String feRoute) {
+        // ResponseDTO reponseDTO = authenticationService.login(loginDTO);
+        // return ResponseUtils.returnReponsetoClient(reponseDTO);
+        return null;
+    }
     @PostMapping("/employee/login")
     @ResponseBody
     public ResponseEntity<ResponseDTO> login(@RequestBody LoginAccountDTO loginDTO) {

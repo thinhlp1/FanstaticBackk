@@ -31,4 +31,8 @@ public class NotificationDTO extends ResponseDataDTO {
 
     private UserCompactDTO sender;
 
+    private String type;
+
+    private String objectId;
+
 }
