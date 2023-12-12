@@ -904,8 +904,12 @@ public class OrderService {
             notificationService.sendOrderCreate(order.getOrderId());
 
             if (order.getVoucher() != null && order.getCustomer() != null) {
-                userVoucherRepository.deleteByUserIdAndVoucherId(order.getCustomer().getId(),
-                        order.getVoucher().getId());
+                UserVoucher userVoucher = userVoucherRepository.findBbyUserIdAndVoucherId(order.getCustomer().getId(),
+                        order.getVoucher().getId()).orElse(null);
+                if (userVoucher != null) {
+                    userVoucher.setUseAt(new Date());
+                    userVoucherRepository.save(userVoucher);
+                }
             }
             if (order.getCustomer() != null) {
                 pushNotificationOrder(order.getCustomer().getId(),
@@ -931,8 +935,15 @@ public class OrderService {
 
                 OrderDTO orderDTO = convertOrderToDTO(order);
                 if (order.getVoucher() != null && order.getCustomer() != null) {
-                    userVoucherRepository.deleteByUserIdAndVoucherId(order.getCustomer().getId(),
-                            order.getVoucher().getId());
+                    UserVoucher userVoucher = userVoucherRepository
+                            .findBbyUserIdAndVoucherId(order.getCustomer().getId(),
+                                    order.getVoucher().getId())
+                            .orElse(null);
+                    if (userVoucher != null) {
+                        userVoucher.setUseAt(new Date());
+                        userVoucherRepository.save(userVoucher);
+
+                    }
                 }
                 if (order.getCustomer() != null) {
                     pushNotificationOrder(order.getCustomer().getId(),
@@ -2247,7 +2258,7 @@ public class OrderService {
             if (orderItemDTO.getOptionsId() != null) {
                 for (Integer optionId : orderItemDTO.getOptionsId()) {
                     OrderItemOption orderItemOption = new OrderItemOption();
-                    if (optionId == null){
+                    if (optionId == null) {
                         continue;
                     }
                     Option option = optionRepository.findById(optionId).orElse(null);

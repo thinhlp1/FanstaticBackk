@@ -41,4 +41,8 @@ public class UserVoucher {
     @ManyToOne
     @JoinColumn(name = "voucher_id")
     private Voucher voucher;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "use_at")
+    private Date useAt;
 }
