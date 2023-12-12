@@ -45,4 +45,7 @@ public class ApplicationConst {
 
     }
 
+    public static String[] CUSTOMER_PERMISSION = { "CUSTOMER_ORDER" };
+    // public static String[]
+
 }

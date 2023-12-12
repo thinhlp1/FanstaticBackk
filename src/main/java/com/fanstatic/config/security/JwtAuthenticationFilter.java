@@ -61,6 +61,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             username = jwtUtil.extractUsername(jwt);
         } catch (Exception e) {
+            System.out.println("Ấ");
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -102,6 +104,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 // ResponseUtils.setResponseDTOToHttpResponse(response,
                 // ResponseUtils.fail(498, "Token không hơp lệ", null));
+                e.printStackTrace();
+
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;

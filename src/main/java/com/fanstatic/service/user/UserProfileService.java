@@ -240,6 +240,7 @@ public class UserProfileService {
 
         Voucher voucher = voucherRepository.findByIdAndActiveIsTrue(voucherId).orElse(null);
         if (voucher == null) {
+            System.out.println(voucherId);
             return ResponseUtils.fail(404, "Voucher không tồn tại", null);
         }
 
