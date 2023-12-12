@@ -346,7 +346,6 @@ public class OrderService {
                     return ResponseUtils.fail(500, "Customer không tồn tại", null);
                 }
                 order.setCustomer(user);
-                order.setEmployeeConfirmed(systemService.getUserLogin());
             }
         }
         order.setStatus(statusRepository.findById(ApplicationConst.OrderStatus.CONFIRMING).get());
@@ -517,10 +516,12 @@ public class OrderService {
                 order.setOrderExtraPortions(orderExtraPortions);
                 orderDTO = convertOrderToDTO(orderRepository.findById(order.getOrderId()).get());
 
-                pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(),
-                        "Order của bạn đã được nhân viên tiếp nhận");
-                notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
-                        "Order của bạn đã được nhân viên tiếp nhận", "Order của bạn");
+                if (order.getCustomer() != null) {
+                    pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(),
+                            "Order của bạn đã được nhân viên tiếp nhận");
+                    notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
+                            "Order của bạn đã được nhân viên tiếp nhận", "Order của bạn");
+                }
 
             }
 
@@ -2246,6 +2247,9 @@ public class OrderService {
             if (orderItemDTO.getOptionsId() != null) {
                 for (Integer optionId : orderItemDTO.getOptionsId()) {
                     OrderItemOption orderItemOption = new OrderItemOption();
+                    if (optionId == null){
+                        continue;
+                    }
                     Option option = optionRepository.findById(optionId).orElse(null);
                     if (option == null) {
                         return ResponseUtils.fail(500, "Option không tồn tại", null);
@@ -2639,9 +2643,11 @@ public class OrderService {
         long totalOption = 0;
         if (orderItemDTO.getOptionsId() != null) {
             for (Integer optionId : orderItemDTO.getOptionsId()) {
-                Option option = optionRepository.findById(optionId).get();
+                if (optionId != null) {
+                    Option option = optionRepository.findById(optionId).get();
 
-                totalOption += option.getPrice();
+                    totalOption += option.getPrice();
+                }
             }
 
         }
