@@ -51,6 +51,13 @@ public class ApplicationConst {
     }
 
     public static String[] CUSTOMER_PERMISSION = { "CUSTOMER_ORDER" };
-    // public static String[]
+
+    public static class NotificationType {
+        public static final String ORDER = "ORDER";
+        public static final String OUTOFSTOCK = "OUTOFSTOCK";
+        public static final String CUSTOMER_SALE = "CUSTOMER_SALE";
+        public static final String ORDER_NO_ACTION = "ORDER_NO_ACTION";
+
+    }
 
 }
