@@ -12,32 +12,39 @@ import org.springframework.data.repository.query.Param;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
-    public Optional<Product> findByCodeAndActiveIsTrue(String code);
+        public Optional<Product> findByCodeAndActiveIsTrue(String code);
 
-    public Optional<List<Product>> findAllByActiveIsTrue();
+        public Optional<List<Product>> findAllByActiveIsTrue();
 
-    public Optional<List<Product>> findAllByActiveIsFalse();
+        public Optional<List<Product>> findAllByActiveIsFalse();
 
-    public Optional<Product> findByIdAndActiveIsFalse(int id);
+        public Optional<Product> findByIdAndActiveIsFalse(int id);
 
-    public Optional<Product> findByIdAndActiveIsTrue(int id);
+        public Optional<Product> findByIdAndActiveIsTrue(int id);
 
-    public Optional<Product> findByNameAndActiveIsTrue(String name);
+        public Optional<Product> findByNameAndActiveIsTrue(String name);
 
-    public Optional<Product> findByCodeAndActiveIsTrueAndIdNot(String code, Integer id);
+        public Optional<Product> findByCodeAndActiveIsTrueAndIdNot(String code, Integer id);
 
-    public Optional<Product> findByNameAndActiveIsTrueAndIdNot(String code, Integer id);
+        public Optional<Product> findByNameAndActiveIsTrueAndIdNot(String code, Integer id);
 
-    @Query("SELECT COUNT(r) FROM Product r WHERE r.code = :code")
-    public int countByCode(@Param("code") String code);
+        @Query("SELECT COUNT(r) FROM Product r WHERE r.code = :code")
+        public int countByCode(@Param("code") String code);
 
-    @Query("SELECT COALESCE(SUM(oi.quantity), 0) " +
-            "FROM OrderItem oi " +
-            "WHERE oi.order.status.id = 'COMPLETE' " +
-            "AND oi.product.id = :productId")
-    Integer countSoldQuantityByProductId(@Param("productId") Integer productId);
+        @Query("SELECT COALESCE(SUM(oi.quantity), 0) " +
+                        "FROM OrderItem oi " +
+                        "WHERE oi.order.status.id = 'COMPLETE' " +
+                        "AND oi.product.id = :productId")
+        Integer countSoldQuantityByProductId(@Param("productId") Integer productId);
 
-   // Tìm tất cả sản phẩm có một category cụ thể và active là true
-   List<Product> findByProductCategoriesCategoryAndActiveIsTrue(Category category);
+        // Tìm tất cả sản phẩm có một category cụ thể và active là true
+        List<Product> findByProductCategoriesCategoryAndActiveIsTrue(Category category);
+
+        @Query("SELECT p FROM Product p " +
+                        "JOIN FETCH p.productCategories pc " +
+                        "JOIN FETCH pc.category c " +
+                        "WHERE c.active = 1 " +
+                        "ORDER BY p.createAt DESC")
+        List<Product> findAllSortedByCreateDateDescWithActiveCategories();
 
 }

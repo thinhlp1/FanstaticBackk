@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class WarehouseDeliverSolutionRequestDTO {
-    private int id;
 
     @NotBlank(message = "{NotBlank.warehouseDeliverSolution.solution}")
     private String solution;
@@ -17,7 +16,6 @@ public class WarehouseDeliverSolutionRequestDTO {
 
     private String description;
 
-    private byte active;
 
 //    List<WarehouseReceiveItemRequestDTO> warehouseReceiveItemRequestDTOList;
 }
