@@ -27,6 +27,7 @@ import com.fanstatic.repository.OrderRepository;
 import com.fanstatic.repository.UserRepository;
 import com.fanstatic.service.order.OrderService;
 import com.fanstatic.service.system.SystemService;
+import com.fanstatic.util.DateUtils;
 import com.fanstatic.util.ResponseUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -255,6 +256,12 @@ public class NotificationService {
             wsPurcharseOrderController.sendWebSocketResponse(notificationDTO,
                     WebsocketConst.TOPPIC_NOTIFICATION + "/" + notification2.getReceiver().getId());
         }
+    }
+
+    public void cleareNotification() {
+        Date date = DateUtils.getDateBefore(30);
+        notificationRepository.deleteBySeenAtBefore(date);
+
     }
 
 }
