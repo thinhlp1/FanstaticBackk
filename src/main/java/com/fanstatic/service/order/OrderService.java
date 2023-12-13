@@ -705,6 +705,8 @@ public class OrderService {
         systemService.writeSystemLog(order.getOrderId(), "", null);
         if (order.getCustomer() != null) {
             pushNotificationOrder(order.getCustomer().getId(), order.getOrderId(), "Order của bạn đã được hủy");
+            notificationService.sendCustomerOrder(order.getOrderId(), order.getCustomer(),
+                    "Order của bạn bị hủy", "Order của bạn");
 
         }
         notificationService.sendOrderCancel(order.getOrderId());

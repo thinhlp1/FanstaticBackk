@@ -22,12 +22,14 @@ public interface OrderTableRepository extends JpaRepository<OrderTable, Integer>
         @Query("SELECT COUNT(o) FROM OrderTable o " +
                         "WHERE o.table.id = :tableId " +
                         "AND o.order.status.id <> 'COMPLETE' " +
+                        "AND o.order.status.id <> 'CANCEL' " +
                         "AND o.order.createAt >= :time")
         public int checkTalbeOccupied(@Param("tableId") int tableId, Date time);
 
         @Query("SELECT o.order FROM OrderTable o " +
                         "WHERE o.table.id = :tableId " +
                         "AND o.order.status.id <> 'COMPLETE' " +
+                        "AND o.order.status.id <> 'CANCEL' " +
                         "AND o.order.createAt >= :time")
         public Optional<Order> findOrderOnTable(@Param("tableId") int tableId, Date time);
 
