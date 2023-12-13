@@ -50,7 +50,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT o FROM Order o " +
             "WHERE (o.status.id = 'AWAIT_CHECKOUT' " +
             "OR o.status.id = 'PROCESSING' " +
-            "OR o.status.id = 'CANCEL' " +
             "OR o.status.id = 'CONFIRMING') " +
             "AND o.customer.id = :customerId " +
             "AND o.createAt >= :time")

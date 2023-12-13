@@ -708,8 +708,8 @@ public class OrderService {
 
         }
         notificationService.sendOrderCancel(order.getOrderId());
-
-        return ResponseUtils.success(200, "Hủy thành công", null);
+        OrderDTO orderDTO = convertOrderToDTO(order);
+        return ResponseUtils.success(202, "Hủy thành công", orderDTO);
     }
 
     public ResponseDTO switchOrder(SwitchOrderRequestDTO switchOrderRequestDTO) {
