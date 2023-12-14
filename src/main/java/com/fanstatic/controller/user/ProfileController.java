@@ -41,7 +41,7 @@ public class ProfileController {
     @PutMapping("/update/image")
     @ResponseBody
     public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile image) {
-        ResponseDTO reponseDTO = userProfileService.updateImage( image);
+        ResponseDTO reponseDTO = userProfileService.updateImage(image);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
@@ -91,6 +91,13 @@ public class ProfileController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> resendOTP() {
         ResponseDTO responseDTO = userProfileService.resendOTP();
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/user-permission")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getPermission() {
+        ResponseDTO responseDTO = userProfileService.getPermission();
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 }
