@@ -19,6 +19,7 @@ import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.auth.AuthenReponse;
 import com.fanstatic.dto.auth.ChangePasswordDTO;
 import com.fanstatic.dto.auth.ConfirmOtpDTO;
 import com.fanstatic.dto.auth.ConfirmPasswordDTO;
@@ -39,6 +40,7 @@ import com.fanstatic.repository.UserRepository;
 import com.fanstatic.repository.UserVoucherRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.CustomerService;
+import com.fanstatic.service.model.RolePermissionService;
 import com.fanstatic.service.order.OrderService;
 import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.OTPService;
@@ -61,6 +63,7 @@ public class UserProfileService {
     private final UserVoucherRepository userVoucherRepository;
     private final VoucherRepository voucherRepository;
     private final FileService fileService;
+    private final RolePermissionService rolePermissionService;
 
     private final SessionUtils sessionUtils;
     private final OTPService otpService;
@@ -177,7 +180,7 @@ public class UserProfileService {
                 // change token after change numberphone
                 String jwtToken = jwtUtil.generateToken(account);
                 cookieUtils.set("token", jwtToken, 24);
-                // systemService.writeLoginLog(jwtToken, account.getUser());
+                systemService.writeLoginLog(jwtToken, account.getUser());
                 // systemService.writeSystemLog(user.getId(), user.getName(), "Thay đổi số điện
                 // thoại");
 
@@ -228,6 +231,8 @@ public class UserProfileService {
             sessionUtils.set("accountExits", true);
             String jwtToken = jwtUtil.generateToken(account);
             cookieUtils.set("token", jwtToken, 24);
+            systemService.writeLoginLog(jwtToken, account.getUser());
+            systemService.writeSystemLog(user.getId(), user.getName(), "Thay đổi số điện thoại");
             return ResponseUtils.success(200, "Đổi mật khẩu thành công", null);
 
         } else {
@@ -263,6 +268,16 @@ public class UserProfileService {
         userVoucherRepository.save(userVoucher);
 
         return ResponseUtils.success(200, "Thu thập voucher thành công", null);
+    }
+
+    public ResponseDTO getPermission() {
+        User user = systemService.getUserLogin();
+        String permission = rolePermissionService.getDataTokenRolePermisson(user.getRole().getId());
+        String tokenPerssion = jwtUtil.generatePublicToken(permission);
+        AuthenReponse authenReponse = new AuthenReponse();
+        authenReponse.setTokenPermission(tokenPerssion);
+        return ResponseUtils.success(200, "User permission", authenReponse);
+
     }
 
 }
