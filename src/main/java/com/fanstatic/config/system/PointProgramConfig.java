@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class PointProgramConfig extends ResponseDataDTO {
-    private Long minPoint;
+    private Long minPrice;
     private Long maxPoint;
     private ConvertRate moneyToPoint;
     private ConvertRate pointToMoney;
