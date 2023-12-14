@@ -146,6 +146,7 @@ public class UserProfileService {
 
     public ResponseDTO changeNumberPhone(String numberPhone) {
         User user = userRepository.findByNumberPhoneAndActiveIsTrue(numberPhone).orElse(null);
+    
         if (user == null) {
             System.out.println(numberPhone);
             sessionUtils.set("numberPhone", numberPhone);
@@ -169,17 +170,17 @@ public class UserProfileService {
             return ResponseUtils.fail(401, "người dùng không tồn tại hoặc bị khóa", null);
         }
         List<FieldError> errors = new ArrayList<>();
-        if(profileUpdateDTO.getEmail() != null) {
-            User userEmail = userRepository.findByEmailAndActiveIsTrue(profileUpdateDTO.getEmail()).orElse(null);
-             if (userEmail != null) {
-            errors.add(new FieldError("ProfileUpdateDTO", "email", "Email đã được sử dụng"));
-        }
-        }
-        // Nếu có lỗi, ném ra một lượt với danh sách lỗi
-        if (!errors.isEmpty()) {
+        // if(profileUpdateDTO.getEmail() != null) {
+        //     User userEmail = userRepository.findByEmailAndActiveIsTrue(profileUpdateDTO.getEmail()).orElse(null);
+        //      if (userEmail != null) {
+        //     errors.add(new FieldError("ProfileUpdateDTO", "email", "Email đã được sử dụng"));
+        // }
+        // }
+        // // Nếu có lỗi, ném ra một lượt với danh sách lỗi
+        // if (!errors.isEmpty()) {
          
-            throw new ValidationException(errors);
-        }
+        //     throw new ValidationException(errors);
+        // }
 
      
         modelMapper.map(profileUpdateDTO, user);
@@ -192,7 +193,23 @@ public class UserProfileService {
 
     }
 
-    public ResponseDTO confirmOTP(ConfirmOtpDTO confirmOtpDTO) {
+    public ResponseDTO confirmOTPChangeProfile(ConfirmOtpDTO confirmOtpDTO) {
+
+        if (sessionUtils.get("numberPhone") == null) {
+            return ResponseUtils.fail(500, "Chưa đăng nhập", null);
+
+        }
+
+        boolean isValid = otpService.validateOTP(confirmOtpDTO.getOtp());
+        if (isValid) {
+            sessionUtils.set("isConfirm", true);
+            return ResponseUtils.success(200, "OPT Hợp lệ", null);
+        }
+        return ResponseUtils.fail(500, "OTP không hợp lệ", null);
+
+    }
+
+    public ResponseDTO confirmOTPChangePhone(ConfirmOtpDTO confirmOtpDTO) {
         TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
         if (sessionUtils.get("numberPhone") == null) {
@@ -215,9 +232,9 @@ public class UserProfileService {
                 // change token after change numberphone
                 String jwtToken = jwtUtil.generateToken(account);
                 cookieUtils.set("token", jwtToken, 24);
-                // systemService.writeLoginLog(jwtToken, account.getUser());
-                // systemService.writeSystemLog(user.getId(), user.getName(), "Thay đổi số điện
-                // thoại");
+                 systemService.writeLoginLog(jwtToken, account.getUser());
+            
+              
 
                 sessionUtils.remove("numberPhone");
 

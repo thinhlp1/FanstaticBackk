@@ -14,7 +14,7 @@ public class ProfileUpdateDTO {
 
     private String name;
 
-    private String email;
+   // private String email;
 
     private Date dateOfBirth;
 

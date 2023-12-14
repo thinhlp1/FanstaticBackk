@@ -90,10 +90,17 @@ public class ProfileController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @PostMapping("/confirm-otp")
+    @PostMapping("/confirm-otp-profile")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> confirmOTP(@RequestBody @Valid ConfirmOtpDTO confirmOtpDTO) {
-        ResponseDTO responseDTO = userProfileService.confirmOTP(confirmOtpDTO);
+    public ResponseEntity<ResponseDTO> confirmOTPprofile(@RequestBody @Valid ConfirmOtpDTO confirmOtpDTO) {
+        ResponseDTO responseDTO = userProfileService.confirmOTPChangeProfile(confirmOtpDTO);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PostMapping("/confirm-otp-phone")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> confirmOTPPhone(@RequestBody @Valid ConfirmOtpDTO confirmOtpDTO) {
+        ResponseDTO responseDTO = userProfileService.confirmOTPChangePhone(confirmOtpDTO);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
