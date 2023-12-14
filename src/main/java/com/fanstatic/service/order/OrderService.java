@@ -1310,7 +1310,7 @@ public class OrderService {
     }
 
     public ResponseDTO updateOrder(OrderUpdateDTO orderUpdateDTO) {
-        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        // TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
         Order order = orderRepository.findById(orderUpdateDTO.getOrderId()).orElse(null);
 
@@ -1322,7 +1322,7 @@ public class OrderService {
         if (orderUpdateDTO.getOrderItemUpdates() != null) {
             ResponseDTO updateResponse = updateOrderItem(orderUpdateDTO.getOrderItemUpdates(), order);
             if (!updateResponse.isSuccess()) {
-                transactionManager.rollback(transactionStatus);
+                // transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1332,7 +1332,7 @@ public class OrderService {
             ResponseDTO updateResponse = updateOrderExtraPortion(orderUpdateDTO.getOrderExtraPortionUpdates(),
                     order);
             if (!updateResponse.isSuccess()) {
-                transactionManager.rollback(transactionStatus);
+                // transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1342,7 +1342,7 @@ public class OrderService {
             ResponseDTO updateResponse = removeOrderItem(orderUpdateDTO.getOrderItemRemoves(),
                     order);
             if (!updateResponse.isSuccess()) {
-                transactionManager.rollback(transactionStatus);
+                // transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1353,7 +1353,7 @@ public class OrderService {
                     order);
             if (!updateResponse.isSuccess()) {
 
-                transactionManager.rollback(transactionStatus);
+                // transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1374,7 +1374,7 @@ public class OrderService {
 
         // if (!transactionStatus.isCompleted()) {
         // System.out.println("commit");
-        transactionManager.commit(transactionStatus);
+        // transactionManager.commit(transactionStatus);
         // }
         order = orderRepository.findById(orderUpdateDTO.getOrderId()).orElse(null);
         List<OrderSurcharge> orderSurcharges = orderSurchargeRepository.findAllByOrder(order);
@@ -2408,7 +2408,7 @@ public class OrderService {
             customerPoint = 0L;
         }
 
-        if (customerPoint > pointProgramConfig.getMinPoint()) {
+        if (customerPoint > pointProgramConfig.getMaxPoint()) {
             Long moneyRedeem = convertPointToMoney(customerPoint);
 
             if (moneyRedeem >= order.getTotal()) {
@@ -2427,7 +2427,7 @@ public class OrderService {
             orderPointResponseDTO.setMoneyCanReem(moneyRedeem);
         }
         orderPointResponseDTO.setPointLeft(0L);
-        orderPointResponseDTO.setMinPrice(pointProgramConfig.getMinPoint());
+        orderPointResponseDTO.setMinPrice(pointProgramConfig.getMinPrice());
         orderPointResponseDTO.setPoint(customerPoint);
         return ResponseUtils.success(200, "Điểm của người dùng", orderPointResponseDTO);
     }
