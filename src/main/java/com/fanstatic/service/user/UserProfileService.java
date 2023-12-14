@@ -23,6 +23,7 @@ import com.fanstatic.config.exception.ValidationException;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.auth.AuthenReponse;
 import com.fanstatic.dto.auth.ChangePasswordDTO;
 import com.fanstatic.dto.auth.ConfirmOtpDTO;
 import com.fanstatic.dto.auth.ConfirmPasswordDTO;
@@ -46,6 +47,7 @@ import com.fanstatic.repository.UserRepository;
 import com.fanstatic.repository.UserVoucherRepository;
 import com.fanstatic.repository.VoucherRepository;
 import com.fanstatic.service.model.CustomerService;
+import com.fanstatic.service.model.RolePermissionService;
 import com.fanstatic.service.order.OrderService;
 import com.fanstatic.service.system.FileService;
 import com.fanstatic.service.system.OTPService;
@@ -68,6 +70,7 @@ public class UserProfileService {
     private final UserVoucherRepository userVoucherRepository;
     private final VoucherRepository voucherRepository;
     private final FileService fileService;
+    private final RolePermissionService rolePermissionService;
 
     private final SessionUtils sessionUtils;
     private final OTPService otpService;
@@ -144,12 +147,12 @@ public class UserProfileService {
 
     }
 
-    public ResponseDTO changeNumberPhone(String numberPhone) {
-        User user = userRepository.findByNumberPhoneAndActiveIsTrue(numberPhone).orElse(null);
-    
+    public ResponseDTO changeNumberPhone(LoginDTO loginDTO) {
+        User user = userRepository.findByNumberPhoneAndActiveIsTrue(loginDTO.getNumberPhone()).orElse(null);
+        System.out.println("NMM0 " + loginDTO.getNumberPhone());
         if (user == null) {
-            System.out.println(numberPhone);
-            sessionUtils.set("numberPhone", numberPhone);
+            System.out.println(loginDTO.getNumberPhone());
+            sessionUtils.set("numberPhone", loginDTO.getNumberPhone());
             boolean isSended = otpService.sendOTP();
             if (isSended) {
                 return ResponseUtils.success(200, "Gửi mã OTP thành công", null);
@@ -162,6 +165,23 @@ public class UserProfileService {
 
     }
 
+    public ResponseDTO changeProfile(LoginDTO loginDTO) {
+        User user = userRepository.findByNumberPhoneAndActiveIsTrue(loginDTO.getNumberPhone()).orElse(null);
+        System.out.println("NMM0 " + loginDTO.getNumberPhone());
+        if (user != null) {
+            System.out.println(loginDTO.getNumberPhone());
+            sessionUtils.set("numberPhone", loginDTO.getNumberPhone());
+            boolean isSended = otpService.sendOTP();
+            if (isSended) {
+                return ResponseUtils.success(200, "Gửi mã OTP thành công", null);
+            } else {
+                return ResponseUtils.fail(500, "Lỗi gửi mã OTP", null);
+            }
+
+        }
+        return ResponseUtils.success(201, "Số điện thoại đã được sử dụng", null);
+
+    }
 
 
      public ResponseDTO updateProfile(ProfileUpdateDTO profileUpdateDTO) {
@@ -233,8 +253,6 @@ public class UserProfileService {
                 String jwtToken = jwtUtil.generateToken(account);
                 cookieUtils.set("token", jwtToken, 24);
                  systemService.writeLoginLog(jwtToken, account.getUser());
-            
-              
 
                 sessionUtils.remove("numberPhone");
 
@@ -283,6 +301,8 @@ public class UserProfileService {
             sessionUtils.set("accountExits", true);
             String jwtToken = jwtUtil.generateToken(account);
             cookieUtils.set("token", jwtToken, 24);
+            systemService.writeLoginLog(jwtToken, account.getUser());
+            systemService.writeSystemLog(user.getId(), user.getName(), "Thay đổi số điện thoại");
             return ResponseUtils.success(200, "Đổi mật khẩu thành công", null);
 
         } else {
@@ -318,6 +338,16 @@ public class UserProfileService {
         userVoucherRepository.save(userVoucher);
 
         return ResponseUtils.success(200, "Thu thập voucher thành công", null);
+    }
+
+    public ResponseDTO getPermission() {
+        User user = systemService.getUserLogin();
+        String permission = rolePermissionService.getDataTokenRolePermisson(user.getRole().getId());
+        String tokenPerssion = jwtUtil.generatePublicToken(permission);
+        AuthenReponse authenReponse = new AuthenReponse();
+        authenReponse.setTokenPermission(tokenPerssion);
+        return ResponseUtils.success(200, "User permission", authenReponse);
+
     }
 
 }

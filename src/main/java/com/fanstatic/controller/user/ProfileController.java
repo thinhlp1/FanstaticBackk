@@ -43,7 +43,7 @@ public class ProfileController {
     @PutMapping("/update/image")
     @ResponseBody
     public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile image) {
-        ResponseDTO reponseDTO = userProfileService.updateImage( image);
+        ResponseDTO reponseDTO = userProfileService.updateImage(image);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
@@ -78,8 +78,15 @@ public class ProfileController {
 
     @PostMapping("/change-numberphone")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> changeNumberPhone(@RequestBody @Valid String numberPhone) {
-        ResponseDTO responseDTO = userProfileService.changeNumberPhone(numberPhone);
+    public ResponseEntity<ResponseDTO> changeNumberPhone(@RequestBody @Valid LoginDTO loginDTO) {
+        ResponseDTO responseDTO = userProfileService.changeNumberPhone(loginDTO);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+     @PostMapping("/change-profile")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> changeProfile(@RequestBody @Valid LoginDTO loginDTO) {
+        ResponseDTO responseDTO = userProfileService.changeProfile(loginDTO);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
@@ -108,6 +115,13 @@ public class ProfileController {
     @ResponseBody
     public ResponseEntity<ResponseDTO> resendOTP() {
         ResponseDTO responseDTO = userProfileService.resendOTP();
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/user-permission")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getPermission() {
+        ResponseDTO responseDTO = userProfileService.getPermission();
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 }
