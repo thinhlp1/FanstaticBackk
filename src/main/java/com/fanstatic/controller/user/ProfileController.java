@@ -16,6 +16,8 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.auth.ChangePasswordDTO;
 import com.fanstatic.dto.auth.ConfirmOtpDTO;
 import com.fanstatic.dto.auth.LoginDTO;
+import com.fanstatic.dto.model.profile.ProfileUpdateDTO;
+import com.fanstatic.dto.model.shift.ShiftRequestDTO;
 import com.fanstatic.service.model.NotificationService;
 import com.fanstatic.service.user.UserProfileService;
 import com.fanstatic.util.ResponseUtils;
@@ -66,10 +68,18 @@ public class ProfileController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
+     @PutMapping("/update/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid ProfileUpdateDTO profileUpdateDTO, @PathVariable("id") int id) {
+        ResponseDTO reponseDTO = userProfileService.updateProfile(profileUpdateDTO);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+
     @PostMapping("/change-numberphone")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> changeNumberPhone(@RequestBody @Valid LoginDTO loginDTO) {
-        ResponseDTO responseDTO = userProfileService.changeNumberPhone(loginDTO);
+    public ResponseEntity<ResponseDTO> changeNumberPhone(@RequestBody @Valid String numberPhone) {
+        ResponseDTO responseDTO = userProfileService.changeNumberPhone(numberPhone);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

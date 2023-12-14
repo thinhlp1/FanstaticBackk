@@ -25,6 +25,8 @@ public class CustomerDTO extends ResponseDataDTO {
 
 	private String numberPhone;
 
+	private String placeOrigin;
+	
 	private byte active;
 
 	private BigInteger point;

@@ -1,5 +1,7 @@
 package com.fanstatic.service.user;
 
+import java.sql.Time;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,10 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.validation.FieldError;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fanstatic.config.constants.ImageConst;
 import com.fanstatic.config.constants.MessageConst;
+import com.fanstatic.config.exception.ValidationException;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
@@ -26,11 +30,14 @@ import com.fanstatic.dto.auth.LoginDTO;
 import com.fanstatic.dto.auth.LoginPasswordDTO;
 import com.fanstatic.dto.model.customer.CustomerDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
+import com.fanstatic.dto.model.profile.ProfileUpdateDTO;
 import com.fanstatic.dto.model.profile.ProfileUserDTO;
+import com.fanstatic.dto.model.shift.ShiftRequestDTO;
 import com.fanstatic.dto.model.user.UserDTO;
 import com.fanstatic.dto.model.voucher.VoucherDTO;
 import com.fanstatic.model.Account;
 import com.fanstatic.model.File;
+import com.fanstatic.model.Shift;
 import com.fanstatic.model.User;
 import com.fanstatic.model.UserVoucher;
 import com.fanstatic.model.Voucher;
@@ -137,11 +144,11 @@ public class UserProfileService {
 
     }
 
-    public ResponseDTO changeNumberPhone(LoginDTO loginDTO) {
-        User user = userRepository.findByNumberPhoneAndActiveIsTrue(loginDTO.getNumberPhone()).orElse(null);
+    public ResponseDTO changeNumberPhone(String numberPhone) {
+        User user = userRepository.findByNumberPhoneAndActiveIsTrue(numberPhone).orElse(null);
         if (user == null) {
-            System.out.println(loginDTO.getNumberPhone());
-            sessionUtils.set("numberPhone", loginDTO.getNumberPhone());
+            System.out.println(numberPhone);
+            sessionUtils.set("numberPhone", numberPhone);
             boolean isSended = otpService.sendOTP();
             if (isSended) {
                 return ResponseUtils.success(200, "Gửi mã OTP thành công", null);
@@ -151,6 +158,37 @@ public class UserProfileService {
 
         }
         return ResponseUtils.success(201, "Số điện thoại đã được sử dụng", null);
+
+    }
+
+
+
+     public ResponseDTO updateProfile(ProfileUpdateDTO profileUpdateDTO) {
+        User user = userRepository.findByIdAndActiveIsTrue(profileUpdateDTO.getId()).orElse(null);
+        if (user == null) {
+            return ResponseUtils.fail(401, "người dùng không tồn tại hoặc bị khóa", null);
+        }
+        List<FieldError> errors = new ArrayList<>();
+        if(profileUpdateDTO.getEmail() != null) {
+            User userEmail = userRepository.findByEmailAndActiveIsTrue(profileUpdateDTO.getEmail()).orElse(null);
+             if (userEmail != null) {
+            errors.add(new FieldError("ProfileUpdateDTO", "email", "Email đã được sử dụng"));
+        }
+        }
+        // Nếu có lỗi, ném ra một lượt với danh sách lỗi
+        if (!errors.isEmpty()) {
+         
+            throw new ValidationException(errors);
+        }
+
+     
+        modelMapper.map(profileUpdateDTO, user);
+        user.setUpdateAt(new Date());
+        user.setUpdateBy(systemService.getUserLogin());
+        User userSaved = userRepository.save(user);
+        systemService.writeSystemLog(userSaved.getId(), userSaved.getNumberPhone(), null);
+
+        return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
 
     }
 

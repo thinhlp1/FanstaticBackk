@@ -97,7 +97,16 @@ public class StatisticalService {
                 today, state);
         List<Object[]> listProductVariantYear = orderItemRepository.findTop10BestSellingProductVariantByRangeAndStates(startOfYear,
                 today, state);
-        // listProduct.subList(0, 5);
+        
+                if(listProductYear.size() > 6) {
+                      listProductYear.subList(0, 5);
+                }
+                 if(listComboProductYear.size() > 6) {
+                      listComboProductYear.subList(0, 5);
+                }
+                 if(listProductVariantYear.size() > 6) {
+                      listProductVariantYear.subList(0, 5);
+                }
 
         List<DataSellProductDTO> listDataSellProductDTOs = new ArrayList<>();
         List<DataSellComboProductDTO> listDataSellComboProductDTOs = new ArrayList<>();
@@ -340,9 +349,12 @@ public class StatisticalService {
         List<Object[]> topProducts = orderItemRepository
                 .findTop10BestSellingProductsByRangeAndStates(startOfYear, today, state);
         List<ResponseDataDTO> listDataSellProductDTOs = new ArrayList<>();
-
-        for (int i = 0; i < topProducts.size(); i++) {
-            Object[] result = topProducts.get(i);
+       List<Object[]> topProductSup = new ArrayList<>();
+         if (topProducts.size() >= 5) {
+            topProductSup =topProducts.subList(0, 5);
+         }
+        for (int i = 0; i < topProductSup.size(); i++) {
+            Object[] result = topProductSup.get(i);
 
             Product product = (Product) result[0];
               long quantity;
@@ -376,7 +388,9 @@ public class StatisticalService {
         List<Object[]> topComboProducts = orderItemRepository
                 .findTop10BestSellingComboProductsByRangeAndStates(startOfYear, today, state);
         List<ResponseDataDTO> listDataSellProductDTOs = new ArrayList<>();
+        if (topComboProducts.size() > 5) {
 
+        }
         for (int i = 0; i < topComboProducts.size(); i++) {
             Object[] result = topComboProducts.get(i);
 
