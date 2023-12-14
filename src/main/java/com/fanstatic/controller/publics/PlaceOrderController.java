@@ -37,7 +37,7 @@ public class PlaceOrderController {
     @GetMapping("/show/products")
     @ResponseBody
     public ResponseEntity<ResponseDTO> showProduct() {
-        ResponseDTO reponseDTO = productService.show(RequestParamConst.ACTIVE_TRUE);
+        ResponseDTO reponseDTO = productService.showProductOrder();
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 

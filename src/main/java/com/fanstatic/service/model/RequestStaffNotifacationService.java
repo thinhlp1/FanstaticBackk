@@ -16,19 +16,23 @@ import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.order.OrderDTO;
 import com.fanstatic.dto.model.requestStaff.CreateRequestStaffNotificationDTO;
 import com.fanstatic.dto.model.requestStaff.RequestStaffNotificationDTO;
+import com.fanstatic.dto.model.table.TableDTO;
 import com.fanstatic.dto.model.user.UserCompactDTO;
 import com.fanstatic.model.File;
 import com.fanstatic.model.Order;
 import com.fanstatic.model.RequestStaffNotification;
+import com.fanstatic.model.Table;
 import com.fanstatic.model.User;
 import com.fanstatic.repository.OrderRepository;
 import com.fanstatic.repository.RequestStaffNotificationRepository;
+import com.fanstatic.repository.TableRepository;
 import com.fanstatic.service.order.OrderService;
 import com.fanstatic.service.system.PushNotificationService;
 import com.fanstatic.service.system.SystemService;
 import com.fanstatic.util.DateUtils;
 import com.fanstatic.util.ResponseUtils;
 
+import io.grpc.netty.shaded.io.netty.handler.ssl.PemPrivateKey;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -39,6 +43,7 @@ public class RequestStaffNotifacationService {
         private final PushNotificationService pushNotificationService;
         private final OrderService orderService;
         private final OrderRepository orderRepository;
+        private final TableRepository tableRepository;
 
         private final ModelMapper modelMapper;
 
@@ -46,16 +51,27 @@ public class RequestStaffNotifacationService {
                 RequestStaffNotification requestStaffNotification = new RequestStaffNotification();
                 User customer = systemService.getUserLogin();
 
-                Order order = orderRepository.findById(createRequestStaffNotificationDTO.getOrderId()).orElse(null);
-                if (order == null) {
-                        return ResponseUtils.fail(404, "Order không tồn tại", null);
+                if (createRequestStaffNotificationDTO.getOrderId() != null) {
+                        Order order = orderRepository.findById(createRequestStaffNotificationDTO.getOrderId())
+                                        .orElse(null);
+                        if (order == null) {
+                                return ResponseUtils.fail(404, "Order không tồn tại", null);
+
+                        }
+                        requestStaffNotification.setOrder(order);
+
+                }
+
+                Table table = tableRepository.findById(createRequestStaffNotificationDTO.getTableId()).orElse(null);
+                if (table == null) {
+                        return ResponseUtils.fail(404, "Bàn không tồn tại", null);
 
                 }
 
                 requestStaffNotification.setCustomer(customer);
                 requestStaffNotification.setContent(createRequestStaffNotificationDTO.getContent());
                 requestStaffNotification.setCreateAt(new Date());
-                requestStaffNotification.setOrder(order);
+                requestStaffNotification.setTable(table);
                 RequestStaffNotification requestStaffNotificationSaved = requestStaffNotificationRepository
                                 .saveAndFlush(requestStaffNotification);
 
@@ -137,6 +153,14 @@ public class RequestStaffNotifacationService {
                         requestStaffNotificationDTO.setOrderDTO((OrderDTO) orderService
                                         .detail(order.getOrderId()).getData());
                 }
+
+                Table table = requestStaffNotification.getTable();
+
+                if (table != null) {
+                        TableDTO tableDTO = modelMapper.map(table, TableDTO.class);
+                        requestStaffNotificationDTO.setTableDTO(tableDTO);
+                }
+
                 if (requestStaffNotification.getDenyAt() != null) {
                         requestStaffNotificationDTO.setStatus("DENIED");
                 } else if (requestStaffNotification.getConfirmAt() != null) {

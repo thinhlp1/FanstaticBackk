@@ -8,10 +8,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/api/manage/warehousereceiveitem")
@@ -24,5 +21,26 @@ public class WarehouseReceiveItemController {
     public ResponseEntity<ResponseDTO> create(@RequestBody @Valid WarehouseReceiveItemRequestDTO data) {
         ResponseDTO responseDTO = warehouseReceiveItemService.create(data);
         return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/show")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> show() {
+        ResponseDTO responseDTO = warehouseReceiveItemService.show();
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/show/byflavorid")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> showByFlavor(@RequestParam(name = "flavorId") int flavorId) {
+        ResponseDTO responseDTO = warehouseReceiveItemService.showByFlavorId(flavorId);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @GetMapping("/show/countbyflavorid")
+    @ResponseBody
+    public int countByFlavorId(@RequestParam(name = "flavorId") int flavorId) {
+        int flavorQuantity = warehouseReceiveItemService.countByFlavorId(flavorId);
+        return flavorQuantity;
     }
 }

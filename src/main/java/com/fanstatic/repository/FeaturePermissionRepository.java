@@ -9,9 +9,10 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-
 public interface FeaturePermissionRepository extends JpaRepository<FeaturePermission, Integer> {
    public List<FeaturePermission> findByManagerFeature(ManagerFeature managerFeature);
-  public Optional<FeaturePermission> findByManagerFeatureAndPermission(ManagerFeature managerFeature,
-                        Permission permission);
+
+   public Optional<FeaturePermission> findByManagerFeatureAndPermission(ManagerFeature managerFeature,
+         Permission permission);
+
 }
