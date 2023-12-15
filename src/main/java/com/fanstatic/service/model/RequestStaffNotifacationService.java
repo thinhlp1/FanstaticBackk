@@ -38,182 +38,190 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class RequestStaffNotifacationService {
-        private final RequestStaffNotificationRepository requestStaffNotificationRepository;
-        private final SystemService systemService;
-        private final PushNotificationService pushNotificationService;
-        private final OrderService orderService;
-        private final OrderRepository orderRepository;
-        private final TableRepository tableRepository;
+    private final RequestStaffNotificationRepository requestStaffNotificationRepository;
+    private final SystemService systemService;
+    private final PushNotificationService pushNotificationService;
+    private final OrderService orderService;
+    private final OrderRepository orderRepository;
+    private final TableRepository tableRepository;
 
-        private final ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
-        public ResponseDTO create(CreateRequestStaffNotificationDTO createRequestStaffNotificationDTO) {
-                RequestStaffNotification requestStaffNotification = new RequestStaffNotification();
-                User customer = systemService.getUserLogin();
+    public ResponseDTO create(CreateRequestStaffNotificationDTO createRequestStaffNotificationDTO) {
+        RequestStaffNotification requestStaffNotification = new RequestStaffNotification();
+        User customer = systemService.getUserLogin();
 
-                if (createRequestStaffNotificationDTO.getOrderId() != null) {
-                        Order order = orderRepository.findById(createRequestStaffNotificationDTO.getOrderId())
-                                        .orElse(null);
-                        if (order == null) {
-                                return ResponseUtils.fail(404, "Order không tồn tại", null);
 
-                        }
-                        requestStaffNotification.setOrder(order);
+        if (createRequestStaffNotificationDTO.getOrderId() != null) {
+            Order order = orderRepository.findById(createRequestStaffNotificationDTO.getOrderId())
+                    .orElse(null);
+            if (order == null) {
+                return ResponseUtils.fail(404, "Order không tồn tại", null);
 
-                }
+            }
+            requestStaffNotification.setOrder(order);
 
-                Table table = tableRepository.findById(createRequestStaffNotificationDTO.getTableId()).orElse(null);
-                if (table == null) {
-                        return ResponseUtils.fail(404, "Bàn không tồn tại", null);
-
-                }
-
-                requestStaffNotification.setCustomer(customer);
-                requestStaffNotification.setContent(createRequestStaffNotificationDTO.getContent());
-                requestStaffNotification.setCreateAt(new Date());
-                requestStaffNotification.setTable(table);
-                RequestStaffNotification requestStaffNotificationSaved = requestStaffNotificationRepository
-                                .saveAndFlush(requestStaffNotification);
-
-                RequestStaffNotificationDTO requestStaffNotificationDTO = modelMapper.map(requestStaffNotificationSaved,
-                                RequestStaffNotificationDTO.class);
-                requestStaffNotificationDTO.setOrderDTO((OrderDTO) orderService
-                                .detail(createRequestStaffNotificationDTO.getOrderId()).getData());
-
-                return ResponseUtils.success(200, "Yêu cầu thành công", requestStaffNotificationDTO);
         }
 
-        public ResponseDTO confirm(Integer id) {
-                RequestStaffNotification requestStaffNotification = requestStaffNotificationRepository.findById(id)
-                                .orElse(null);
-                if (requestStaffNotification == null) {
-                        return ResponseUtils.fail(200, "Yêu cầu không tồn tại", null);
-                }
-                if (requestStaffNotification.getEmployeeConfirm() != null) {
-                        return ResponseUtils.fail(400, "Yêu cầu đã bị nhân viên từ chối",
-                                        modelMapper.map(requestStaffNotification.getEmployeeConfirm(),
-                                                        UserCompactDTO.class));
+        Table table = tableRepository.findById(createRequestStaffNotificationDTO.getTableId()).orElse(null);
+        if (table == null) {
+            return ResponseUtils.fail(404, "Bàn không tồn tại", null);
 
-                }
-
-                User employeeConfirm = systemService.getUserLogin();
-
-                requestStaffNotification.setEmployeeConfirm(employeeConfirm);
-                requestStaffNotification.setConfirmAt(new Date());
-
-                RequestStaffNotification requestStaffNotificationSaved = requestStaffNotificationRepository
-                                .saveAndFlush(requestStaffNotification);
-
-                RequestStaffNotificationDTO requestStaffNotificationDTO = details(requestStaffNotificationSaved);
-                pushNotificationToUser(requestStaffNotification.getCustomer().getId(), "Nhân viên đang tới",
-                                "Order của bạn đã được tiếp nhận");
-                return ResponseUtils.success(200, "Xác nhận thành công", requestStaffNotificationDTO);
         }
 
-        public ResponseDTO deny(Integer id) {
-                RequestStaffNotification requestStaffNotification = requestStaffNotificationRepository.findById(id)
-                                .orElse(null);
-                if (requestStaffNotification == null) {
-                        return ResponseUtils.fail(404, "Yêu cầu không tồn tại", null);
-                }
+        requestStaffNotification.setCustomer(customer);
+        requestStaffNotification.setContent(createRequestStaffNotificationDTO.getContent());
+        requestStaffNotification.setCreateAt(new Date());
+        requestStaffNotification.setTable(table);
 
-                if (requestStaffNotification.getEmployeeConfirm() != null) {
-                        return ResponseUtils.fail(400, "Yêu cầu đã bị nhân viên từ chối",
-                                        modelMapper.map(requestStaffNotification.getEmployeeConfirm(),
-                                                        UserCompactDTO.class));
+        RequestStaffNotification requestStaffNotificationSaved = requestStaffNotificationRepository
+                .saveAndFlush(requestStaffNotification);
 
-                }
-                User employeeConfirm = systemService.getUserLogin();
+        RequestStaffNotificationDTO requestStaffNotificationDTO = modelMapper.map(requestStaffNotificationSaved,
+                RequestStaffNotificationDTO.class);
+        if (createRequestStaffNotificationDTO.getOrderId() != null) {
 
-                requestStaffNotification.setEmployeeConfirm(employeeConfirm);
-                requestStaffNotification.setDenyAt(new Date());
-
-                RequestStaffNotification requestStaffNotificationSaved = requestStaffNotificationRepository
-                                .saveAndFlush(requestStaffNotification);
-
-                RequestStaffNotificationDTO requestStaffNotificationDTO = details(requestStaffNotificationSaved);
-                pushNotificationToUser(requestStaffNotification.getCustomer().getId(), "Nhân viên đang tới",
-                                "Order của bạn đã được tiếp nhận");
-
-                return ResponseUtils.success(200, "Xác nhận thành công", requestStaffNotificationDTO);
+            requestStaffNotificationDTO.setOrderDTO((OrderDTO) orderService
+                    .detail(createRequestStaffNotificationDTO.getOrderId()).getData());
         }
 
-        public RequestStaffNotificationDTO details(RequestStaffNotification requestStaffNotification) {
-                RequestStaffNotificationDTO requestStaffNotificationDTO = modelMapper.map(requestStaffNotification,
-                                RequestStaffNotificationDTO.class);
 
-                File file = requestStaffNotification.getCustomer().getImage();
-                if (file != null) {
-                        requestStaffNotificationDTO.getCustomer().setImageUrl(file.getLink());
-                }
+        requestStaffNotificationDTO.setStatus("WAIT");
 
-                Order order = requestStaffNotification.getOrder();
+        return ResponseUtils.success(200, "Yêu cầu thành công", requestStaffNotificationDTO);
+    }
 
-                if (order != null) {
-                        requestStaffNotificationDTO.setOrderDTO((OrderDTO) orderService
-                                        .detail(order.getOrderId()).getData());
-                }
+    public ResponseDTO confirm(Integer id) {
+        RequestStaffNotification requestStaffNotification = requestStaffNotificationRepository.findById(id)
+                .orElse(null);
+        if (requestStaffNotification == null) {
+            return ResponseUtils.fail(200, "Yêu cầu không tồn tại", null);
+        }
+        if (requestStaffNotification.getEmployeeConfirm() != null) {
+            return ResponseUtils.fail(400, "Yêu cầu đã bị nhân viên từ chối",
+                    modelMapper.map(requestStaffNotification.getEmployeeConfirm(),
+                            UserCompactDTO.class));
 
-                Table table = requestStaffNotification.getTable();
-
-                if (table != null) {
-                        TableDTO tableDTO = modelMapper.map(table, TableDTO.class);
-                        requestStaffNotificationDTO.setTableDTO(tableDTO);
-                }
-
-                if (requestStaffNotification.getDenyAt() != null) {
-                        requestStaffNotificationDTO.setStatus("DENIED");
-                } else if (requestStaffNotification.getConfirmAt() != null) {
-                        requestStaffNotificationDTO.setStatus("CONFIRM");
-                } else {
-                        requestStaffNotificationDTO.setStatus("WAIT");
-                }
-                return requestStaffNotificationDTO;
         }
 
-        public ResponseDTO showToDay() {
-                Date twentyFourHoursAgo = DateUtils.getDayBeforeTime(24); // Tính thời
-                                                                          // điểm 24 giờ
+        User employeeConfirm = systemService.getUserLogin();
 
-                List<RequestStaffNotification> requestStaffNotifications = requestStaffNotificationRepository
-                                .findAllInTime(twentyFourHoursAgo);
-                List<ResponseDataDTO> requestStaffNotificationDTOs = new ArrayList<>();
+        requestStaffNotification.setEmployeeConfirm(employeeConfirm);
+        requestStaffNotification.setConfirmAt(new Date());
 
-                for (RequestStaffNotification requestStaffNotification : requestStaffNotifications) {
-                        RequestStaffNotificationDTO requestStaffNotificationDTO = details(
-                                        requestStaffNotification);
-                        requestStaffNotificationDTOs.add(requestStaffNotificationDTO);
-                }
+        RequestStaffNotification requestStaffNotificationSaved = requestStaffNotificationRepository
+                .saveAndFlush(requestStaffNotification);
 
-                ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
-                responseListDataDTO.setDatas(requestStaffNotificationDTOs);
-                responseListDataDTO.setNameList("Danhh sách gọi nhân viên");
+        RequestStaffNotificationDTO requestStaffNotificationDTO = details(requestStaffNotificationSaved);
+        pushNotificationToUser(requestStaffNotification.getCustomer().getId(), "Nhân viên đang tới",
+                "Order của bạn đã được tiếp nhận");
+        return ResponseUtils.success(200, "Xác nhận thành công", requestStaffNotificationDTO);
+    }
 
-                return ResponseUtils.success(200, "Danh sach gọi nhân viên", responseListDataDTO);
+    public ResponseDTO deny(Integer id) {
+        RequestStaffNotification requestStaffNotification = requestStaffNotificationRepository.findById(id)
+                .orElse(null);
+        if (requestStaffNotification == null) {
+            return ResponseUtils.fail(404, "Yêu cầu không tồn tại", null);
         }
 
-        public ResponseDTO show() {
+        if (requestStaffNotification.getEmployeeConfirm() != null) {
+            return ResponseUtils.fail(400, "Yêu cầu đã bị nhân viên từ chối",
+                    modelMapper.map(requestStaffNotification.getEmployeeConfirm(),
+                            UserCompactDTO.class));
 
-                List<RequestStaffNotification> requestStaffNotifications = requestStaffNotificationRepository
-                                .findAllOrderCreateAtDesc();
-                List<ResponseDataDTO> requestStaffNotificationDTOs = new ArrayList<>();
+        }
+        User employeeConfirm = systemService.getUserLogin();
 
-                for (RequestStaffNotification requestStaffNotification : requestStaffNotifications) {
-                        RequestStaffNotificationDTO requestStaffNotificationDTO = details(
-                                        requestStaffNotification);
-                        requestStaffNotificationDTOs.add(requestStaffNotificationDTO);
-                }
+        requestStaffNotification.setEmployeeConfirm(employeeConfirm);
+        requestStaffNotification.setDenyAt(new Date());
 
-                ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
-                responseListDataDTO.setDatas(requestStaffNotificationDTOs);
-                responseListDataDTO.setNameList("Danhh sách gọi nhân viên");
+        RequestStaffNotification requestStaffNotificationSaved = requestStaffNotificationRepository
+                .saveAndFlush(requestStaffNotification);
 
-                return ResponseUtils.success(200, "Danh sach gọi nhân viên", responseListDataDTO);
+        RequestStaffNotificationDTO requestStaffNotificationDTO = details(requestStaffNotificationSaved);
+        pushNotificationToUser(requestStaffNotification.getCustomer().getId(), "Nhân viên đang tới",
+                "Order của bạn đã được tiếp nhận");
+
+        return ResponseUtils.success(200, "Xác nhận thành công", requestStaffNotificationDTO);
+    }
+
+    public RequestStaffNotificationDTO details(RequestStaffNotification requestStaffNotification) {
+        RequestStaffNotificationDTO requestStaffNotificationDTO = modelMapper.map(requestStaffNotification,
+                RequestStaffNotificationDTO.class);
+
+        File file = requestStaffNotification.getCustomer().getImage();
+        if (file != null) {
+            requestStaffNotificationDTO.getCustomer().setImageUrl(file.getLink());
         }
 
-        private void pushNotificationToUser(Integer userId, String title, String body) {
-                String url = ApplicationConst.CLIENT_HOST;
-                pushNotificationService.pushNotification(userId, PushNotificationService.HIGT, title, body,
-                                url);
+        Order order = requestStaffNotification.getOrder();
+
+        if (order != null) {
+            requestStaffNotificationDTO.setOrderDTO((OrderDTO) orderService
+                    .detail(order.getOrderId()).getData());
         }
+
+        Table table = requestStaffNotification.getTable();
+
+        if (table != null) {
+            TableDTO tableDTO = modelMapper.map(table, TableDTO.class);
+            requestStaffNotificationDTO.setTableDTO(tableDTO);
+        }
+
+        if (requestStaffNotification.getDenyAt() != null) {
+            requestStaffNotificationDTO.setStatus("DENIED");
+        } else if (requestStaffNotification.getConfirmAt() != null) {
+            requestStaffNotificationDTO.setStatus("CONFIRM");
+        } else {
+            requestStaffNotificationDTO.setStatus("WAIT");
+        }
+        return requestStaffNotificationDTO;
+    }
+
+    public ResponseDTO showToDay() {
+        Date twentyFourHoursAgo = DateUtils.getDayBeforeTime(24); // Tính thời
+        // điểm 24 giờ
+
+        List<RequestStaffNotification> requestStaffNotifications = requestStaffNotificationRepository
+                .findAllInTime(twentyFourHoursAgo);
+        List<ResponseDataDTO> requestStaffNotificationDTOs = new ArrayList<>();
+
+        for (RequestStaffNotification requestStaffNotification : requestStaffNotifications) {
+            RequestStaffNotificationDTO requestStaffNotificationDTO = details(
+                    requestStaffNotification);
+            requestStaffNotificationDTOs.add(requestStaffNotificationDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(requestStaffNotificationDTOs);
+        responseListDataDTO.setNameList("Danhh sách gọi nhân viên");
+
+        return ResponseUtils.success(200, "Danh sach gọi nhân viên", responseListDataDTO);
+    }
+
+    public ResponseDTO show() {
+
+        List<RequestStaffNotification> requestStaffNotifications = requestStaffNotificationRepository
+                .findAllOrderCreateAtDesc();
+        List<ResponseDataDTO> requestStaffNotificationDTOs = new ArrayList<>();
+
+        for (RequestStaffNotification requestStaffNotification : requestStaffNotifications) {
+            RequestStaffNotificationDTO requestStaffNotificationDTO = details(
+                    requestStaffNotification);
+            requestStaffNotificationDTOs.add(requestStaffNotificationDTO);
+        }
+
+        ResponseListDataDTO responseListDataDTO = new ResponseListDataDTO();
+        responseListDataDTO.setDatas(requestStaffNotificationDTOs);
+        responseListDataDTO.setNameList("Danhh sách gọi nhân viên");
+
+        return ResponseUtils.success(200, "Danh sach gọi nhân viên", responseListDataDTO);
+    }
+
+    private void pushNotificationToUser(Integer userId, String title, String body) {
+        String url = ApplicationConst.CLIENT_HOST;
+        pushNotificationService.pushNotification(userId, PushNotificationService.HIGT, title, body,
+                url);
+    }
 }

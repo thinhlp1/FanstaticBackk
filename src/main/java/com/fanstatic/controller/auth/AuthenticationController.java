@@ -41,14 +41,14 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> login(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<ResponseDTO> login(@RequestBody  LoginDTO loginDTO) {
         ResponseDTO reponseDTO = authenticationService.login(loginDTO);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
     @PostMapping("/login-password")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> login(@RequestBody LoginPasswordDTO loginDTO) {
+    public ResponseEntity<ResponseDTO> login(@RequestBody  LoginPasswordDTO loginDTO) {
         ResponseDTO reponseDTO = authenticationService.loginPassword(loginDTO);
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }

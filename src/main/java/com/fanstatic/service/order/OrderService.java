@@ -710,8 +710,8 @@ public class OrderService {
 
         }
         notificationService.sendOrderCancel(order.getOrderId());
-
-        return ResponseUtils.success(200, "Hủy thành công", null);
+        OrderDTO orderDTO = convertOrderToDTO(order);
+        return ResponseUtils.success(205, "Hủy thành công", orderDTO);
     }
 
     public ResponseDTO switchOrder(SwitchOrderRequestDTO switchOrderRequestDTO) {
@@ -1310,7 +1310,7 @@ public class OrderService {
     }
 
     public ResponseDTO updateOrder(OrderUpdateDTO orderUpdateDTO) {
-        // TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+//        TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
 
         Order order = orderRepository.findById(orderUpdateDTO.getOrderId()).orElse(null);
 
@@ -1322,7 +1322,9 @@ public class OrderService {
         if (orderUpdateDTO.getOrderItemUpdates() != null) {
             ResponseDTO updateResponse = updateOrderItem(orderUpdateDTO.getOrderItemUpdates(), order);
             if (!updateResponse.isSuccess()) {
-                // transactionManager.rollback(transactionStatus);
+
+//                transactionManager.rollback(transactionStatus);
+
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1332,7 +1334,7 @@ public class OrderService {
             ResponseDTO updateResponse = updateOrderExtraPortion(orderUpdateDTO.getOrderExtraPortionUpdates(),
                     order);
             if (!updateResponse.isSuccess()) {
-                // transactionManager.rollback(transactionStatus);
+//                transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1342,7 +1344,7 @@ public class OrderService {
             ResponseDTO updateResponse = removeOrderItem(orderUpdateDTO.getOrderItemRemoves(),
                     order);
             if (!updateResponse.isSuccess()) {
-                // transactionManager.rollback(transactionStatus);
+//                transactionManager.rollback(transactionStatus);
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1353,7 +1355,8 @@ public class OrderService {
                     order);
             if (!updateResponse.isSuccess()) {
 
-                // transactionManager.rollback(transactionStatus);
+//                transactionManager.rollback(transactionStatus);
+
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1374,7 +1377,7 @@ public class OrderService {
 
         // if (!transactionStatus.isCompleted()) {
         // System.out.println("commit");
-        // transactionManager.commit(transactionStatus);
+//        transactionManager.commit(transactionStatus);
         // }
         order = orderRepository.findById(orderUpdateDTO.getOrderId()).orElse(null);
         List<OrderSurcharge> orderSurcharges = orderSurchargeRepository.findAllByOrder(order);
