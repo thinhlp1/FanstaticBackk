@@ -253,6 +253,15 @@ public class NotificationService {
                 }
             }
             notificationDTO.setHasSeen(!(notification2.getSeenAt() == null));
+            if (notification2.getType().equals(ApplicationConst.NotificationType.ORDER)) {
+                Order order = orderRepository.findById(Integer.valueOf(notification2.getObjectId())).orElse(null);
+                if (order != null) {
+                    if (order.getStatus().getId().equals(ApplicationConst.OrderStatus.CANCEL)
+                            || order.getStatus().getId().equals(ApplicationConst.OrderStatus.COMPLETE)) {
+                        notificationDTO.setType(ApplicationConst.NotificationType.ORDER_NO_ACTION);
+                    }
+                }
+            }
             wsPurcharseOrderController.sendWebSocketResponse(notificationDTO,
                     WebsocketConst.TOPPIC_NOTIFICATION + "/" + notification2.getReceiver().getId());
         }

@@ -1322,7 +1322,9 @@ public class OrderService {
         if (orderUpdateDTO.getOrderItemUpdates() != null) {
             ResponseDTO updateResponse = updateOrderItem(orderUpdateDTO.getOrderItemUpdates(), order);
             if (!updateResponse.isSuccess()) {
+
 //                transactionManager.rollback(transactionStatus);
+
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1354,6 +1356,7 @@ public class OrderService {
             if (!updateResponse.isSuccess()) {
 
 //                transactionManager.rollback(transactionStatus);
+
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -2408,7 +2411,7 @@ public class OrderService {
             customerPoint = 0L;
         }
 
-        if (customerPoint > pointProgramConfig.getMinPoint()) {
+        if (customerPoint > pointProgramConfig.getMaxPoint()) {
             Long moneyRedeem = convertPointToMoney(customerPoint);
 
             if (moneyRedeem >= order.getTotal()) {
@@ -2427,7 +2430,7 @@ public class OrderService {
             orderPointResponseDTO.setMoneyCanReem(moneyRedeem);
         }
         orderPointResponseDTO.setPointLeft(0L);
-        orderPointResponseDTO.setMinPrice(pointProgramConfig.getMinPoint());
+        orderPointResponseDTO.setMinPrice(pointProgramConfig.getMinPrice());
         orderPointResponseDTO.setPoint(customerPoint);
         return ResponseUtils.success(200, "Điểm của người dùng", orderPointResponseDTO);
     }
