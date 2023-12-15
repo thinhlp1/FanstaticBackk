@@ -603,7 +603,7 @@ public class OrderService {
             // orderTableSaved.getMessage(), null);
 
             // }
-            // orderSaved.setOrderTables(rootOrder.getOrderTables());
+             orderSaved.setOrderTables(rootOrder.getOrderTables());
 
             List<ExtraPortionOrderRequestDTO> extraPortionDTOs = orderRequestDTO.getExtraPortions();
             if (extraPortionDTOs != null && !extraPortionDTOs.isEmpty()) {
@@ -2827,7 +2827,8 @@ public class OrderService {
                 }
                 newOrderItemDTO.getProductVarient().setCategories(categoryDTOs);
 
-            } else if (product != null) {
+            }
+            if (product != null) {
                 SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orElse(null);
                 if (saleEvent != null) {
 
@@ -2836,7 +2837,6 @@ public class OrderService {
                 }
 
                 List<ProductImageDTO> productImages = productService.getProductImage(product);
-
                 List<ProductCategory> productCategories = productCategoryRepository.findByProduct(product);
 
                 List<CategoryCompactDTO> categoryDTOs = new ArrayList<>();
@@ -2848,7 +2848,8 @@ public class OrderService {
                 newOrderItemDTO.getProduct().setCategories(categoryDTOs);
                 newOrderItemDTO.getProduct().setImageUrl(productImages);
 
-            } else if (comboProduct != null) {
+            }
+            if (comboProduct != null) {
                 SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orElse(null);
                 if (saleEvent != null) {
                     newOrderItemDTO.getComboProduct().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
