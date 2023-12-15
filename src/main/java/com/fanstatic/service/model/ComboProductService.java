@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -21,10 +23,14 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
 import com.fanstatic.dto.model.category.CategoryCompactDTO;
+import com.fanstatic.dto.model.category.CategoryDTO;
 import com.fanstatic.dto.model.combo.ComboProductDTO;
 import com.fanstatic.dto.model.combo.ComboProductDetailDTO;
 import com.fanstatic.dto.model.combo.ComboProductDetailRequestDTO;
 import com.fanstatic.dto.model.combo.ComboProductRequestDTO;
+import com.fanstatic.dto.model.extraportion.ExtraPortionDTO;
+import com.fanstatic.dto.model.product.ProductCompactDTO;
+import com.fanstatic.dto.model.product.ProductDTO;
 import com.fanstatic.dto.model.saleevent.SaleEventDTO;
 import com.fanstatic.model.Category;
 import com.fanstatic.model.ComboProduct;
@@ -32,6 +38,7 @@ import com.fanstatic.model.ComboProductDetail;
 import com.fanstatic.model.ExtraPortion;
 import com.fanstatic.model.File;
 import com.fanstatic.model.Product;
+import com.fanstatic.model.ProductCategory;
 import com.fanstatic.model.ProductVarient;
 import com.fanstatic.model.SaleEvent;
 import com.fanstatic.repository.CategoryRepository;
@@ -65,6 +72,16 @@ public class ComboProductService {
     private final ModelMapper modelMapper;
     private final SystemService systemService;
     private final FileService fileService;
+
+    @Autowired
+    @Lazy
+    private ProductService productService;
+    @Autowired
+    @Lazy
+    private ExtraPortionService extraPortionService;
+    @Autowired
+    @Lazy
+    private ProductVarientService productVarientService;
 
     public ResponseDTO create(ComboProductRequestDTO comboProductRequestDTO) {
         TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
@@ -501,6 +518,21 @@ public class ComboProductService {
         for (ComboProductDetail comboProductDetail : comboProduct.getComboProductDetails()) {
             ComboProductDetailDTO comboProductDetailDTO = modelMapper.map(comboProductDetail,
                     ComboProductDetailDTO.class);
+            if (comboProductDetail.getProduct() != null) {
+                ProductCompactDTO productCompactDTO = new ProductCompactDTO();
+                ProductDTO productDTO = (ProductDTO) productService.detail(comboProductDetail.getProduct().getId())
+                        .getData();
+                productCompactDTO = modelMapper.map(productDTO, ProductCompactDTO.class);
+                comboProductDetailDTO.setProduct(productCompactDTO);
+
+            }
+
+            if (comboProductDetail.getExtraPortion() != null) {
+                ExtraPortionDTO extraPortionDTO = (ExtraPortionDTO) extraPortionService
+                        .detail(comboProductDetail.getExtraPortion().getExtraPortionId()).getData();
+                comboProductDetailDTO.setExtraPortion(extraPortionDTO);
+            }
+
             comboProductDetailDTOs.add(comboProductDetailDTO);
 
         }
