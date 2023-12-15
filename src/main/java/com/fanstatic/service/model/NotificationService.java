@@ -27,6 +27,7 @@ import com.fanstatic.repository.OrderRepository;
 import com.fanstatic.repository.UserRepository;
 import com.fanstatic.service.order.OrderService;
 import com.fanstatic.service.system.SystemService;
+import com.fanstatic.util.DateUtils;
 import com.fanstatic.util.ResponseUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -159,7 +160,7 @@ public class NotificationService {
     }
 
     public boolean sendOrderCheckout(Integer orderId) {
-        String message = "Order " + orderId + " đang yêu cầu thanh toán";
+        String message = "Order " + orderId + " đang yêu cầu thanh toán. Mã order: " + orderId;
         String action = DETAIL_TO_ORDER + orderId;
         String title = "Order cần thánh toán";
 
@@ -175,7 +176,7 @@ public class NotificationService {
     }
 
     public boolean sendOrderComplete(Integer orderId) {
-        String message = "Order " + orderId + " đã hoàn thành";
+        String message = "Order " + orderId + " đã hoàn thành. Mã order: " + orderId;
         String action = DETAIL_TO_ORDER + orderId;
         String title = "Order đã hoàn thành";
 
@@ -191,7 +192,7 @@ public class NotificationService {
     }
 
     public boolean sendOrderupdate(Integer orderId) {
-        String message = "Order " + orderId + " đã được cập nhật";
+        String message = "Order " + orderId + " đã được cập nhật. Mã order: " + orderId;
         String action = DETAIL_TO_ORDER + orderId;
         String title = "Order đã được cập nhật";
 
@@ -207,9 +208,9 @@ public class NotificationService {
     }
 
     public boolean sendOrderCancel(Integer orderId) {
-        String message = "Order " + orderId + " đã bị hủy ";
+        String message = "Order " + orderId + " đã bị hủy. Mã order: " + orderId;
         String action = DETAIL_TO_ORDER + orderId;
-        String title = "Order đã được cập nhật";
+        String title = "Order đã bị hủy";
 
         // get user who receive notication
         List<User> users = userRepository
@@ -255,6 +256,12 @@ public class NotificationService {
             wsPurcharseOrderController.sendWebSocketResponse(notificationDTO,
                     WebsocketConst.TOPPIC_NOTIFICATION + "/" + notification2.getReceiver().getId());
         }
+    }
+
+    public void cleareNotification() {
+        Date date = DateUtils.getDateBefore(30);
+        notificationRepository.deleteBySeenAtBefore(date);
+
     }
 
 }

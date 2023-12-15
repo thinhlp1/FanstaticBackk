@@ -246,7 +246,16 @@ public class UserProfileService {
 
         User user = systemService.getUserLogin();
 
-        UserVoucher userVoucher = new UserVoucher();
+        UserVoucher userVoucher = userVoucherRepository.findBbyUserIdAndVoucherId(user.getId(),
+                voucher.getId()).orElse(null);
+        if (userVoucher != null) {
+            if (userVoucher.getUseAt() != null) {
+                return ResponseUtils.fail(400, "Voucher đã được thu thập và sử dụng", null);
+            }
+            return ResponseUtils.fail(400, "Voucher đã được thu thập", null);
+
+        }
+        userVoucher = new UserVoucher();
         userVoucher.setUser(user);
         userVoucher.setVoucher(voucher);
         userVoucher.setCollectAt(new Date());

@@ -19,20 +19,18 @@ public interface OrderTableRepository extends JpaRepository<OrderTable, Integer>
     public int checkTalbeOccupiedAndRootId(@Param("tableId") int tableId, @Param("rootOrderId") int rootOrderId,
                                            Date time);
 
-    @Query("SELECT COUNT(o) FROM OrderTable o " +
-            "WHERE o.table.id = :tableId " +
-            "AND o.order.status.id <> 'COMPLETE' " +
-            "AND o.order.status.id <> 'CANCEL' " +
+        @Query("SELECT COUNT(o) FROM OrderTable o " +
+                        "WHERE o.table.id = :tableId " +
+                        "AND o.order.status.id <> 'COMPLETE' " +
+                        "AND o.order.status.id <> 'CANCEL' " +
+                        "AND o.order.createAt >= :time")
+        public int checkTalbeOccupied(@Param("tableId") int tableId, Date time);
 
-            "AND o.order.createAt >= :time")
-    public int checkTalbeOccupied(@Param("tableId") int tableId, Date time);
-
-    @Query("SELECT o.order FROM OrderTable o " +
-            "WHERE o.table.id = :tableId " +
-            "AND o.order.status.id <> 'COMPLETE' " +
-            "AND o.order.status.id <> 'CANCEL' " +
-
-            "AND o.order.createAt >= :time")
-    public Optional<Order> findOrderOnTable(@Param("tableId") int tableId, Date time);
+        @Query("SELECT o.order FROM OrderTable o " +
+                        "WHERE o.table.id = :tableId " +
+                        "AND o.order.status.id <> 'COMPLETE' " +
+                        "AND o.order.status.id <> 'CANCEL' " +
+                        "AND o.order.createAt >= :time")
+        public Optional<Order> findOrderOnTable(@Param("tableId") int tableId, Date time);
 
 }

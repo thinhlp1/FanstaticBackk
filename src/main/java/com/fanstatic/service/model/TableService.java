@@ -147,7 +147,7 @@ public class TableService {
 
             // create QR code for save table
             for (Table table : tableSaveds) {
-                QrCode qrCode = qrCodeService.saveQrCodeTable(ApplicationConst.CLIENT_HOST + "?table=" + table.getId(),
+                QrCode qrCode = qrCodeService.saveQrCodeTable(ApplicationConst.CLIENT_HOST + "?table=" + table.getNumberTable(),
                         String.valueOf(table.getId()));
                 table.setQrCode(qrCode);
                 tableRepository.save(table);
@@ -263,12 +263,12 @@ public class TableService {
             Path pathToFile = qrCodeService.createQR(ApplicationConst.CLIENT_HOST, "table1");
             FileUploadInfoDTO fileUploadInfoDTO = firebaseStorageService.uploadImage(pathToFile,
                     ImageConst.TALBE_FOLDER);
-            return ResponseUtils.success(200, "OKE Đó", fileUploadInfoDTO);
+            return ResponseUtils.success(200, "QR thành công", fileUploadInfoDTO);
         } catch (WriterException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return ResponseUtils.fail(500, "Như cke", null);
+        return ResponseUtils.fail(500, "Không thành công", null);
     }
 
 }

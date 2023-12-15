@@ -1,5 +1,7 @@
 package com.fanstatic.dto.model.bill;
 
+import java.util.Date;
+
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.model.payment.PaymentMethodDTO;
 import com.fanstatic.dto.model.status.StatusDTO;
@@ -19,5 +21,11 @@ public class BillDTO extends ResponseDataDTO {
     private PaymentMethodDTO paymentMethod;
 
     private String checkoutUrl;
+
+    private Date updateAt;
+
+    private Date createAt;
+
+    private Date deleteAt;
 
 }

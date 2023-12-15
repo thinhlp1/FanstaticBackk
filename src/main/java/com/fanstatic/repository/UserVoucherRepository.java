@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,7 +23,7 @@ public interface UserVoucherRepository extends JpaRepository<UserVoucher, Intege
         @Query("SELECT uv.voucher FROM UserVoucher uv " +
                         "WHERE uv.user.id = :userId " +
                         "AND  uv.voucher.active = 1 " +
-                        "AND :currentDate >=  uv.voucher.startAt AND  :currentDate <= uv.voucher.endAt")
+                        "AND :currentDate >=  uv.voucher.startAt AND  :currentDate <= uv.voucher.endAt AND uv.useAt IS NULL")
         List<Voucher> findActiveVouchersForUser(@Param("userId") int userId, @Param("currentDate") Date currentDate);
 
         @Query("SELECT v, COUNT(uv) AS quantityCollected " +
@@ -37,4 +38,7 @@ public interface UserVoucherRepository extends JpaRepository<UserVoucher, Intege
         @Transactional
         @Query("DELETE FROM UserVoucher uv WHERE uv.user.id = :userId AND uv.voucher.id = :voucherId")
         void deleteByUserIdAndVoucherId(int userId, int voucherId);
+
+        @Query("SELECT uv FROM UserVoucher uv WHERE uv.user.id = :userId AND uv.voucher.id = :voucherId")
+        Optional<UserVoucher> findBbyUserIdAndVoucherId(int userId, int voucherId);
 }
