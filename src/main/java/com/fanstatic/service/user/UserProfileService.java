@@ -302,7 +302,7 @@ public class UserProfileService {
             String jwtToken = jwtUtil.generateToken(account);
             cookieUtils.set("token", jwtToken, 24);
             systemService.writeLoginLog(jwtToken, account.getUser());
-            systemService.writeSystemLog(user.getId(), user.getName(), "Thay đổi số điện thoại");
+            systemService.writeSystemLog(user.getId(), null, "Thay đổi số điện thoại");
             return ResponseUtils.success(200, "Đổi mật khẩu thành công", null);
 
         } else {
