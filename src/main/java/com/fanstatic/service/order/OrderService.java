@@ -1,6 +1,7 @@
 package com.fanstatic.service.order;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -603,7 +604,9 @@ public class OrderService {
             // orderTableSaved.getMessage(), null);
 
             // }
-            // orderSaved.setOrderTables(rootOrder.getOrderTables());
+            List<OrderTable> orderTables2 = rootOrder.getOrderTables().stream().map(OrderTable::new)
+                    .collect(Collectors.toList());
+            orderSaved.setOrderTables(orderTables2);
 
             List<ExtraPortionOrderRequestDTO> extraPortionDTOs = orderRequestDTO.getExtraPortions();
             if (extraPortionDTOs != null && !extraPortionDTOs.isEmpty()) {
