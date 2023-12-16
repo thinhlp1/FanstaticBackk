@@ -2,6 +2,7 @@ package com.fanstatic.service.system;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.apache.tomcat.util.json.JSONParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import com.fanstatic.config.constants.MessageConst;
 import com.fanstatic.config.system.ContactConfig;
@@ -104,8 +106,10 @@ public class SystemConfigService {
     private ResponseDTO loadConfig() {
         try {
 
-            File configFile = new File("src\\main\\resources\\config\\config.json");
-            systemConfig = objectMapper.readValue(configFile, SystemConfig.class);
+            ClassPathResource resource = new ClassPathResource("config/config.json");
+            byte[] content = FileCopyUtils.copyToByteArray(resource.getInputStream());
+            String jsonString = new String(content, StandardCharsets.UTF_8);
+            systemConfig = objectMapper.readValue(jsonString, SystemConfig.class);
             return ResponseUtils.success(200, "Cấu hình hệ thống", systemConfig);
         } catch (IOException e) {
             // Xử lý lỗi khi không thể đọc cấu hình
