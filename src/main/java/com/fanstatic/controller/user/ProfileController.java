@@ -43,7 +43,7 @@ public class ProfileController {
     @PutMapping("/update/image")
     @ResponseBody
     public ResponseEntity<ResponseDTO> updateImage(@RequestPart MultipartFile image) {
-        ResponseDTO reponseDTO = userProfileService.updateImage(image);
+        ResponseDTO reponseDTO = userProfileService.updateImage(image); 
         return ResponseUtils.returnReponsetoClient(reponseDTO);
     }
 
