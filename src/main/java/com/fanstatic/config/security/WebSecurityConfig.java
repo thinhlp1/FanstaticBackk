@@ -62,7 +62,7 @@ public class WebSecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://149.28.143.65:3000"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000","http://192.168.1.99:3000", "http://vivit.live:3000","http://192.168.3.4:3000", "http://10.82.49.95:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PUT", "OPTIONS", "PATCH", "DELETE"));
         configuration.setAllowCredentials(true);
         configuration.addAllowedHeader("*"); // Thêm dòng này

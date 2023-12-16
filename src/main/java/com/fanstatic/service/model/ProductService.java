@@ -73,7 +73,6 @@ public class ProductService {
     private final PlatformTransactionManager transactionManager;
     private final ModelMapper modelMapper;
     private final SystemService systemService;
-    private final ComboProductService comboProductService;
 
     private final CategoryRepository categoryRepository;
     private final OrderItemRepository orderItemRepository;
@@ -742,11 +741,11 @@ public class ProductService {
         List<ComboProduct> comboProducts = comboProductRepository.findByCategory(category);
         List<ComboProductDTO> comboProductDTOs = new ArrayList<>();
 
-        for (ComboProduct comboProduct : comboProducts) {
-            ComboProductDTO comboProdutDTO = (ComboProductDTO) comboProductService.detail(comboProduct.getId())
-                    .getData();
-            comboProductDTOs.add(comboProdutDTO);
-        }
+        // for (ComboProduct comboProduct : comboProducts) {
+        //     ComboProductDTO comboProdutDTO = (ComboProductDTO) comboProductService.detail(comboProduct.getId())
+        //             .getData();
+        //     comboProductDTOs.add(comboProdutDTO);
+        // }
 
         List<HotProductDTO> hotProductDTOs = new ArrayList<>();
         for (ProductDTO productDTO : productDTOS) {

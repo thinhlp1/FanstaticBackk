@@ -1,6 +1,7 @@
 package com.fanstatic.service.order;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -603,7 +604,9 @@ public class OrderService {
             // orderTableSaved.getMessage(), null);
 
             // }
-            // orderSaved.setOrderTables(rootOrder.getOrderTables());
+            List<OrderTable> orderTables2 = rootOrder.getOrderTables().stream().map(OrderTable::new)
+                    .collect(Collectors.toList());
+            orderSaved.setOrderTables(orderTables2);
 
             List<ExtraPortionOrderRequestDTO> extraPortionDTOs = orderRequestDTO.getExtraPortions();
             if (extraPortionDTOs != null && !extraPortionDTOs.isEmpty()) {
@@ -710,8 +713,8 @@ public class OrderService {
 
         }
         notificationService.sendOrderCancel(order.getOrderId());
-
-        return ResponseUtils.success(200, "Hủy thành công", null);
+        OrderDTO orderDTO = convertOrderToDTO(order);
+        return ResponseUtils.success(205, "Hủy thành công", orderDTO);
     }
 
     public ResponseDTO switchOrder(SwitchOrderRequestDTO switchOrderRequestDTO) {
@@ -1310,7 +1313,8 @@ public class OrderService {
     }
 
     public ResponseDTO updateOrder(OrderUpdateDTO orderUpdateDTO) {
-        // TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        // TransactionStatus transactionStatus = transactionManager.getTransaction(new
+        // DefaultTransactionDefinition());
 
         Order order = orderRepository.findById(orderUpdateDTO.getOrderId()).orElse(null);
 
@@ -1322,7 +1326,9 @@ public class OrderService {
         if (orderUpdateDTO.getOrderItemUpdates() != null) {
             ResponseDTO updateResponse = updateOrderItem(orderUpdateDTO.getOrderItemUpdates(), order);
             if (!updateResponse.isSuccess()) {
+
                 // transactionManager.rollback(transactionStatus);
+
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1354,6 +1360,7 @@ public class OrderService {
             if (!updateResponse.isSuccess()) {
 
                 // transactionManager.rollback(transactionStatus);
+
                 return ResponseUtils.fail(updateResponse.getStatusCode(), updateResponse.getMessage(),
                         null);
             }
@@ -1610,6 +1617,7 @@ public class OrderService {
             }
 
             List<OrderItem> orderItems = order.getOrderItems();
+            boolean isSame = false;
             for (OrderItem orderItem : orderItems) {
                 // Kiểm tra nếu product, product variant hoặc combo giống nhau
                 if (isSameProductOrVariantOrCombo(orderItem, orderItemRequestDTO)) {
@@ -1618,14 +1626,17 @@ public class OrderService {
                     orderItem.setQuantity(orderItem.getQuantity() +
                             orderItemRequestDTO.getQuantity());
                     orderItemRepository.saveAndFlush(orderItem);
-
+                    isSame = true;
+                    break;
                 }
 
             }
 
-            List<OrderItemRequestDTO> orderItemRequestDTO2s = new ArrayList<>();
-            orderItemRequestDTO2s.add(orderItemRequestDTO);
-            ResponseDTO isSaved = createOrderItem(orderItemRequestDTO2s, order);
+            if (!isSame) {
+                List<OrderItemRequestDTO> orderItemRequestDTO2s = new ArrayList<>();
+                orderItemRequestDTO2s.add(orderItemRequestDTO);
+                createOrderItem(orderItemRequestDTO2s, order);
+            }
         }
 
         return ResponseUtils.success(200, "Thêm món thành công", null);
@@ -1645,26 +1656,31 @@ public class OrderService {
                 return ResponseUtils.fail(400, "Số lượng không hợp lệ", null);
 
             }
-
+            boolean isSame = false;
             for (OrderExtraPortion rootExtraPortion : order.getOrderExtraPortions()) {
                 if (rootExtraPortion.getExtraPortion().getExtraPortionId() == extraPortionOrderRequestDTO
                         .getExtraPortionId()) {
                     rootExtraPortion
                             .setQuantity(rootExtraPortion.getQuantity() + extraPortionOrderRequestDTO.getQuantity());
                     orderExtraPortionRepository.saveAndFlush(rootExtraPortion);
-
+                    isSame = true;
+                    break;
                 }
 
             }
 
-            OrderExtraPortion orderExtraPortion = modelMapper.map(extraPortionOrderRequestDTO, OrderExtraPortion.class);
+            if (isSame) {
 
-            orderExtraPortion.setCreateAt(new Date());
-            orderExtraPortion.setCreateBy(systemService.getUserLogin());
-            orderExtraPortion.setExtraPortion(extraPortion);
-            orderExtraPortion.setOrder(order);
+                OrderExtraPortion orderExtraPortion = modelMapper.map(extraPortionOrderRequestDTO,
+                        OrderExtraPortion.class);
 
-            orderExtraPortionRepository.saveAndFlush(orderExtraPortion);
+                orderExtraPortion.setCreateAt(new Date());
+                orderExtraPortion.setCreateBy(systemService.getUserLogin());
+                orderExtraPortion.setExtraPortion(extraPortion);
+                orderExtraPortion.setOrder(order);
+
+                orderExtraPortionRepository.saveAndFlush(orderExtraPortion);
+            }
         }
 
         return ResponseUtils.success(200, "Thêm món thành công", null);

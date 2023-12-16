@@ -147,7 +147,7 @@ public class TableService {
 
             // create QR code for save table
             for (Table table : tableSaveds) {
-                QrCode qrCode = qrCodeService.saveQrCodeTable(ApplicationConst.CLIENT_HOST + "?table=" + table.getNumberTable(),
+                QrCode qrCode = qrCodeService.saveQrCodeTable(ApplicationConst.CLIENT_HOST + "?table=" + table.getId(),
                         String.valueOf(table.getId()));
                 table.setQrCode(qrCode);
                 tableRepository.save(table);
