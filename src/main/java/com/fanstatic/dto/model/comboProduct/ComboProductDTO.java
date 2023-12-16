@@ -10,4 +10,6 @@ public class ComboProductDTO extends ResponseDataDTO {
     private int id;
 
     private String name;
+
+    private int price;
 }

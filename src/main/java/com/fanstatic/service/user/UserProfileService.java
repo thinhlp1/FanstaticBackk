@@ -134,8 +134,8 @@ public class UserProfileService {
             User userSaved = userRepository.save(user);
             if (userSaved != null) {
 
-                systemService.writeSystemLog(userSaved.getId(), userSaved.getName(), null);
-                return ResponseUtils.success(200, MessageConst.UPDATE_SUCCESS, null);
+              //  systemService.writeSystemLog(userSaved.getId(), userSaved.getName(), null);
+                return ResponseUtils.success(200, "Cập nhật thành công vui lòng tải lại trang", null);
 
             } else {
                 return ResponseUtils.fail(500, MessageConst.UPDATE_FAIL, null);
@@ -286,6 +286,9 @@ public class UserProfileService {
         User user = systemService.getUserLogin();
         Account account = user.getAccount();
 
+        if (changePasswordDTO.getOldPassword() == null || changePasswordDTO.getOldPassword().trim().equals(' ')) {
+            return ResponseUtils.fail(400, "Vui lòng nhập mật khẩu cũ", null);
+        }
         if (!passwordEncoder.matches(changePasswordDTO.getOldPassword(), account.getPassword())) {
             return ResponseUtils.fail(400, "Mật khẩu không đúng", null);
         }
@@ -302,7 +305,7 @@ public class UserProfileService {
             String jwtToken = jwtUtil.generateToken(account);
             cookieUtils.set("token", jwtToken, 24);
             systemService.writeLoginLog(jwtToken, account.getUser());
-            systemService.writeSystemLog(user.getId(), null, "Thay đổi số điện thoại");
+          //  systemService.writeSystemLog(user.getId(), null, "Thay đổi số điện thoại");
             return ResponseUtils.success(200, "Đổi mật khẩu thành công", null);
 
         } else {
