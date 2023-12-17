@@ -16,6 +16,8 @@ import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.auth.ChangePasswordDTO;
 import com.fanstatic.dto.auth.ConfirmOtpDTO;
 import com.fanstatic.dto.auth.LoginDTO;
+import com.fanstatic.dto.model.profile.ProfileUpdateDTO;
+import com.fanstatic.dto.model.shift.ShiftRequestDTO;
 import com.fanstatic.service.model.NotificationService;
 import com.fanstatic.service.user.UserProfileService;
 import com.fanstatic.util.ResponseUtils;
@@ -66,10 +68,25 @@ public class ProfileController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
+     @PutMapping("/update/{id}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> update(@RequestBody @Valid ProfileUpdateDTO profileUpdateDTO, @PathVariable("id") int id) {
+        ResponseDTO reponseDTO = userProfileService.updateProfile(profileUpdateDTO);
+        return ResponseUtils.returnReponsetoClient(reponseDTO);
+    }
+
+
     @PostMapping("/change-numberphone")
     @ResponseBody
     public ResponseEntity<ResponseDTO> changeNumberPhone(@RequestBody @Valid LoginDTO loginDTO) {
         ResponseDTO responseDTO = userProfileService.changeNumberPhone(loginDTO);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+     @PostMapping("/change-profile")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> changeProfile(@RequestBody @Valid LoginDTO loginDTO) {
+        ResponseDTO responseDTO = userProfileService.changeProfile(loginDTO);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
@@ -80,10 +97,17 @@ public class ProfileController {
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 
-    @PostMapping("/confirm-otp")
+    @PostMapping("/confirm-otp-profile")
     @ResponseBody
-    public ResponseEntity<ResponseDTO> confirmOTP(@RequestBody @Valid ConfirmOtpDTO confirmOtpDTO) {
-        ResponseDTO responseDTO = userProfileService.confirmOTP(confirmOtpDTO);
+    public ResponseEntity<ResponseDTO> confirmOTPprofile(@RequestBody @Valid ConfirmOtpDTO confirmOtpDTO) {
+        ResponseDTO responseDTO = userProfileService.confirmOTPChangeProfile(confirmOtpDTO);
+        return ResponseUtils.returnReponsetoClient(responseDTO);
+    }
+
+    @PostMapping("/confirm-otp-phone")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> confirmOTPPhone(@RequestBody @Valid ConfirmOtpDTO confirmOtpDTO) {
+        ResponseDTO responseDTO = userProfileService.confirmOTPChangePhone(confirmOtpDTO);
         return ResponseUtils.returnReponsetoClient(responseDTO);
     }
 

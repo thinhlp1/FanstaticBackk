@@ -24,6 +24,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderTable {
 
+	public OrderTable(OrderTable orderTable) {
+		this.id = orderTable.id;
+		this.order = orderTable.order;
+		this.table = orderTable.table;
+		this.updateAt = orderTable.updateAt;
+		this.updateBy = orderTable.updateBy;
+		this.createAt = orderTable.createAt;
+		this.createBy = orderTable.createBy;
+		this.deleteAt = orderTable.deleteAt;
+		this.deleteBy = orderTable.deleteBy;
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
