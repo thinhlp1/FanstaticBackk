@@ -31,6 +31,9 @@ public class VoucherRequestDTO {
     @NotNull(message = "{NotNull.voucher.priceCondition}")
     private BigInteger priceCondition;
 
+    // thịnh thêm thuộc tính quantity
+    private int quantity;
+
     private Date startAt;
 
     @Future(message = "{Future.voucher.endAt}")
