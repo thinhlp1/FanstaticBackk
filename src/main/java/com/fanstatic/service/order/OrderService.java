@@ -890,15 +890,24 @@ public class OrderService {
             order.setUpdateAt(new Date());
             orderRepository.save(order);
 
-            if (order.getCustomer() != null) {
-                OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
-                        .getData());
-                Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
+             if (order.getCustomer() != null) {
+            OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
+                    .getData());
+            System.out.println(orderPointResponseDTO);
+            User customer = order.getCustomer();
 
-                User customer = order.getCustomer();
+            if (order.getRedeem() != null) {
+                Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
+                customer.setPoint(point);
+                userRepository.save(customer);
+
+            } else {
+                Long point = order.getCustomer().getPoint() + orderPointResponseDTO.getPoint();
                 customer.setPoint(point);
                 userRepository.save(customer);
             }
+
+        }
 
             List<OrderItem> orderItems = order.getOrderItems();
             Status itemStatus = statusRepository.findById(ApplicationConst.OrderStatus.ITEM_COMPLETE).get();
@@ -994,14 +1003,23 @@ public class OrderService {
         order.setUpdateAt(new Date());
         orderRepository.save(order);
 
-        if (order.getCustomer() != null) {
+          if (order.getCustomer() != null) {
             OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
                     .getData());
-            Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
-
+            System.out.println(orderPointResponseDTO);
             User customer = order.getCustomer();
-            customer.setPoint(point);
-            userRepository.save(customer);
+
+            if (order.getRedeem() != null) {
+                Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
+                customer.setPoint(point);
+                userRepository.save(customer);
+
+            } else {
+                Long point = order.getCustomer().getPoint() + orderPointResponseDTO.getPoint();
+                customer.setPoint(point);
+                userRepository.save(customer);
+            }
+
         }
 
         List<OrderItem> orderItems = order.getOrderItems();
