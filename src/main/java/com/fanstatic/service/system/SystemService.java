@@ -86,7 +86,12 @@ public class SystemService {
     public User getUserLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Account account = (Account) authentication.getPrincipal();
+            Account account = new Account();
+            try {
+                 account = (Account) authentication.getPrincipal();
+            } catch (Exception exception){
+                return  null;
+            }
             User user = account.getUser();
             return user;
         }

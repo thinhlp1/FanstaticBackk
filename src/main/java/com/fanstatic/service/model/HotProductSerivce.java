@@ -154,7 +154,7 @@ public class HotProductSerivce {
             }
             if (hotProduct.getComboProduct() != null) {
                 ComboProductDTO comboProductDTO = (ComboProductDTO) comboProductService
-                        .delete(hotProduct.getComboProduct().getId()).getData();
+                        .detail(hotProduct.getComboProduct().getId()).getData();
                 hotProductDTO.setComboProduct(comboProductDTO);
             }
 

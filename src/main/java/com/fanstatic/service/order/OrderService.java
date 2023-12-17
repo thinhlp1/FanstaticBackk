@@ -603,7 +603,7 @@ public class OrderService {
             // orderTableSaved.getMessage(), null);
 
             // }
-             orderSaved.setOrderTables(rootOrder.getOrderTables());
+//             orderSaved.setOrderTables(rootOrder.getOrderTables());
 
             List<ExtraPortionOrderRequestDTO> extraPortionDTOs = orderRequestDTO.getExtraPortions();
             if (extraPortionDTOs != null && !extraPortionDTOs.isEmpty()) {
