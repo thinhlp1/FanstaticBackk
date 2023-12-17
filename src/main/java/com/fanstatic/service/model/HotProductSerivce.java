@@ -14,6 +14,7 @@ import com.fanstatic.config.constants.RequestParamConst;
 import com.fanstatic.dto.ResponseDTO;
 import com.fanstatic.dto.ResponseDataDTO;
 import com.fanstatic.dto.ResponseListDataDTO;
+import com.fanstatic.dto.model.combo.ComboProductDTO;
 import com.fanstatic.dto.model.hotproduct.HotProductDTO;
 import com.fanstatic.dto.model.hotproduct.HotProductRequestDTO;
 import com.fanstatic.dto.model.product.ProductDTO;
@@ -38,6 +39,7 @@ public class HotProductSerivce {
     private final ModelMapper modelMapper;
     private final SystemService systemService;
     private final ProductService productService;
+    private final ComboProductService comboProductService;
     private final PlatformTransactionManager transactionManager;
 
     public ResponseDTO addHotProduct(List<HotProductRequestDTO> hotProductRequestDTOs) {
@@ -120,8 +122,17 @@ public class HotProductSerivce {
 
         for (HotProduct hotProduct : hotProducts) {
             HotProductDTO hotProductDTO = modelMapper.map(hotProduct, HotProductDTO.class);
-            ProductDTO productDTO = (ProductDTO) productService.detail(hotProduct.getProduct().getId()).getData();
-            hotProductDTO.setProduct(productDTO);
+
+            if (hotProduct.getProduct() != null) {
+                ProductDTO productDTO = (ProductDTO) productService.detail(hotProduct.getProduct().getId()).getData();
+                hotProductDTO.setProduct(productDTO);
+            }
+            if (hotProduct.getComboProduct() != null) {
+                ComboProductDTO comboProductDTO = (ComboProductDTO) comboProductService
+                        .delete(hotProduct.getComboProduct().getId()).getData();
+                hotProductDTO.setComboProduct(comboProductDTO);
+            }
+
             hotProductDTOs.add(hotProductDTO);
         }
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();
@@ -137,7 +148,16 @@ public class HotProductSerivce {
 
         for (HotProduct hotProduct : hotProducts) {
             HotProductDTO hotProductDTO = modelMapper.map(hotProduct, HotProductDTO.class);
-            // if 
+            if (hotProduct.getProduct() != null) {
+                ProductDTO productDTO = (ProductDTO) productService.detail(hotProduct.getProduct().getId()).getData();
+                hotProductDTO.setProduct(productDTO);
+            }
+            if (hotProduct.getComboProduct() != null) {
+                ComboProductDTO comboProductDTO = (ComboProductDTO) comboProductService
+                        .delete(hotProduct.getComboProduct().getId()).getData();
+                hotProductDTO.setComboProduct(comboProductDTO);
+            }
+
             productDTOS.add(hotProductDTO);
         }
         ResponseListDataDTO reponseListDataDTO = new ResponseListDataDTO();

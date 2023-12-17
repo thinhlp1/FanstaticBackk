@@ -367,6 +367,10 @@ public class RolePermissionService {
                 continue;
             }
 
+            if (managerFeature.getId().equals("CUSTOMER_ORDER")){
+                continue;
+            }
+
             if (addedFeatureId.contains(managerFeature.getId())) {
                 continue;
             }

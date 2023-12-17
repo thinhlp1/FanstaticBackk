@@ -1,7 +1,9 @@
 package com.fanstatic.config.constants;
 
 public class ApplicationConst {
-    public static final String CLIENT_HOST = "https://fantastic-ui-chi.vercel.app";
+    public static final String CLIENT_HOST = "https://fantastic-ui-two.vercel.app";
+    // public static final String CLIENT_HOST = "http://vivit.live:3000";
+
     public static final String CLIENT_HOST_ICON = "https://fantastic-ui-chi.vercel.app/icon/favicon.svg";
 
     public static final int CUSTOMER_ROLE_ID = 3;
