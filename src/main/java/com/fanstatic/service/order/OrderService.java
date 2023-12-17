@@ -1030,7 +1030,7 @@ public class OrderService {
 
     public ResponseDTO cacncelCheckout(Integer orderCode) {
         Integer orderId = getOrderIdFromOrderCode(orderCode);
-
+        System.out.println("ORDERID " + orderId);
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             return ResponseUtils.fail(400, "Order không tồn tại", null);
@@ -1043,6 +1043,7 @@ public class OrderService {
         }
 
         Status status = statusRepository.findById(ApplicationConst.BillStatus.CANCELLED).get();
+        System.out.println("BIL " + bill.getBillId());
         bill.setStatus(status);
         bill.setUpdateAt(new Date());
         billRepository.save(bill);
@@ -1056,7 +1057,7 @@ public class OrderService {
                     "Thanh toán bị hủy", "Thanh toán bị hủy");
 
         }
-        notificationService.sendOrderComplete(order.getOrderId());
+        notificationService.sendOrderCancel(order.getOrderId());
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(400, "Thanh toán order đã bị hủy", orderDTO);

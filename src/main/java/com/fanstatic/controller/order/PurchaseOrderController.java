@@ -491,6 +491,7 @@ public class PurchaseOrderController {
     @GetMapping("/cancel-checkout")
     @ResponseBody
     public ResponseEntity<ResponseDTO> cancelCheckout(@RequestParam("orderCode") Integer ordercode) {
+        System.out.println(ordercode);
 
         ResponseDTO responseDTO = orderService.cacncelCheckout(ordercode);
         if (responseDTO.isSuccess()) {
