@@ -2224,7 +2224,7 @@ public class OrderService {
                 }
 
                 orderItem.setProduct(product);
-                SaleEvent saleEvent = saleProductRepository.findSaleByProductVarientId(product.getId())
+                SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId())
                         .orElse(null);
                 if (saleEvent != null) {
                     long price = (long) ((long) product.getPrice()
