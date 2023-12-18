@@ -608,7 +608,6 @@ public class OrderService {
                     .collect(Collectors.toList());
             orderSaved.setOrderTables(orderTables2);
 
-
             List<ExtraPortionOrderRequestDTO> extraPortionDTOs = orderRequestDTO.getExtraPortions();
             if (extraPortionDTOs != null && !extraPortionDTOs.isEmpty()) {
                 ResponseDTO orderExtraSaved = createExtraPortion(orderRequestDTO.getExtraPortions(), orderSaved);
@@ -890,12 +889,6 @@ public class OrderService {
             order.setUpdateAt(new Date());
             orderRepository.save(order);
 
-             if (order.getCustomer() != null) {
-            OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
-                    .getData());
-            System.out.println(orderPointResponseDTO);
-            User customer = order.getCustomer();
-
             if (order.getCustomer() != null) {
                 OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
                         .getData());
@@ -1001,22 +994,15 @@ public class OrderService {
         order.setUpdateAt(new Date());
         orderRepository.save(order);
 
-          if (order.getCustomer() != null) {
+        if (order.getCustomer() != null) {
             OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
                     .getData());
-            System.out.println(orderPointResponseDTO);
+            Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
+
             User customer = order.getCustomer();
-
-             if (order.getCustomer() != null) {
-                OrderPointResponseDTO orderPointResponseDTO = ((OrderPointResponseDTO) getPoint(order.getOrderId())
-                        .getData());
-                System.out.println(orderPointResponseDTO);
-                Long point = orderPointResponseDTO.getPointLeft() + order.getPoint();
-
-                User customer = order.getCustomer();
-                customer.setPoint(customer.getPoint() + point);
-                userRepository.save(customer);
-            }
+            customer.setPoint(customer.getPoint() + point);
+            userRepository.save(customer);
+        }
 
         List<OrderItem> orderItems = order.getOrderItems();
         Status itemStatus = statusRepository.findById(ApplicationConst.OrderStatus.ITEM_COMPLETE).get();
@@ -1044,7 +1030,7 @@ public class OrderService {
 
     public ResponseDTO cacncelCheckout(Integer orderCode) {
         Integer orderId = getOrderIdFromOrderCode(orderCode);
-        System.out.println("ORDERID " + orderId);
+
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             return ResponseUtils.fail(400, "Order không tồn tại", null);
@@ -1057,7 +1043,6 @@ public class OrderService {
         }
 
         Status status = statusRepository.findById(ApplicationConst.BillStatus.CANCELLED).get();
-        System.out.println("BIL " + bill.getBillId());
         bill.setStatus(status);
         bill.setUpdateAt(new Date());
         billRepository.save(bill);
@@ -1071,7 +1056,7 @@ public class OrderService {
                     "Thanh toán bị hủy", "Thanh toán bị hủy");
 
         }
-        notificationService.sendOrderCancel(order.getOrderId());
+        notificationService.sendOrderComplete(order.getOrderId());
         OrderDTO orderDTO = convertOrderToDTO(order);
 
         return ResponseUtils.success(400, "Thanh toán order đã bị hủy", orderDTO);
@@ -2638,8 +2623,9 @@ public class OrderService {
                             .orElse(null);
                     if (productVariant != null) {
 
-                        saleEvent = saleProductRepository.findSaleByProductVarientId(productVariant.getId())
+                        saleEvent = saleProductRepository.findSaleByProductId(productVariant.getId())
                                 .orElse(null);
+
                         if (saleEvent != null) {
                             itemPrice = (long) (productVariant.getPrice()
                                     - (productVariant.getPrice() * ((double) saleEvent.getPercent() / 100)));
@@ -2856,8 +2842,7 @@ public class OrderService {
                 }
                 newOrderItemDTO.getProductVarient().setCategories(categoryDTOs);
 
-            }
-            if (product != null) {
+            } else if (product != null) {
                 SaleEvent saleEvent = saleProductRepository.findSaleByProductId(product.getId()).orElse(null);
                 if (saleEvent != null) {
 
@@ -2866,6 +2851,7 @@ public class OrderService {
                 }
 
                 List<ProductImageDTO> productImages = productService.getProductImage(product);
+
                 List<ProductCategory> productCategories = productCategoryRepository.findByProduct(product);
 
                 List<CategoryCompactDTO> categoryDTOs = new ArrayList<>();
@@ -2877,8 +2863,7 @@ public class OrderService {
                 newOrderItemDTO.getProduct().setCategories(categoryDTOs);
                 newOrderItemDTO.getProduct().setImageUrl(productImages);
 
-            }
-            if (comboProduct != null) {
+            } else if (comboProduct != null) {
                 SaleEvent saleEvent = saleProductRepository.findSaleByComboId(comboProduct.getId()).orElse(null);
                 if (saleEvent != null) {
                     newOrderItemDTO.getComboProduct().setSaleEvent(modelMapper.map(saleEvent, SaleEventDTO.class));
